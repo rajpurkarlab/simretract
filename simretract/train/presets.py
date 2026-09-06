@@ -3,9 +3,9 @@
 The canonical table is ``configs/train/presets.yaml`` (read through
 ``simretract.config.preset_flags``): ``defaults`` is the complete flag set of
 the baseline row and every preset lists what it changes.  ``BUILTIN_PRESETS``
-mirrors the four high-level switches of each row so that ``--help`` and the
-unit tests work in a checkout whose configs are unavailable; the unit tests
-assert the two agree whenever the yaml can be loaded.
+mirrors the switches of each row so that ``--help`` and the unit tests work
+in a checkout whose configs are unavailable; the unit tests assert the two
+agree whenever the yaml can be loaded.
 
 A preset installs parser *defaults*: flags given explicitly on the command
 line still win.  ``resolve(name)`` returns the fully finalized flag set
@@ -24,39 +24,31 @@ PRESET_SWITCHES: dict[str, Any] = {
     "dropout": True,
 }
 
-#: Switch-level view of the rows in configs/train/presets.yaml.
+#: Switch-level view of the rows in configs/train/presets.yaml, in table order.
+#: Every row is pi0 with the dropout rule on, except ``no_dropout``; the
+#: ``no_smooth`` / ``no_standoff`` rows keep the baseline flags and train on
+#: the no-smoothing / no-standoff cache pairs (configs/data.yaml).
 BUILTIN_PRESETS: dict[str, dict[str, Any]] = {
-    # --- reference rows (docs/ABLATIONS.md) --------------------------------
     "baseline": {"policy": "pi0", "data": "full", "ablation": "none",
                  "dropout": True},
+    "no_dropout": {"policy": "pi0", "data": "full", "ablation": "none",
+                   "dropout": False},
     "no_recovery": {"policy": "pi0", "data": "strict_only", "ablation": "none",
                     "dropout": True},
-    "no_depth": {"policy": "pi0", "data": "full", "ablation": "no_depth",
-                 "dropout": True},
     "half_data": {"policy": "pi0", "data": "half", "ablation": "none",
                   "dropout": True},
-    "smolvla": {"policy": "smolvla", "data": "full", "ablation": "none",
-                "dropout": True, "smolvla_full": True},
-    "act": {"policy": "act", "data": "full", "ablation": "none",
-            "dropout": True, "act_opt": "baseline"},
-    # --- optional rows (no reference result; trained without dropout) ------
     "no_plane": {"policy": "pi0", "data": "full", "ablation": "no_plane",
-                 "dropout": False},
+                 "dropout": True},
     "no_mask": {"policy": "pi0", "data": "full", "ablation": "no_mask",
-                "dropout": False},
-    "no_aug": {"policy": "pi0", "data": "full", "ablation": "no_aug",
-               "dropout": False},
-    "fastwam": {"policy": "fastwam", "data": "full", "ablation": "none",
-                "dropout": False, "chunk_h": 48, "video_t": 9, "video_ratio": 6},
-    "pi05": {"policy": "pi05", "data": "full", "ablation": "none",
-             "dropout": False},
-    "pi0_fast": {"policy": "pi0_fast", "data": "full", "ablation": "none",
-                 "dropout": False},
+                "dropout": True},
+    "no_smooth": {"policy": "pi0", "data": "full", "ablation": "none",
+                  "dropout": True, "sets": "strict_nosmooth,recovery_nosmooth"},
+    "no_standoff": {"policy": "pi0", "data": "full", "ablation": "none",
+                    "dropout": True, "sets": "strict_nostandoff,recovery_nostandoff"},
 }
 
-#: Rows with a reference result table, in table order.
-REFERENCE_ROWS: tuple[str, ...] = ("baseline", "no_recovery", "no_depth",
-                               "half_data", "smolvla", "act")
+#: Preset names in table order (the order of configs/train/presets.yaml).
+PRESET_ORDER: tuple[str, ...] = tuple(BUILTIN_PRESETS)
 
 
 def _as_parser_defaults(flags: dict[str, Any]) -> dict[str, Any]:

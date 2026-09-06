@@ -1,10 +1,12 @@
-"""Training presets resolve to exactly the launch configuration of the reference rows.
+"""Training presets resolve to exactly the launch configuration of their rows.
 
-Each of the six reference presets is translated back into the environment
-block and argument list of its reference launch configuration (the legacy
-environment-variable form of the trainer knobs) and compared against those
-literal sets.  Number formatting goes through ``%g`` on both sides so
-``0.25``, ``8`` and ``2.5e-05`` compare as strings the way a shell would pass them.
+Each of the eight presets is translated back into the environment block and
+argument list of its launch configuration (the legacy environment-variable
+form of the trainer knobs) and compared against those literal sets.  Number
+formatting goes through ``%g`` on both sides so ``0.25``, ``8`` and
+``2.5e-05`` compare as strings the way a shell would pass them.
+
+Presets carry flags and a description only: no preset records a result.
 """
 
 from __future__ import annotations
@@ -14,13 +16,15 @@ from typing import Any
 import pytest
 
 from simretract import config
+from simretract.train import presets as _presets
 
 pytestmark = pytest.mark.unit
 
-REFERENCE = ("baseline", "no_recovery", "no_depth", "half_data", "smolvla", "act")
-OPTIONAL = ("no_plane", "no_mask", "no_aug", "fastwam", "pi05", "pi0_fast")
+PRESETS = ("baseline", "no_dropout", "no_recovery", "half_data", "no_plane", "no_mask",
+           "no_smooth", "no_standoff")
 
-#: Cache set names as recorded in norm.json of the released checkpoints (configs/data.yaml legacy_name).
+#: Cache set names of the main pair as recorded in norm.json of checkpoints trained
+#: before the rename (configs/data.yaml legacy_name); the other sets keep their names.
 LEGACY_SET = {"strict": "rake_e5", "recovery": "step1e5far1000"}
 
 
@@ -35,7 +39,7 @@ def _g(v: Any) -> str:
 def to_legacy(flags: dict[str, Any]) -> tuple[dict[str, str], dict[str, str]]:
     """Map a resolved preset to (environment block, argparse flags) in the legacy launch form."""
     env: dict[str, str] = {
-        "SETS": ",".join(LEGACY_SET[s] for s in flags["sets"]),
+        "SETS": ",".join(LEGACY_SET.get(s, s) for s in flags["sets"]),
         "FLOAT_DEPTH": _g(flags["float_depth"]),
         "NOGRIP": _g(flags["nogrip"]),
         "SAVE_EVERY": _g(flags["save_every"]),
@@ -83,7 +87,7 @@ def to_legacy(flags: dict[str, Any]) -> tuple[dict[str, str], dict[str, str]]:
     return env, args
 
 
-# The launch configuration of every dropout row (environment block + trainer defaults).
+# The launch configuration of the dropout baseline (environment block + trainer defaults).
 COMMON_ENV = {
     "SETS": "rake_e5,step1e5far1000",
     "SET_FRAC": "0.5,0.5",
@@ -115,6 +119,16 @@ COMMON_ARGS = {
     "--warmup": "1000",
     "--init": "<pi0_base>",
 }
+# The non-dropout launch: no DROP_* / PLANE_*_END variables set, i.e. the trainer's
+# pre-dropout defaults (blind drop 0, plane noise constant at sigma 3 deg / 3% glitches).
+NO_DROPOUT_ENV = {
+    **COMMON_ENV,
+    "DROP_MASK_P": "0",
+    "DROP_PLANE_P": "0",
+    "PLANE_SIG_END": "3",
+    "PLANE_GLITCH_END": "0.03",
+    "PLANE_RAND_FRAC": "0",
+}
 
 
 def _without(d: dict[str, str], *keys: str) -> dict[str, str]:
@@ -124,21 +138,25 @@ def _without(d: dict[str, str], *keys: str) -> dict[str, str]:
 EXPECTED: dict[str, tuple[dict[str, str], dict[str, str]]] = {
     # pi0 + dropout baseline
     "baseline": (dict(COMMON_ENV), dict(COMMON_ARGS)),
-    # A0: strict set only, no SET_FRAC (single set)
+    # the same launch with the dropout rule off
+    "no_dropout": (dict(NO_DROPOUT_ENV), dict(COMMON_ARGS)),
+    # strict set only, no SET_FRAC (single set)
     "no_recovery": ({**_without(COMMON_ENV, "SET_FRAC"), "SETS": "rake_e5"}, dict(COMMON_ARGS)),
-    # A3: single masked-RGB camera
-    "no_depth": (dict(COMMON_ENV), {**COMMON_ARGS, "--input_mode": "masked_rgb_nodepth"}),
-    # A7: half selection passed through SUBSET_JSON
+    # half selection passed through SUBSET_JSON
     "half_data": ({**COMMON_ENV, "SUBSET_JSON": "<half_subset.json>"}, dict(COMMON_ARGS)),
-    # SmolVLA-full: VLM + vision unfrozen, baseline optimizer, init lerobot/smolvla_base
-    "smolvla": ({**COMMON_ENV, "SMOLVLA_FULL": "1"}, {**COMMON_ARGS, "--policy": "smolvla", "--init": "lerobot/smolvla_base"}),
-    # ACT: baseline optimizer regime, from scratch (no --init)
-    "act": ({**COMMON_ENV, "ACT_BASELINE_OPT": "1"}, {**_without(COMMON_ARGS, "--init"), "--policy": "act"}),
+    # 7-D state
+    "no_plane": (dict(COMMON_ENV), {**COMMON_ARGS, "--state": "qpos"}),
+    # unmasked image streams
+    "no_mask": (dict(COMMON_ENV), {**COMMON_ARGS, "--input_mode": "full_rgbd"}),
+    # baseline flags on the no-smoothing cache pair
+    "no_smooth": ({**COMMON_ENV, "SETS": "strict_nosmooth,recovery_nosmooth"}, dict(COMMON_ARGS)),
+    # baseline flags on the no-standoff cache pair
+    "no_standoff": ({**COMMON_ENV, "SETS": "strict_nostandoff,recovery_nostandoff"}, dict(COMMON_ARGS)),
 }
 
 
-@pytest.mark.parametrize("name", REFERENCE)
-def test_reference_preset_matches_reference_launch(name: str) -> None:
+@pytest.mark.parametrize("name", PRESETS)
+def test_preset_matches_its_launch(name: str) -> None:
     env, args = to_legacy(config.preset_flags(name))
     want_env, want_args = EXPECTED[name]
     assert env == want_env, name
@@ -147,8 +165,8 @@ def test_reference_preset_matches_reference_launch(name: str) -> None:
 
 def test_all_presets_exist_and_are_complete() -> None:
     names = config.preset_names()
-    assert names[: len(REFERENCE)] == list(REFERENCE)
-    assert set(names) == set(REFERENCE) | set(OPTIONAL)
+    assert names == list(PRESETS)
+    assert tuple(_presets.PRESET_ORDER) == PRESETS
     defaults = set(config.load_config("train/presets")["defaults"])
     for name in names:
         p = config.preset(name)
@@ -157,50 +175,70 @@ def test_all_presets_exist_and_are_complete() -> None:
         assert "${" not in str(p), name
 
 
-def test_reference_presets_carry_reference_rows() -> None:
-    rows = {n: config.preset(n)["reference"] for n in REFERENCE}
-    assert rows["baseline"] == {"grabbed": 50, "secured": 49, "held": 33, "kept": 23, "timeouts": 0}
-    assert rows["no_recovery"] == {"grabbed": 47, "secured": 42, "held": 27, "kept": 17, "timeouts": 3}
-    assert rows["no_depth"] == {"grabbed": 50, "secured": 47, "held": 37, "kept": 30, "timeouts": 0}
-    assert rows["half_data"] == {"grabbed": 49, "secured": 45, "held": 35, "kept": 16, "timeouts": 1}
-    assert rows["smolvla"] == {"grabbed": 50, "secured": 47, "held": 40, "kept": 9, "timeouts": 0}
-    assert rows["act"] == {"grabbed": 42, "secured": 27, "held": 19, "kept": 10, "timeouts": 8}
-    for name in OPTIONAL:
-        assert "reference" not in config.preset(name)
+def test_no_preset_carries_results() -> None:
+    raw = config.load_config("train/presets")
+    for name, row in raw["presets"].items():
+        assert "reference" not in (row or {}), name
+        assert set(row or {}) <= set(raw["defaults"]) | {"description"}, name
+    assert "reference" not in config.PRESET_META_KEYS
+    text = config.config_path("train/presets").read_text(encoding="utf-8")
+    for word in ("reference:", "grabbed", "secured", "timeouts"):
+        assert word not in text, word
 
 
 def test_switch_semantics_agree_with_concrete_flags() -> None:
-    """The four switches and the flags the trainer actually reads never disagree."""
+    """The switches and the flags the trainer actually reads never disagree."""
     for name in config.preset_names():
         f = config.preset_flags(name)
+        assert f["policy"] == "pi0"
         if f["data"] == "strict_only":
             assert f["sets"] == ["strict"] and f["set_frac"] is None
         else:
-            assert f["sets"] == ["strict", "recovery"] and f["set_frac"] == [0.5, 0.5]
+            assert len(f["sets"]) == 2 and f["set_frac"] == [0.5, 0.5]
+            assert f["sets"][0].startswith("strict") and f["sets"][1].startswith("recovery")
         assert (f["ablation"] == "no_plane") == (f["state"] == "qpos")
         assert (f["ablation"] == "no_mask") == (f["input_mode"] == "full_rgbd")
-        assert (f["ablation"] == "no_depth") == (f["input_mode"] == "masked_rgb_nodepth")
-        assert (f["ablation"] == "no_aug") == f["no_aug"]
+        assert f["input_mode"] != "masked_rgb_nodepth" and not f["no_aug"]
+        assert f["dropout"] == (name != "no_dropout")
         if f["dropout"]:
             assert (f["drop_mask_p"], f["plane_sig_end"], f["plane_glitch_end"], f["plane_rand_frac"]) == (0.25, 8.0, 0.25, 0.5)
         else:
             assert (f["drop_mask_p"], f["plane_sig_end"], f["plane_glitch_end"], f["plane_rand_frac"]) == (0.0, 3.0, 0.03, 0.0)
         assert (f["drop_plane_p"], f["drop_start"], f["plane_sig"], f["plane_glitch_p"]) == (0.0, 0.5, 3.0, 0.03)
-        if f["policy"] == "pi0":
-            assert str(f["init"]).endswith("/pi0_base") and "/" in str(f["init"])
-        if f["policy"] == "act":
-            assert f["init"] is None
+        assert str(f["init"]).endswith("/pi0_base") and "/" in str(f["init"])
 
 
-def test_each_reference_ablation_changes_one_thing() -> None:
+def test_each_preset_changes_one_thing() -> None:
+    """Exactly one switch (plus the flags it implies) differs from the baseline;
+    drop_plane_p is 0 on both sides of the dropout switch and never changes."""
     base = config.preset_flags("baseline")
-    derived = {"sets", "set_frac", "input_mode", "state", "init", "smolvla_full", "act_opt", "no_aug", "subset_json"}
-    switches = {"policy", "data", "ablation", "dropout"}
-    for name in REFERENCE[1:]:
+    expected = {
+        "no_dropout": {"dropout", "drop_mask_p", "plane_sig_end", "plane_glitch_end", "plane_rand_frac"},
+        "no_recovery": {"data", "sets", "set_frac"},
+        "half_data": {"data"},
+        "no_plane": {"ablation", "state"},
+        "no_mask": {"ablation", "input_mode"},
+        "no_smooth": {"sets"},
+        "no_standoff": {"sets"},
+    }
+    for name in PRESETS[1:]:
         f = config.preset_flags(name)
         changed = {k for k in base if f[k] != base[k]}
-        assert len(changed & switches) == 1, (name, changed)
-        assert changed <= switches | derived, (name, changed)
+        assert changed == expected[name], (name, changed)
+
+
+def test_data_variants_train_on_their_own_pairs() -> None:
+    sets = config.data_config()["sets"]
+    assert config.preset_flags("no_smooth")["sets"] == ["strict_nosmooth", "recovery_nosmooth"]
+    assert config.preset_flags("no_standoff")["sets"] == ["strict_nostandoff", "recovery_nostandoff"]
+    for name in ("no_smooth", "no_standoff"):
+        for s in config.preset_flags(name)["sets"]:
+            assert s in sets, s
+
+
+def test_presets_and_checkpoint_rows_agree() -> None:
+    rows = [n for n in config.hub()["checkpoints"] if n != "pi0_base"]
+    assert rows == list(PRESETS)
 
 
 def test_unknown_preset_lists_alternatives() -> None:

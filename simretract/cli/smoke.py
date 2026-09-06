@@ -134,10 +134,11 @@ def write_synthetic_cache(root: Path, log_path: Path, *, workers: int = 4) -> Pa
 
 
 def train_act_smoke(cache: Path, out: Path, log_path: Path) -> Path:
-    """``simretract-train --preset act --smoke`` on ``cache``; returns the
-    checkpoint directory (``out``, with ``final/`` inside)."""
+    """``simretract-train --policy act --smoke`` on ``cache`` (the ACT backbone
+    is a trainer switch, not a preset); returns the checkpoint directory
+    (``out``, with ``final/`` inside)."""
     fresh_dir(out)
-    rc = run_logged([sys.executable, "-m", "simretract.cli.train", "--preset", "act", "--smoke",
+    rc = run_logged([sys.executable, "-m", "simretract.cli.train", "--policy", "act", "--smoke",
                      "--cache", cache, "--out", out, "--num-workers", "2"],
                     log_path, timeout=1800)
     if rc != 0:

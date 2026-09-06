@@ -12,7 +12,7 @@ used by the package comes from the YAML files under ``configs/``:
 * ``configs/hub.yaml``            hub organisation, repository ids, checkpoint and
                                   base-weight names
 * ``configs/data.yaml``           dataset ids, selection files, cache flags, fingerprints
-* ``configs/train/presets.yaml``  named training rows (the reference rows and optional rows)
+* ``configs/train/presets.yaml``  named training rows (flags only; no results)
 * ``configs/generation/*.yaml``   expert-recorder recipes
 * ``configs/eval/sim.yaml``       simulation benchmark protocol
 
@@ -59,7 +59,8 @@ STORAGE_KEYS: tuple[str, ...] = ("data_raw", "data_cache", "checkpoints", "runs"
 REPO_KEYS: tuple[str, ...] = ("assets", "selections", "third_party", "configs")
 
 #: Keys of a resolved preset that are descriptive rather than trainer flags.
-PRESET_META_KEYS: frozenset[str] = frozenset({"name", "description", "reference"})
+#: Presets carry flags and a description only (no result tables).
+PRESET_META_KEYS: frozenset[str] = frozenset({"name", "description"})
 
 _PLACEHOLDER = "CHANGE_ME"
 _SUBST_RE = re.compile(r"\$\{([A-Za-z0-9_.]+)\}")

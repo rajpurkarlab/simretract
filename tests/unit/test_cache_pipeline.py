@@ -56,8 +56,22 @@ def cfg_for(raw: dict, set_key: str) -> C.CacheConfig:
 
 
 def test_production_presets():
-    assert C.SET_PRESETS["strict"] == dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=False)
-    assert C.SET_PRESETS["recovery"] == dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=True)
+    strict = dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=False)
+    recovery = dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=True)
+    assert C.SET_PRESETS["strict"] == strict and C.SET_PRESETS["recovery"] == recovery
+    # the no-smoothing / no-standoff pairs build with the same flags as the main pair
+    for name in ("strict_nosmooth", "strict_nostandoff"):
+        assert C.SET_PRESETS[name] == strict, name
+    for name in ("recovery_nosmooth", "recovery_nostandoff"):
+        assert C.SET_PRESETS[name] == recovery, name
+    assert set(C.SET_PRESETS) == {"strict", "recovery", "strict_nosmooth", "recovery_nosmooth",
+                                  "strict_nostandoff", "recovery_nostandoff"}
+    b = C.build_parser().parse_args(["--set", "recovery_nosmooth", "--raw", "r", "--out", "o", "--no-exclude-seeds"])
+    cfg_b = C.config_from_args(b)
+    assert cfg_b.name == "recovery_nosmooth" and cfg_b.perturb_trim is True
+    # no fingerprint is recorded for the variant sets: --verify has nothing to compare and says so
+    assert C.reference_fingerprint("strict_nosmooth") is None
+    assert C.reference_fingerprint("strict")["frames"] == 69402
     a = C.build_parser().parse_args(["--set", "recovery", "--raw", "r", "--out", "o", "--no-exclude-seeds", "--no-perturb-trim"])
     cfg = C.config_from_args(a)
     assert cfg.perturb_trim is False and cfg.keep_only is True and cfg.name == "recovery"
@@ -161,11 +175,16 @@ def test_cli_and_log_lines(raw, tmp_path, caplog):
 def test_presets_match_data_yaml():
     yaml = pytest.importorskip("yaml")
     data = yaml.safe_load(open(Path(__file__).resolve().parents[2] / "configs" / "data.yaml"))
+    assert set(C.SET_PRESETS) == set(data["sets"])
     for key, preset in C.SET_PRESETS.items():
         assert data["sets"][key]["cache_flags"] == preset
         ref = C.reference_fingerprint(key)
-        assert ref["frames"] == data["sets"][key]["fingerprint"]["frames"]
-        assert ref["md5"] == data["sets"][key]["fingerprint"]["md5_8"]
+        want = data["sets"][key]["fingerprint"]
+        if want is None:  # no reference build recorded: --verify skips the set
+            assert ref is None, key
+            continue
+        assert ref["frames"] == want["frames"]
+        assert ref["md5"] == want["md5_8"]
 
 
 def test_hub_shard_contract(tmp_path, raw):
@@ -177,6 +196,13 @@ def test_hub_shard_contract(tmp_path, raw):
     assert hub.wanted_episodes({"seeds": [200011, 200022]}) == {"ep_200011", "ep_200022"}
     assert hub.wanted_episodes({"episodes": ["ep_1_p0", {"name": "ep_2_p1"}, {"seed": 3}]}) == {"ep_1_p0", "ep_2_p1", "ep_3"}
     assert hub.wanted_episodes(None) is None
+    merged = hub.merge_manifests({
+        "manifest.json": {"shards": {"shard_0000.tar": ["ep_1", "ep_2"], "shard_0001.tar": ["ep_3"]}},
+        "later/manifest.json": {"shards": {"shard_0000.tar": ["ep_4"]}},
+    })
+    assert merged == {"shard_0000.tar": ["ep_1", "ep_2"], "shard_0001.tar": ["ep_3"], "later/shard_0000.tar": ["ep_4"]}
+    assert set(hub.data_sets()) >= {"strict", "recovery", "strict_nosmooth", "recovery_nosmooth",
+                                    "strict_nostandoff", "recovery_nostandoff"}
     shard = tmp_path / "shard_0000.tar"
     with tarfile.open(shard, "w") as tf:
         for name in ("ep_200011", "ep_200022"):

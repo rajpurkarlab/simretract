@@ -5,19 +5,25 @@
 # fully explicit flag set (every key of `defaults` is present in every preset).
 # Keys are the trainer's argparse destinations. `${paths.*}` and `${hub.*}`
 # references are expanded from configs/paths.yaml and configs/hub.yaml.
+# Presets carry flags and a description only; benchmark results are not
+# recorded here.
 #
 # Reference hardware: 1x H200 (141 GB) at batch 16 x accum 4 (effective 64),
-# 15k steps: pi0 ~7.5 h, SmolVLA ~2.6 h, ACT ~1.1 h. On a 32 GB card use
-# --batch 8 --accum 8 (same effective batch; pi0 needs more than 32 GB).
+# 15k steps: pi0 ~7.5 h. On a 32 GB card use --batch 8 --accum 8 (same
+# effective batch; pi0 needs more than 32 GB).
 #
-# Semantics of the four switches (the trainer derives nothing from them; the
+# Semantics of the switches (the trainer derives nothing from them; the
 # concrete flags below are what it reads, and they must agree):
 #   data      full        = strict + recovery, 50/50 set sampling
 #             strict_only = strict alone (frame-proportional sampling)
 #             half        = full data, deterministic half selection (RNG 0) done in-process
-#   ablation  none | no_plane (7-D state) | no_mask (unmasked RGB-D) | no_depth (single camera) | no_aug
-#   dropout   late-trajectory blind dropout + plane deterioration (see docs/DROPOUT.md)
-#   policy    pi0 | smolvla | act | fastwam | pi05 | pi0_fast
+#   ablation  none | no_plane (7-D state) | no_mask (unmasked RGB-D)
+#             (no_depth and no_aug remain trainer switches without a preset)
+#   dropout   late-trajectory blind dropout + plane deterioration (docs/DROPOUT.md);
+#             on in every preset except no_dropout
+#   sets      the cache pair a row trains on (configs/data.yaml): the no_smooth and
+#             no_standoff rows keep the baseline flags and swap the data
+#   policy    pi0 in every preset; other backbones are trainer flags (docs/ABLATIONS.md)
 
 schema: 1
 
@@ -52,7 +58,7 @@ defaults:
   warmup: 1000
   save_every: 5000
   init: "${paths.checkpoints}/pi0_base"    # local directory (simretract-download base-weights)
-  # backbone regimes
+  # backbone regimes (used only with --policy smolvla / act)
   smolvla_full: true                       # smolvla: unfreeze VLM + vision, baseline optimizer
   act_opt: baseline                        # act: baseline | official optimizer regime
   # dropout rule
@@ -66,101 +72,42 @@ defaults:
   plane_rand_frac: 0.5                     # share of glitches that become a random normal (w > 0)
 
 presets:
-  # ---- reference rows (core-50, three-pass protocol; docs/ABLATIONS.md) ---------------
   baseline:
-    description: pi0, strict-500 + recovery far-1000 (50/50), masked RGB + depth, plane state, dropout on
-    reference: {grabbed: 50, secured: 49, held: 33, kept: 23, timeouts: 0}
+    description: pi0, strict-500 + recovery far-1000 (50/50), masked RGB + depth, plane state, dropout rule on
+
+  no_dropout:
+    description: baseline flags with the dropout rule off (constant plane noise, no blind frames)
+    dropout: false
+    drop_mask_p: 0.0
+    drop_plane_p: 0.0
+    plane_sig_end: 3.0
+    plane_glitch_end: 0.03
+    plane_rand_frac: 0.0
 
   no_recovery:
-    description: A0 - strict-500 only (no recovery data)
+    description: strict-500 only (no recovery co-training)
     data: strict_only
     sets: [strict]
     set_frac: null
-    reference: {grabbed: 47, secured: 42, held: 27, kept: 17, timeouts: 3}
-
-  no_depth:
-    description: A3 - single masked-RGB camera, no depth stream
-    ablation: no_depth
-    input_mode: masked_rgb_nodepth
-    reference: {grabbed: 50, secured: 47, held: 37, kept: 30, timeouts: 0}
 
   half_data:
-    description: A7 - half of both sets (250 strict seeds + 500 far episodes, bin-balanced, RNG 0)
+    description: half of both sets (250 strict seeds + 500 far episodes, bin-balanced, RNG 0)
     data: half
-    reference: {grabbed: 49, secured: 45, held: 35, kept: 16, timeouts: 1}
 
-  smolvla:
-    description: SmolVLA backbone, VLM + vision unfrozen, baseline optimizer, same data and inputs
-    policy: smolvla
-    init: "${hub.base_weights.smolvla}"
-    reference: {grabbed: 50, secured: 47, held: 40, kept: 9, timeouts: 0}
-
-  act:
-    description: ACT backbone (ResNet-18, from scratch), baseline optimizer, same data and inputs
-    policy: act
-    init: null
-    reference: {grabbed: 42, secured: 27, held: 19, kept: 10, timeouts: 8}
-
-  # ---- optional rows (no reference numbers; trained without the dropout rule) --------
   no_plane:
-    description: A1 - 7-D joint state, no plane normal
+    description: 7-D joint state, no plane normal
     ablation: no_plane
     state: qpos
-    dropout: false
-    drop_mask_p: 0.0
-    plane_sig_end: 3.0
-    plane_glitch_end: 0.03
-    plane_rand_frac: 0.0
 
   no_mask:
-    description: A2 - unmasked RGB + unmasked depth
+    description: unmasked RGB + unmasked depth to the policy (the mask still feeds the plane fit)
     ablation: no_mask
     input_mode: full_rgbd
-    dropout: false
-    drop_mask_p: 0.0
-    plane_sig_end: 3.0
-    plane_glitch_end: 0.03
-    plane_rand_frac: 0.0
 
-  no_aug:
-    description: A4 - no train-time augmentation (mask corruption, fills, depth artefacts, plane noise)
-    ablation: no_aug
-    no_aug: true
-    dropout: false
-    drop_mask_p: 0.0
-    plane_sig_end: 3.0
-    plane_glitch_end: 0.03
-    plane_rand_frac: 0.0
+  no_smooth:
+    description: baseline flags on the no-smoothing data (straight-segment reach, no standoff control point)
+    sets: [strict_nosmooth, recovery_nosmooth]
 
-  fastwam:
-    description: Fast-WAM backbone (video co-training, 48-step chunks); needs the fastwam environment
-    policy: fastwam
-    init: "${hub.base_weights.fastwam}"
-    chunk_h: 48
-    video_t: 9
-    video_ratio: 6
-    dropout: false
-    drop_mask_p: 0.0
-    plane_sig_end: 3.0
-    plane_glitch_end: 0.03
-    plane_rand_frac: 0.0
-
-  pi05:
-    description: pi0.5 backbone (state digitised into the prompt), baseline optimizer regime
-    policy: pi05
-    init: "${hub.base_weights.pi05}"
-    dropout: false
-    drop_mask_p: 0.0
-    plane_sig_end: 3.0
-    plane_glitch_end: 0.03
-    plane_rand_frac: 0.0
-
-  pi0_fast:
-    description: pi0-FAST backbone (FAST action tokenizer, official optimizer preset)
-    policy: pi0_fast
-    init: "${hub.base_weights.pi0_fast}"
-    dropout: false
-    drop_mask_p: 0.0
-    plane_sig_end: 3.0
-    plane_glitch_end: 0.03
-    plane_rand_frac: 0.0
+  no_standoff:
+    description: baseline flags on the no-standoff data (smoothed reach curving straight to the grasp)
+    sets: [strict_nostandoff, recovery_nostandoff]

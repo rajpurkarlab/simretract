@@ -1,8 +1,10 @@
 """The half-data selection is deterministic and balanced.
 
-On the shipped strict-500 selection with a synthetic cache order the strict
+On a shipped strict-500 selection with a synthetic cache order the strict
 bins must be 63/62/63/62, and with a synthetic far set the recovery half
-must contain exactly 500 draws over the selected seeds.
+must contain exactly 500 draws over the selected seeds.  The selection is
+parametrised by the cache set names, so it runs unchanged on the
+no-smoothing and no-standoff pairs.
 """
 from __future__ import annotations
 
@@ -91,6 +93,26 @@ def test_far_trim_and_topup(tmp_path):
     assert len(subset["recovery"]) == 500
     far_seeds = {vf[str(i)]["seed"] for i in subset["recovery"]}
     assert len(far_seeds & chosen) == 250 and len(far_seeds - chosen) == 250
+
+
+@pytest.mark.parametrize("selection, strict_set, far_set", [
+    ("strict_500_no_smoothing.json", "strict_nosmooth", "recovery_nosmooth"),
+    ("strict_500_no_standoff.json", "strict_nostandoff", "recovery_nostandoff"),
+])
+def test_half_selection_on_the_variant_pairs(tmp_path, selection, strict_set, far_set):
+    sj = ROOT / "data" / "selections" / selection
+    spec = json.load(open(sj))
+    seeds = [int(s) for s in spec["seeds"]]
+    assert len(seeds) == 500 and set(spec["grasp_z_cm"]) == {str(s) for s in seeds}
+    vs, vf = make_cache(tmp_path, seeds, {s: 2 for s in seeds}, strict_set=strict_set, far_set=far_set)
+    subset, sel = select_half(tmp_path, sj, strict_set=strict_set, far_set=far_set)
+    assert set(subset) == {strict_set, far_set}
+    assert len(subset[strict_set]) == 250 and len(subset[far_set]) == 500
+    assert sel["strict_bins"] == {0: 63, 1: 62, 2: 63, 3: 62}
+    chosen = set(sel["strict_seeds"])
+    assert {vf[str(i)]["seed"] for i in subset[far_set]} <= chosen and sel["far_seed_coverage"] == 250
+    subset2, _ = select_half(tmp_path, sj, strict_set=strict_set, far_set=far_set)
+    assert subset2 == subset
 
 
 def test_write_selection(tmp_path):

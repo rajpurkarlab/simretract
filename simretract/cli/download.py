@@ -1,9 +1,10 @@
 """``simretract-download``: fetch raw data shards, checkpoints or base
 weights as configured in ``configs/hub.yaml``.
 
-    simretract-download data --set strict --out data/raw/strict
-    simretract-download data --set recovery --out data/raw/recovery
-    simretract-download checkpoints baseline act
+    simretract-download data --set strict --out data/raw/strict_train
+    simretract-download data --set recovery --out data/raw/recovery_far1000
+    simretract-download data --set strict_nosmooth --out data/raw/strict_no_smoothing
+    simretract-download checkpoints baseline no_smooth
     simretract-download base-weights pi0_base
     simretract-download base-weights paligemma_tokenizer smolvla --hub-cache
 """

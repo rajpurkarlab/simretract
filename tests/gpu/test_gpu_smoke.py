@@ -60,7 +60,7 @@ def test_train_act_smoke(work: Path, state: dict) -> None:
     ckpt = smoke.train_act_smoke(cache, work / "act_smoke", log)
     norm = json.loads((ckpt / "final" / "norm.json").read_text())
     regime = norm["train_regime"]
-    assert regime["policy"] == "act" and regime["preset"] == "act"
+    assert regime["policy"] == "act" and regime["preset"] is None
     assert norm["input_mode"] == "masked_rgbd" and norm["state_mode"] == "qpos_plane"
     assert len(norm["state_mean"]) == 10 and len(norm["action_mean"]) == 7
     # the run root mirrors final/ so both spellings load

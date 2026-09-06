@@ -8,8 +8,9 @@ Data path (identical for every policy):
 
 Policy switch (``--policy``): pi0 (default), smolvla, act, fastwam, pi05,
 pi0_fast.  Ablation switch (``--ablation``) and data regime (``--data``)
-map onto the input mode, state mode and cache sets exactly as the reference
-rows; ``--preset`` bundles the two with the policy (see ``presets.py``).
+map onto the input mode, state mode and cache sets; ``--sets`` picks the
+cache pair (configs/data.yaml); ``--preset`` bundles all of it into the
+shipped rows (see ``presets.py``).
 
 Checkpoint contract (consumed by ``simretract-serve`` / ``simretract-eval-sim``):
   runs/<name>/norm.json                       normalization + regime record
@@ -86,7 +87,8 @@ environment fallback
 examples
   simretract-train --preset baseline --cache data/cache --out runs/baseline
   simretract-train --policy act --data full --ablation none --smoke
-  simretract-train --preset no_depth --batch 8 --accum 8
+  simretract-train --preset no_plane --batch 8 --accum 8
+  simretract-train --preset no_smooth --cache data/cache --out runs/no_smooth
 
 training is not bit-reproducible (unseeded sampler and augmentation).
 """
@@ -147,14 +149,17 @@ def config_path(key: str, fallback: str) -> str:
         return fallback
 
 
-def default_strict_json() -> str:
-    """``data/selections/<strict selection>`` from ``configs/data.yaml``
-    (``sets.strict.selection``), falling back to ``strict_500.json``."""
+def default_strict_json(set_name: str = "strict") -> str:
+    """``data/selections/<selection>`` of cache set ``set_name`` from
+    ``configs/data.yaml`` (``sets.<name>.selection``), falling back to
+    ``strict_500.json``.  The strict selection supplies the per-seed grasp
+    heights that ``--data half`` stratifies on, so it follows the strict set
+    of the run (``strict_nosmooth`` -> the no-smoothing selection, ...)."""
     name = "strict_500.json"
     cfg = _config_module()
     if cfg is not None:
         try:
-            name = str(cfg.data_config()["sets"]["strict"]["selection"])
+            name = str(cfg.data_config()["sets"][set_name]["selection"])
         except Exception:  # noqa: BLE001
             pass
     sel = config_path("selections", os.path.join("data", "selections"))
@@ -588,8 +593,9 @@ def build_parser(use_config: bool = True) -> argparse.ArgumentParser:
                    help="frame cache directory (simretract-build-cache) "
                         "[env CACHE] (default: configs/paths.yaml data/cache)")
     g.add_argument("--sets", default=env_value("SETS"),
-                   help="comma list of cache set names [env SETS] (default: "
-                        "strict,recovery; strict for --data strict_only)")
+                   help="comma list of cache set names, strict set first [env SETS] "
+                        "(default: strict,recovery; strict for --data strict_only; "
+                        "the no_smooth / no_standoff presets name their own pair)")
     g.add_argument("--set-frac", "--set_frac", dest="set_frac",
                    default=env_value("SET_FRAC"),
                    help="per-set sampling probabilities, comma list or 'none' "
@@ -602,7 +608,8 @@ def build_parser(use_config: bool = True) -> argparse.ArgumentParser:
                         "[env SUBSET_JSON]")
     g.add_argument("--strict-json", default=env_value("STRICT_JSON"),
                    help="strict selection json (seeds + grasp_z_cm) used by "
-                        "--data half (default: <selections>/strict_500.json)")
+                        "--data half (default: the selection of the first --sets "
+                        "entry in configs/data.yaml)")
     g.add_argument("--input-mode", "--input_mode", dest="input_mode",
                    choices=INPUT_MODES, default=None,
                    help="full: raw RGB + corrupted mask; masked_rgb: masked RGB "
@@ -798,7 +805,7 @@ def finalize_args(a: argparse.Namespace) -> argparse.Namespace:
     if a.out is None:
         a.out = os.path.join(config_path("runs", "runs"), a.preset or a.policy)
     if a.strict_json is None:
-        a.strict_json = default_strict_json()
+        a.strict_json = default_strict_json(a.set_list[0])
     if a.verdicts is None:
         a.verdicts = os.path.join(a.cache, f"{a.set_list[0]}_verdicts.json")
     if a.init is None and a.policy == "pi0":

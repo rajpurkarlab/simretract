@@ -6,18 +6,22 @@ release is published), verifying file sizes and the sha256 values listed there.
 
 ## Released rows
 
+One checkpoint per preset of `configs/train/presets.yaml`; every row is pi0.
+
 | row | preset | directory | policy | size |
 |---|---|---|---|---|
 | baseline | `baseline` | `checkpoints/baseline` | pi0 | 16.1 GB |
-| no recovery (A0) | `no_recovery` | `checkpoints/no_recovery` | pi0 | 16.1 GB |
-| no depth (A3) | `no_depth` | `checkpoints/no_depth` | pi0 | 16.1 GB |
-| half data (A7) | `half_data` | `checkpoints/half_data` | pi0 | 16.1 GB |
-| SmolVLA | `smolvla` | `checkpoints/smolvla` | SmolVLA | 1.2 GB |
-| ACT | `act` | `checkpoints/act` | ACT | 0.2 GB |
+| no dropout | `no_dropout` | `checkpoints/no_dropout` | pi0 | 16.1 GB |
+| no recovery | `no_recovery` | `checkpoints/no_recovery` | pi0 | 16.1 GB |
+| half data | `half_data` | `checkpoints/half_data` | pi0 | 16.1 GB |
+| no plane | `no_plane` | `checkpoints/no_plane` | pi0 | 16.1 GB |
+| no mask | `no_mask` | `checkpoints/no_mask` | pi0 | 16.1 GB |
+| no smoothing | `no_smooth` | `checkpoints/no_smooth` | pi0 | 16.1 GB |
+| no standoff | `no_standoff` | `checkpoints/no_standoff` | pi0 | 16.1 GB |
 | pi0 base weights | (init) | `checkpoints/pi0_base` | pi0 | 14 GB |
 
 Every directory holds `config.json`, `model.safetensors` and `norm.json`
-(`docs/DATA_FORMAT.md`, section 5). Reference benchmark numbers per row:
+(`docs/DATA_FORMAT.md`, section 5). The flags behind each row:
 `docs/ABLATIONS.md`.
 
 The released checkpoints contain network parameters and normalization
@@ -28,14 +32,14 @@ descends from, with the upstream notices preserved: `LICENSE-CHECKPOINTS.md`.
 
 ```bash
 scripts/download_checkpoints.sh baseline                 # one row
-scripts/download_checkpoints.sh all --base-weights       # every row + pi0_base (~95 GB)
+scripts/download_checkpoints.sh all --base-weights       # every row + pi0_base (~145 GB)
 simretract-download base-weights                         # pi0_base only
 ```
 
 ## Base weights
 
 The released `pi0_base` directory is the copy of the pi0 base weights that
-every pi0 row was fine-tuned from. It is not tensor-identical to the current
+every row was fine-tuned from. It is not tensor-identical to the current
 hub `lerobot/pi0_base`, so training from the hub id gives a different model.
 `simretract-train --init` therefore accepts only a local checkpoint directory
 (`config.json` + `model.safetensors`), which `simretract-download base-weights`
@@ -43,11 +47,12 @@ writes and verifies against the sha256 in `configs/hub.yaml` once that table
 is filled in; pass `--allow-unverified-init` to train from a hub id or any
 other directory, knowing the result is not the released row.
 
-The other backbones initialise from hub ids recorded in `configs/hub.yaml`:
+The other backbones of `simretract-train --policy` (`docs/ABLATIONS.md`,
+"Other backbones") initialise from hub ids recorded in `configs/hub.yaml`:
 `lerobot/smolvla_base` with the `HuggingFaceTB/SmolVLM2-500M-Video-Instruct`
 tokenizer (SmolVLA), torchvision ResNet18 ImageNet weights (ACT, downloaded
-by torchvision on first use), and the optional pi0.5 / pi0-FAST / Fast-WAM
-bases.
+by torchvision on first use), and the pi0.5 / pi0-FAST / Fast-WAM bases.
+No checkpoint of those backbones is released.
 
 ## Gated assets
 

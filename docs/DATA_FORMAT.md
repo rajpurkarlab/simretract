@@ -73,9 +73,12 @@ pipeline: 640x480, 58 deg vertical field of view, fx = fy = 240 / tan(29 deg)
 
 ## 2. Frame cache
 
-`simretract-build-cache --set strict|recovery --raw DIR --out CACHE` converts a
-raw set into flat memmaps that the trainer indexes by global frame number. Both
-sets share one cache directory; `meta.json` is merged per set.
+`simretract-build-cache --set <name> --raw DIR --out CACHE` converts a raw set
+into flat memmaps that the trainer indexes by global frame number. The set
+name is one of `strict`, `recovery`, `strict_nosmooth`, `recovery_nosmooth`,
+`strict_nostandoff`, `recovery_nostandoff` (`configs/data.yaml`); it selects
+the flag preset and becomes the file prefix. All sets share one cache
+directory; `meta.json` is merged per set.
 
 ```
 CACHE/
@@ -93,9 +96,10 @@ CACHE/
 ```
 
 `episodes` lists half-open frame ranges `[a0, a1)` per stored episode, in
-directory-sorted order. The production flags (recorded under `flags`) are:
+directory-sorted order. The production flags (recorded under `flags`) are the
+same for every strict set and for every recovery set:
 
-| flag | strict | recovery | effect |
+| flag | strict sets | recovery sets | effect |
 |---|---|---|---|
 | `pretrim` | 1 | 1 | store only frames before the gripper-close cutoff (first frame within 1e-4 m of the final opening, plus a 25-frame margin) |
 | `keep_only` | 1 | 1 | store only arc-length-kept frames (joint quantum 2.5e-3 rad, gripper quantum 2.5e-4 m); sets `prekept` so the trainer skips resampling |
@@ -107,8 +111,10 @@ Episodes whose seeds appear in `data/selections/test_pool.json` are excluded
 mechanically (default on, logged). Episodes whose first probe frames have an
 empty tool mask are skipped. After writing, 20 random frames are decoded again
 from the PNGs and compared bitwise. Expected frame counts and array
-fingerprints for the released sets are in `configs/data.yaml`
-(`simretract-build-cache --verify` compares them).
+fingerprints for the main pair are in `configs/data.yaml`
+(`simretract-build-cache --verify` compares them); the no-smoothing and
+no-standoff sets carry `fingerprint: null`, and `--verify` says so and skips
+the comparison for them.
 
 ## 3. Selection files (`data/selections/`)
 
@@ -123,18 +129,25 @@ listed here.
 | `strict_500.json` | `name`, `seeds` (500), `per_bin` (125), `bins_cm` (4 labels), `rule`, `recipe` (the scalar knobs of `configs/generation/strict.yaml` the set was recorded with), `grasp_z_cm` {seed: grasp height in cm}, `trimmed_out` (seeds dropped from over-full bins), `short_bins` {bin: missing count}, `n_recorded_total` | the strict training set: 125 seeds per 2.5 cm grasp-height bin over -5..+5 cm along the tool axis |
 | `recovery_train_2000.json` | `name`, `rule`, `draws_per_seed` (4), `train_episodes` (1954 ids), `surplus` (39 ids), `perturb_frac` {episode: `info.perturb.frac`} | exact-4 selection: the lowest four draw indices per strict seed that produced a keep |
 | `recovery_far1000.json` | `name`, `rule`, `episodes` (1000 ids), `frac_max`, `n`, `seeds_covered` | the 1000 training episodes with the smallest `info.perturb.frac` (perturbed farthest from the grasp); ties broken by sorted name |
+| `strict_500_no_smoothing.json` | `name`, `seeds` (500), `per_bin` (125), `bins_cm`, `rule`, `recipe` (reach description, standoff, speed, rate limit, grasp range), `grasp_z_cm`, `trimmed_out`, `short_bins`, `held_out_swaps` (seeds that fell into the held-out pool and their bin-matched replacements) | the no-smoothing strict set: the same task recorded with a two-segment straight reach and the candidate's own standoff, 125 seeds per 2.5 cm grasp-height bin |
+| `recovery_far1000_no_smoothing.json` | `name`, `rule`, `episodes` (1000 ids), `frac_max` (0.5), `n`, `seeds_covered`, `draws_per_seed` (histogram) | far recovery draws (perturbation fraction <= 0.5) on the no-smoothing seeds, two per seed where available, filled to exactly 1000 |
+| `strict_500_no_standoff.json` | `name`, `seeds` (500), `per_bin` (125), `bins_cm` (four 3 cm bands over -6..+6), `rule`, `recipe`, `grasp_z_cm` (recomputed from the stored grasp point), `trimmed_out`, `repaired_frames` | the no-standoff strict set: the smoothed reach curving straight to the grasp, band-balanced at recording time |
+| `recovery_far1000_no_standoff.json` | `name`, `rule`, `episodes` (1000 ids), `frac_max`, `n`, `seeds_covered` | the far-1000 selection over the recovery draws on the no-standoff seeds |
 | `test_pool.json` | `name`, `purpose`, `rule`, `count` (115), `seeds`, `episodes` [{seed, strict, x, y, z, tilt_deg}] | the frozen held-out pool; every seed in it is excluded from every cache |
 | `test_core40.json` | `name`, `note`, `seeds` (40) | 4x4-stratified core of the pool (presented x and z) |
 | `test_extra10.json` | `name`, `note`, `seeds` (10) | 10 further pool seeds that fill the sparsest cells |
 | `test_core50.json` | `name`, `note`, `seeds` (50) | core-40 + extra-10: the benchmark seed set |
 
 The half-data preset writes two files beside its run: `<run>_subset.json`
-(`{"strict": [episode indices], "recovery": [episode indices]}`, the filter the
-trainer applies before its train/val split) and `<run>_selection.json`
-(`rule`, `strict_seeds`, `far_seed_coverage`). The rule is deterministic (RNG
-seed 0): 250 strict seeds stratified by grasp-height bin, and the far-1000
-episodes of those seeds trimmed round-robin from the seeds with the most draws
-(or topped up from unselected seeds, rarest bin first) to exactly 500.
+(`{"<strict set>": [episode indices], "<recovery set>": [episode indices]}`,
+the filter the trainer applies before its train/val split) and
+`<run>_selection.json` (`rule`, `strict_seeds`, `far_seed_coverage`). The rule
+is deterministic (RNG seed 0): 250 strict seeds stratified by grasp-height
+bin, and the far-1000 episodes of those seeds trimmed round-robin from the
+seeds with the most draws (or topped up from unselected seeds, rarest bin
+first) to exactly 500. It is keyed by the cache set names and reads the
+grasp heights from the strict selection of the pair in use, so `--data half`
+runs unchanged on the no-smoothing and no-standoff pairs.
 
 ## 4. Hub manifest contract (raw sets)
 
@@ -144,15 +157,21 @@ directories plus a manifest:
 ```
 manifest.json          {"n_episodes": N, "shard_n": 100, "shards": {"shard_0000.tar": ["ep_...", ...], ...}}
 shard_0000.tar ...     each tar contains whole episode directories at its root
+<dir>/manifest.json    optional later additions: their own manifest + shards, shard names
+<dir>/shard_0000.tar   relative to that directory
 meta.tar               recorder logs and markers (optional)
 <selection>.json       the selection file(s) the set was assembled with
 ```
 
-`simretract-download data --set strict` downloads every shard and extracts all
-episodes; `--set recovery` reads `recovery_far1000.json`, downloads only the
-shards that contain selected members, and extracts only those directories.
-The download verifies the episode count against the manifest and the selection
-(500 strict, 1000 recovery) before it reports success.
+`simretract-download data --set <name>` takes any cache set of
+`configs/data.yaml`: the set's `hub_repo` names the repository key in
+`configs/hub.yaml` and its `selection` the wanted episodes. The download reads
+every manifest in the repository, fetches only the shards that contain
+selected members, extracts only those directories, and reports the episode
+count against the selection (500 for a strict set, 1000 for a recovery set)
+before it reports success. A repository may hold more episodes than a
+selection names (an earlier draft of a set, a replaced seed); only the
+selected ones are extracted.
 
 ## 5. Checkpoint directories
 

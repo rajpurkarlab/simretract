@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import collections
 import json
 import os
 import sys
@@ -137,8 +138,11 @@ def test_hub_placeholder_and_substitution() -> None:
     assert h["repos"]["checkpoints"] == "YOUR_HF_ORG/simretract-checkpoints"
     assert "${" not in json.dumps(h)
     assert h["checkpoints"]["pi0_base"]["path"] == "pi0_base"
-    for row in ("baseline", "no_recovery", "no_depth", "half_data", "smolvla", "act"):
+    for row in ("baseline", "no_dropout", "no_recovery", "half_data", "no_plane", "no_mask", "no_smooth", "no_standoff"):
         assert row in h["checkpoints"]
+    for key in ("strict_raw", "recovery_raw", "strict_nosmooth_raw", "recovery_nosmooth_raw",
+                "strict_nostandoff_raw", "recovery_nostandoff_raw"):
+        assert h["repos"][key].startswith("YOUR_HF_ORG/simretract-"), key
     bw = h["base_weights"]
     assert bw["sam3"] == "facebook/sam3"
     assert bw["paligemma_tokenizer"] == "google/paligemma-3b-pt-224"
@@ -236,6 +240,20 @@ def test_data_fingerprints_match_the_reference_builds() -> None:
         assert config.selection_path(d["sets"][key]["selection"]).is_file()
     for key in ("pool", "core40", "extra10", "core50"):
         assert config.selection_path(d["test"][key]).is_file()
+    # the no-smoothing / no-standoff pairs: same cache flags, no recorded fingerprint (verify is skipped)
+    repos = config.hub()["repos"]
+    for key, kind in (("strict_nosmooth", "strict"), ("recovery_nosmooth", "recovery"),
+                      ("strict_nostandoff", "strict"), ("recovery_nostandoff", "recovery")):
+        entry = d["sets"][key]
+        assert entry["cache_flags"] == d["sets"][kind]["cache_flags"], key
+        assert entry["fingerprint"] is None, key
+        assert entry["episodes"] == d["sets"][kind]["episodes"], key
+        assert entry["hub_repo"] in repos, key
+        assert config.selection_path(entry["selection"]).is_file(), key
+    assert d["sets"]["strict_nosmooth"]["selection"] == "strict_500_no_smoothing.json"
+    assert d["sets"]["recovery_nosmooth"]["selection"] == "recovery_far1000_no_smoothing.json"
+    assert d["sets"]["strict_nostandoff"]["selection"] == "strict_500_no_standoff.json"
+    assert d["sets"]["recovery_nostandoff"]["selection"] == "recovery_far1000_no_standoff.json"
 
 
 def test_selection_counts_and_disjointness() -> None:
@@ -259,6 +277,31 @@ def test_selection_counts_and_disjointness() -> None:
     far_seeds = {int(e.split("_")[1]) for e in far["episodes"]}
     assert not set(test_pool["seeds"]) & far_seeds
     assert far_seeds <= set(strict["seeds"])
+
+
+@pytest.mark.parametrize("variant", ["no_smoothing", "no_standoff"])
+def test_variant_selection_counts_and_disjointness(variant: str) -> None:
+    strict = _sel(f"strict_500_{variant}")
+    far = _sel(f"recovery_far1000_{variant}")
+    test_pool = _sel("test_pool")
+    assert strict["name"] == f"strict_500_{variant}" and far["name"] == f"recovery_far1000_{variant}"
+    assert len(strict["seeds"]) == 500 == len(set(strict["seeds"]))
+    assert set(strict["grasp_z_cm"]) == {str(s) for s in strict["seeds"]}
+    assert len(strict["bins_cm"]) == 4 and strict["per_bin"] == 125 and strict["rule"]
+    assert len(far["episodes"]) == far["n"] == 1000 == len(set(far["episodes"]))
+    assert far["episodes"] == sorted(far["episodes"]) and far["rule"]
+    far_seeds = {int(e.split("_")[1]) for e in far["episodes"]}
+    assert far_seeds <= set(strict["seeds"]) and len(far_seeds) == far["seeds_covered"]
+    assert not set(test_pool["seeds"]) & set(strict["seeds"])
+    assert not set(test_pool["seeds"]) & far_seeds
+    assert min(strict["seeds"]) >= 200000
+    if variant == "no_smoothing":
+        # bin-balanced over the same 2.5 cm bins as the main strict set
+        bins = collections.Counter(min(3, max(0, int((z + 5) / 2.5))) for z in strict["grasp_z_cm"].values())
+        assert dict(bins) == {0: 125, 1: 125, 2: 125, 3: 125}
+        assert far["frac_max"] == 0.5
+    else:
+        assert far["frac_max"] < 0.5
 
 
 def test_far1000_is_the_smallest_perturbation_fraction() -> None:

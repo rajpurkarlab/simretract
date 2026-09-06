@@ -7,11 +7,18 @@ org: YOUR_HF_ORG
 repos:
   checkpoints: "${org}/simretract-checkpoints"      # model repo: one directory per row + pi0_base
   selections: "${org}/simretract-selections"        # dataset repo: selection JSONs
-  strict_raw: "${org}/simretract-strict-raw"        # dataset repo: strict-500 raw shards + manifest.json
-  recovery_raw: "${org}/simretract-recovery-raw"    # dataset repo: recovery raw shards + manifest.json
+  # raw dataset repos: tar shards of episode directories + manifest.json (docs/DATA_FORMAT.md);
+  # configs/data.yaml maps each cache set to one of these keys (sets.<name>.hub_repo)
+  strict_raw: "${org}/simretract-strict-raw"                           # strict-500
+  recovery_raw: "${org}/simretract-recovery-raw"                       # recovery far-1000
+  strict_nosmooth_raw: "${org}/simretract-strict-no-smoothing-raw"     # no-smoothing strict-500
+  recovery_nosmooth_raw: "${org}/simretract-recovery-no-smoothing-raw" # no-smoothing recovery far-1000
+  strict_nostandoff_raw: "${org}/simretract-strict-no-standoff-raw"    # no-standoff strict-500
+  recovery_nostandoff_raw: "${org}/simretract-recovery-no-standoff-raw"  # no-standoff recovery far-1000
 
-# Directory names inside `repos.checkpoints`. Each directory holds
-# config.json + model.safetensors + norm.json (fastwam adds context.pt).
+# Directory names inside `repos.checkpoints`, one per preset of
+# configs/train/presets.yaml plus the pi0 base weights. Each directory holds
+# config.json + model.safetensors + norm.json.
 checkpoints:
   pi0_base:
     path: pi0_base
@@ -19,21 +26,25 @@ checkpoints:
     sha256: {}                       # model.safetensors: <fill in>
     note: pi0 initialisation weights; a local copy is required by simretract-train --policy pi0
   baseline:      {path: baseline,      files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_dropout:    {path: no_dropout,    files: [config.json, model.safetensors, norm.json], sha256: {}}
   no_recovery:   {path: no_recovery,   files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_depth:      {path: no_depth,      files: [config.json, model.safetensors, norm.json], sha256: {}}
   half_data:     {path: half_data,     files: [config.json, model.safetensors, norm.json], sha256: {}}
-  smolvla:       {path: smolvla,       files: [config.json, model.safetensors, norm.json], sha256: {}}
-  act:           {path: act,           files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_plane:      {path: no_plane,      files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_mask:       {path: no_mask,       files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_smooth:     {path: no_smooth,     files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_standoff:   {path: no_standoff,   files: [config.json, model.safetensors, norm.json], sha256: {}}
 
 # Third-party weights and tokenizers pulled from their canonical hub locations.
 # Gated entries need `huggingface-cli login` after accepting the licence.
+# The backbone entries serve `simretract-train --policy <name>` (docs/ABLATIONS.md,
+# "Other backbones"); no shipped preset uses them.
 base_weights:
-  smolvla: lerobot/smolvla_base                          # Apache-2.0
-  smolvlm_tokenizer: HuggingFaceTB/SmolVLM2-500M-Video-Instruct
-  paligemma_tokenizer: google/paligemma-3b-pt-224        # gated (Gemma terms)
+  paligemma_tokenizer: google/paligemma-3b-pt-224        # gated (Gemma terms); pi0 prompt tokenizer
   sam3: facebook/sam3                                    # gated (SAM licence); file sam3.pt
-  resnet18: torchvision:ResNet18_Weights.IMAGENET1K_V1   # ACT backbone, fetched by torchvision
-  fastwam: lerobot/fastwam_base                          # optional row
-  pi05: lerobot/pi05_base                                # optional row
-  pi0_fast: lerobot/pi0fast-base                         # optional row
-  fast_tokenizer: lerobot/fast-action-tokenizer          # optional row (pi0_fast)
+  smolvla: lerobot/smolvla_base                          # --policy smolvla (Apache-2.0)
+  smolvlm_tokenizer: HuggingFaceTB/SmolVLM2-500M-Video-Instruct
+  resnet18: torchvision:ResNet18_Weights.IMAGENET1K_V1   # --policy act, fetched by torchvision
+  fastwam: lerobot/fastwam_base                          # --policy fastwam
+  pi05: lerobot/pi05_base                                # --policy pi05
+  pi0_fast: lerobot/pi0fast-base                         # --policy pi0_fast
+  fast_tokenizer: lerobot/fast-action-tokenizer          # --policy pi0_fast

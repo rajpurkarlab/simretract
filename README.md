@@ -113,6 +113,11 @@ scripts/build_cache.sh recovery --verify
 scripts/train.sh baseline --init checkpoints/pi0_base
 ```
 
+The `no_smooth` and `no_standoff` rows train on their own raw pairs
+(`scripts/download_data.sh strict_nosmooth`, `recovery_nosmooth`,
+`strict_nostandoff`, `recovery_nostandoff`, then `scripts/build_cache.sh` with
+the same set names; `data/README.md`).
+
 Path B (six commands, then evaluate):
 
 ```bash
@@ -148,7 +153,7 @@ simulation, 1x H200 for training):
 | cache, strict | 69,402 frames | ~130 GB | 1-2 h + plane sidecar |
 | cache, recovery | 106,868 frames | ~200 GB | 1-2 h + plane sidecar |
 | train pi0 (15k steps, 16x4) | 16 GB checkpoint | ~107 GB GPU | ~7.5 h |
-| train SmolVLA / ACT | 1.2 GB / 0.2 GB | | ~2.6 h / ~1.1 h |
+| train SmolVLA / ACT (`--policy`, no preset) | 1.2 GB / 0.2 GB | | ~2.6 h / ~1.1 h |
 | sim benchmark, one row | 50 seeds x up to 3 attempts | | 5-7 h |
 
 Smaller training GPUs: `--batch 8 --accum 8` keeps the effective batch of 64.
@@ -156,23 +161,24 @@ Smaller training GPUs: `--batch 8 --accum 8` keeps the effective batch of 64.
 ## Models and ablations
 
 `simretract-train --preset <name>` expands to the exact flag set; every row
-differs from the baseline in exactly one thing.
+is pi0 and differs from the baseline in exactly one thing. The dropout rule
+is on in every preset except `no_dropout`.
 
 | preset | flags | what it removes or swaps |
 |---|---|---|
 | `baseline` | `--policy pi0 --data full --ablation none --dropout` | nothing (strict-500 + recovery far-1000, 50/50 sampling, late-trajectory dropout) |
+| `no_dropout` | `--no-dropout` | the dropout rule (no blind frames, constant plane noise) |
 | `no_recovery` | `--data strict_only` | recovery co-training (strict-500 only) |
-| `no_depth` | `--ablation no_depth` | the depth stream (single masked-RGB camera) |
 | `half_data` | `--data half` | half of both sets (deterministic bin-balanced selection) |
-| `smolvla` | `--policy smolvla --smolvla-full` | the backbone (SmolVLA, full fine-tune) |
-| `act` | `--policy act --act-opt baseline` | the backbone (ACT from scratch) |
-| `no_plane` (optional) | `--ablation no_plane` | the plane normal from the state vector |
-| `no_mask` (optional) | `--ablation no_mask` | the tool mask from the image streams |
-| `no_aug` (optional) | `--ablation no_aug` | all train-time augmentation and the dropout ramp |
-| `fastwam`, `pi05`, `pi0_fast` (optional) | `--policy ...` | the backbone; no smoke coverage |
+| `no_plane` | `--ablation no_plane` | the plane normal from the state vector |
+| `no_mask` | `--ablation no_mask` | the tool mask from the image streams |
+| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | reach smoothing in the demonstrations (data recorded with a straight-segment reach) |
+| `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the reach standoff in the demonstrations (data recorded curving straight to the grasp) |
 
-Reference benchmark numbers and the dropout rule: `docs/ABLATIONS.md`,
-`docs/DROPOUT.md`, `docs/PROTOCOL.md`.
+Other backbones (SmolVLA, ACT, pi0.5, pi0-FAST, Fast-WAM) and the remaining
+ablation switches are trainer flags without a preset. Flags per preset, the
+backbone flags and the dropout rule: `docs/ABLATIONS.md`, `docs/DROPOUT.md`;
+the benchmark procedure: `docs/PROTOCOL.md`.
 
 ## Hardware
 
@@ -218,13 +224,14 @@ is none. Details and outputs: `tests/README.md`.
 All hub repository ids live in `configs/hub.yaml` (`org: YOUR_HF_ORG` until the
 release is published); nothing else in the code names a repository. What ships,
 what is downloaded, expected counts and cache fingerprints: `data/README.md` and
-`checkpoints/README.md`. Raw benchmark results are not shipped; the reference
-numbers in `docs/ABLATIONS.md` are reproduced by `scripts/eval_sim.sh`.
+`checkpoints/README.md`. Benchmark results are not shipped;
+`scripts/eval_sim.sh` produces them from any checkpoint under the protocol of
+`docs/PROTOCOL.md`.
 
 ## Citation
 
-See `CITATION.cff`. The reference rows in `docs/ABLATIONS.md` are the rows
-reported in the paper cited there.
+See `CITATION.cff`. The presets in `docs/ABLATIONS.md` are the model rows of
+the paper cited there.
 
 ## Release contents and licensing
 

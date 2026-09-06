@@ -30,12 +30,12 @@ def _clean_env(monkeypatch):
         monkeypatch.delenv("SIMRETRACT_" + name, raising=False)
 
 
-#: The reference launch configuration of the six reference rows, translated
-#: to trainer flags (cache set names strict/recovery replace the legacy set
-#: prefixes).  Every row: FLOAT_DEPTH=1 NOGRIP=1 SAVE_EVERY=5000,
-#: --input_mode masked_rgbd --state qpos_plane --episodes all --steps 15000
-#: --batch 16 --accum 4, dropout env DROP_MASK_P=0.25 DROP_PLANE_P=0
-#: DROP_START=0.5 PLANE_SIG_END=8 PLANE_GLITCH_END=0.25 PLANE_RAND_FRAC=0.5.
+#: The launch configuration of the eight presets, translated to trainer
+#: flags (cache set names strict/recovery replace the legacy set prefixes).
+#: Every row: FLOAT_DEPTH=1 NOGRIP=1 SAVE_EVERY=5000, --input_mode masked_rgbd
+#: --state qpos_plane --episodes all --steps 15000 --batch 16 --accum 4,
+#: dropout env DROP_MASK_P=0.25 DROP_PLANE_P=0 DROP_START=0.5 PLANE_SIG_END=8
+#: PLANE_GLITCH_END=0.25 PLANE_RAND_FRAC=0.5 (no_dropout: the knobs unset).
 COMMON = {
     "float_depth": True, "nogrip": True, "save_every": 5000, "no_aug": False,
     "input_mode": "masked_rgbd", "state": "qpos_plane", "episodes": "all",
@@ -46,29 +46,27 @@ COMMON = {
     "plane_sig": 3.0, "plane_sig_end": 8.0, "plane_glitch_p": 0.03,
     "plane_glitch_end": 0.25, "plane_rand_frac": 0.5,
 }
-REFERENCE_ROWS = {
+FULL = {"policy": "pi0", "data": "full", "ablation": "none", "dropout": True,
+        "set_list": ["strict", "recovery"], "set_frac_list": [0.5, 0.5]}
+PRESET_ROWS = {
     # both sets, SET_FRAC=0.5,0.5
-    "baseline": {**COMMON, "policy": "pi0", "data": "full", "ablation": "none",
-                 "set_list": ["strict", "recovery"], "set_frac_list": [0.5, 0.5]},
+    "baseline": {**COMMON, **FULL},
+    # the dropout knobs unset: blind drop 0, constant plane noise
+    "no_dropout": {**COMMON, **FULL, "dropout": False, "drop_mask_p": 0.0, "drop_plane_p": 0.0,
+                   "plane_sig_end": 3.0, "plane_glitch_end": 0.03, "plane_rand_frac": 0.0},
     # strict set only, no SET_FRAC
-    "no_recovery": {**COMMON, "policy": "pi0", "data": "strict_only",
-                    "ablation": "none", "set_list": ["strict"],
+    "no_recovery": {**COMMON, **FULL, "data": "strict_only", "set_list": ["strict"],
                     "set_frac_list": None},
-    # --input_mode masked_rgb_nodepth
-    "no_depth": {**COMMON, "policy": "pi0", "data": "full", "ablation": "no_depth",
-                 "input_mode": "masked_rgb_nodepth",
-                 "set_list": ["strict", "recovery"], "set_frac_list": [0.5, 0.5]},
     # SUBSET_JSON from the half selection
-    "half_data": {**COMMON, "policy": "pi0", "data": "half", "ablation": "none",
-                  "set_list": ["strict", "recovery"], "set_frac_list": [0.5, 0.5]},
-    # SMOLVLA_FULL=1 --policy smolvla
-    "smolvla": {**COMMON, "policy": "smolvla", "data": "full", "ablation": "none",
-                "smolvla_full": True,
-                "set_list": ["strict", "recovery"], "set_frac_list": [0.5, 0.5]},
-    # ACT_BASELINE_OPT=1 --policy act
-    "act": {**COMMON, "policy": "act", "data": "full", "ablation": "none",
-            "act_opt": "baseline",
-            "set_list": ["strict", "recovery"], "set_frac_list": [0.5, 0.5]},
+    "half_data": {**COMMON, **FULL, "data": "half"},
+    # --state qpos
+    "no_plane": {**COMMON, **FULL, "ablation": "no_plane", "state": "qpos"},
+    # --input_mode full_rgbd
+    "no_mask": {**COMMON, **FULL, "ablation": "no_mask", "input_mode": "full_rgbd"},
+    # baseline flags on the no-smoothing pair
+    "no_smooth": {**COMMON, **FULL, "set_list": ["strict_nosmooth", "recovery_nosmooth"]},
+    # baseline flags on the no-standoff pair
+    "no_standoff": {**COMMON, **FULL, "set_list": ["strict_nostandoff", "recovery_nostandoff"]},
 }
 
 
@@ -76,16 +74,38 @@ def _yaml_available() -> bool:
     return presets._yaml_presets() is not None
 
 
-@pytest.mark.parametrize("name", list(REFERENCE_ROWS))
+@pytest.mark.parametrize("name", list(PRESET_ROWS))
 @pytest.mark.parametrize("use_config", [False, True])
-def test_reference_presets_match_reference_rows(name, use_config):
+def test_presets_match_their_launch_rows(name, use_config):
     if use_config and not _yaml_available():
         pytest.skip("configs/train/presets.yaml not loadable in this checkout")
     got = presets.resolve(name, use_config=use_config)
-    for key, val in REFERENCE_ROWS[name].items():
+    for key, val in PRESET_ROWS[name].items():
         assert got[key] == val, f"{name}: {key} = {got[key]!r}, expected {val!r}"
-    assert got["dropout"] is True
     assert got["preset"] == name
+
+
+def test_preset_table_is_exactly_the_eight_rows():
+    assert presets.preset_names(use_config=False) == list(PRESET_ROWS)
+    if _yaml_available():
+        assert presets.preset_names(use_config=True) == list(PRESET_ROWS)
+
+
+@pytest.mark.parametrize("name, selection", [
+    ("baseline", "strict_500.json"),
+    ("half_data", "strict_500.json"),
+    ("no_smooth", "strict_500_no_smoothing.json"),
+    ("no_standoff", "strict_500_no_standoff.json"),
+])
+def test_strict_json_follows_the_strict_set(name, selection):
+    """``--data half`` stratifies on the strict selection of the pair in use."""
+    if not _yaml_available():
+        pytest.skip("configs not loadable")
+    a = train.parse_args(["--preset", name, "--data", "half"], use_config=True)
+    assert os.path.basename(a.strict_json) == selection
+    assert a.set_list[0].startswith("strict") and a.set_list[1].startswith("recovery")
+    b = train.parse_args(["--preset", name, "--data", "half", "--strict-json", "x.json"], use_config=True)
+    assert b.strict_json == "x.json"
 
 
 @pytest.mark.parametrize("name", presets.preset_names(use_config=False))
@@ -171,10 +191,12 @@ def test_explicit_flags_win_over_preset():
 
 
 def test_smoke_defaults():
-    a = train.parse_args(["--preset", "act", "--smoke"], use_config=False)
-    assert (a.batch, a.accum) == (4, 1)
-    b = train.parse_args(["--preset", "act", "--smoke", "--batch", "2"], use_config=False)
+    a = train.parse_args(["--policy", "act", "--smoke"], use_config=False)
+    assert (a.batch, a.accum) == (4, 1) and a.preset is None
+    b = train.parse_args(["--policy", "act", "--smoke", "--batch", "2"], use_config=False)
     assert (b.batch, b.accum) == (2, 1)
+    c = train.parse_args(["--preset", "baseline", "--smoke"], use_config=False)
+    assert (c.batch, c.accum) == (4, 1)
 
 
 def test_fastwam_defaults_and_policy_switch():
@@ -183,6 +205,18 @@ def test_fastwam_defaults_and_policy_switch():
     assert a.wam_gc is True and a.wam_shift == 5.0 and a.wam_fp32_master is False
     b = train.parse_args(["--policy", "pi05"], use_config=False)
     assert b.chunk_h == 50 and b.pi05_opt == "baseline"
+
+
+def test_other_backbones_are_flags_not_presets():
+    """The backbone switch and its knobs stay on the trainer; no preset names them."""
+    assert set(train.POLICIES) == {"pi0", "smolvla", "act", "fastwam", "pi05", "pi0_fast"}
+    for policy in train.POLICIES:
+        assert policy not in presets.preset_names(use_config=False)
+    a = train.parse_args(["--preset", "baseline", "--policy", "act", "--act-opt", "official", "--init", ""],
+                         use_config=False)
+    assert a.policy == "act" and a.act_opt == "official" and a.set_list == ["strict", "recovery"]
+    b = train.parse_args(["--policy", "smolvla", "--no-smolvla-full"], use_config=False)
+    assert b.smolvla_full is False and b.dropout is True
 
 
 def test_env_fallback(monkeypatch):
@@ -234,9 +268,9 @@ def test_default_pi0_init_is_a_local_checkpoints_dir():
 
 
 def test_train_regime_record_and_knobs():
-    a = train.parse_args(["--preset", "smolvla"], use_config=False)
+    a = train.parse_args(["--policy", "smolvla"], use_config=False)
     reg = train.train_regime(a)
-    assert reg["policy"] == "smolvla" and reg["smolvla_full"] is True
+    assert reg["policy"] == "smolvla" and reg["smolvla_full"] is True and reg["preset"] is None
     assert reg["dropout_knobs"]["plane_sig_end"] == 8.0
     k = train.knobs_from_args(a)
     assert (k.drop_mask_p, k.plane_glitch_end, k.chunk_h) == (0.25, 0.25, 50)

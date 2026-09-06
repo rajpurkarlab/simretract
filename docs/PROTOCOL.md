@@ -4,8 +4,7 @@
 
 `simretract-eval-sim` runs a checkpoint closed-loop in Isaac Sim on a fixed
 seed set and scores the outcome funnel. The settings below are pinned in
-`configs/eval/sim.yaml` and are the settings behind every number in
-`docs/ABLATIONS.md`.
+`configs/eval/sim.yaml` and apply to every model row of `docs/ABLATIONS.md`.
 
 ### Seed sets
 
@@ -113,7 +112,7 @@ seeds with the three-attempt rule, and compare rows only under identical
 settings (in particular the same `exec_h`; rows recorded with `exec_h 20` are
 not comparable to `exec_h 50` rows). Training is not bit-reproducible either
 (unseeded sampler and augmentation), so a retrained row is expected to land
-near, not on, the reference numbers.
+near, not on, an earlier evaluation of the same preset.
 
 ## 2. Real-robot runs
 

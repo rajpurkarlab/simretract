@@ -1,20 +1,32 @@
 # Dataset ids, selection files, cache flags and fingerprints.
 #
-# Two training sets feed every model row:
-#   strict     500 expert take-over episodes, 125 per 2.5 cm grasp-height bin over -5..+5 cm
-#   recovery   1000 perturbation-recovery episodes (the far-1000 selection of the 2000-episode
-#              recovery pool: smallest perturbation fraction = injected farthest from the grasp)
+# Every model row trains on a strict set plus a recovery set. Three pairs ship:
+#   strict / recovery                    the main pair (baseline and every single-change row)
+#   strict_nosmooth / recovery_nosmooth  the same task recorded without reach smoothing
+#                                        (two straight segments, the candidate's own standoff)
+#   strict_nostandoff / recovery_nostandoff
+#                                        recorded without the reach standoff (the smoothed reach
+#                                        curves straight to the grasp)
+# Each strict set holds 500 expert take-over episodes (bin-balanced over the grasp height);
+# each recovery set holds 1000 perturbation-recovery episodes drawn on those seeds, the
+# far-1000 selection (smallest perturbation fraction = injected farthest from the grasp).
 #
 # Selection files under data/selections/ (schemas in docs/DATA_FORMAT.md):
-#   strict_500.json           the strict training set (500 seeds)
-#   recovery_train_2000.json  the exact-4 recovery pool (+ per-episode perturb_frac)
-#   recovery_far1000.json     the far-1000 recovery training set
-#   test_pool.json            115 held-out seeds, excluded from every cache
+#   strict_500.json                        the strict training set (500 seeds)
+#   recovery_train_2000.json               the exact-4 recovery pool (+ per-episode perturb_frac)
+#   recovery_far1000.json                  the far-1000 recovery training set
+#   strict_500_no_smoothing.json           the no-smoothing strict set (500 seeds)
+#   recovery_far1000_no_smoothing.json     its far-1000 recovery set
+#   strict_500_no_standoff.json            the no-standoff strict set (500 seeds)
+#   recovery_far1000_no_standoff.json      its far-1000 recovery set
+#   test_pool.json                         115 held-out seeds, excluded from every cache
 #   test_core40.json, test_extra10.json, test_core50.json   benchmark seed sets (core50 = the protocol set)
 #
 # Cache set names double as file prefixes inside data/cache
 # (<name>_{rgb,dep,msk,gmk,state,action,gpose,plane,plane_conf}.npy + meta.json + <name>_verdicts.json).
-# `legacy_name` is the set name recorded in norm.json of the released checkpoints; it must not change.
+# `legacy_name` (main pair only) is the set name recorded in norm.json of checkpoints trained
+# before the rename; it must not change. `fingerprint: null` means no reference build is
+# recorded: `simretract-build-cache --verify` reports that and skips the comparison for that set.
 
 sets:
   strict:
@@ -48,6 +60,54 @@ sets:
       frames: 106868
       md5_8: {action: 636630ba, plane: 93dda3b0, gpose: 7f918202}
 
+  strict_nosmooth:
+    selection: strict_500_no_smoothing.json
+    hub_repo: strict_nosmooth_raw
+    episodes: 500
+    cache_flags:                        # simretract-build-cache --set strict_nosmooth (same flags as strict)
+      pretrim: true
+      keep_only: true
+      seed_min: 200000
+      skip_gmk: true
+      perturb_trim: false
+    fingerprint: null                   # not recorded; --verify skips this set
+
+  recovery_nosmooth:
+    selection: recovery_far1000_no_smoothing.json
+    hub_repo: recovery_nosmooth_raw
+    episodes: 1000
+    cache_flags:                        # simretract-build-cache --set recovery_nosmooth (same flags as recovery)
+      pretrim: true
+      keep_only: true
+      seed_min: 200000
+      skip_gmk: true
+      perturb_trim: true
+    fingerprint: null
+
+  strict_nostandoff:
+    selection: strict_500_no_standoff.json
+    hub_repo: strict_nostandoff_raw
+    episodes: 500
+    cache_flags:                        # simretract-build-cache --set strict_nostandoff (same flags as strict)
+      pretrim: true
+      keep_only: true
+      seed_min: 200000
+      skip_gmk: true
+      perturb_trim: false
+    fingerprint: null
+
+  recovery_nostandoff:
+    selection: recovery_far1000_no_standoff.json
+    hub_repo: recovery_nostandoff_raw
+    episodes: 1000
+    cache_flags:                        # simretract-build-cache --set recovery_nostandoff (same flags as recovery)
+      pretrim: true
+      keep_only: true
+      seed_min: 200000
+      skip_gmk: true
+      perturb_trim: true
+    fingerprint: null
+
 # Frozen test seeds. Every cache build excludes `exclude_from_training` seeds
 # (logged), regardless of what the raw directory contains.
 test:
@@ -57,7 +117,9 @@ test:
   core50: test_core50.json              # core40 + extra10: the benchmark protocol set
   exclude_from_training: test_pool.json
 
-# Half-data row (--data half): deterministic subset drawn in-process by the trainer.
+# Half-data row (--data half): deterministic subset drawn in-process by the trainer
+# from whichever strict / recovery pair the run trains on (the strict selection of
+# the first set supplies the per-seed grasp heights).
 half:
   rng_seed: 0
   strict_seeds: 250                     # per grasp-height bin: 63, 62, 63, 62

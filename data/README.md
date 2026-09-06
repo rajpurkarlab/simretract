@@ -10,6 +10,10 @@ training and test set (schemas in `docs/DATA_FORMAT.md`):
 | `strict_500.json` | the strict training set: 500 seeds, 125 per 2.5 cm grasp-height bin, with per-seed grasp height and the recorder recipe |
 | `recovery_train_2000.json` | the exact-4 recovery selection (1954 training episodes + 39 surplus) |
 | `recovery_far1000.json` | the 1000 recovery episodes with the smallest perturbation fraction - the set the models train on |
+| `strict_500_no_smoothing.json` | the no-smoothing strict set: 500 seeds of the same task recorded with a two-segment straight reach and the grasp candidate's own standoff, 125 per 2.5 cm grasp-height bin (`no_smooth` preset) |
+| `recovery_far1000_no_smoothing.json` | its recovery set: 1000 far recovery draws (perturbation fraction at most 0.5) on those seeds |
+| `strict_500_no_standoff.json` | the no-standoff strict set: 500 seeds recorded with the smoothed reach curving straight to the grasp, band-balanced over the grasp height (`no_standoff` preset) |
+| `recovery_far1000_no_standoff.json` | its recovery set: the 1000 recovery draws with the smallest perturbation fraction on those seeds |
 | `test_pool.json` | the frozen held-out pool (115 seeds); excluded from every cache |
 | `test_core40.json`, `test_extra10.json`, `test_core50.json` | benchmark seed sets; `test_core50.json` is the protocol set |
 
@@ -37,18 +41,30 @@ the release is published; the files carry the manifest contract described in
 ```bash
 scripts/download_data.sh strict      # -> data/raw/strict_train      500 episode dirs, ~27 GB (5 shards of 100)
 scripts/download_data.sh recovery    # -> data/raw/recovery_far1000  1000 episode dirs, ~55 GB (only the shards holding far-1000 members are fetched)
-scripts/download_data.sh all
+scripts/download_data.sh all         # both
+# the data variants of the no_smooth / no_standoff presets (same sizes per set)
+scripts/download_data.sh strict_nosmooth       # -> data/raw/strict_no_smoothing
+scripts/download_data.sh recovery_nosmooth     # -> data/raw/recovery_no_smoothing
+scripts/download_data.sh strict_nostandoff     # -> data/raw/strict_no_standoff
+scripts/download_data.sh recovery_nostandoff   # -> data/raw/recovery_no_standoff
+scripts/download_data.sh all_variants          # every set
 ```
 
-`simretract-download data` verifies the shard list against `manifest.json`,
-extracts only the selected episode directories, and checks the final counts
-(500 and 1000). Re-running skips shards that are already extracted.
+`simretract-download data --set <name>` reads every `manifest.json` of the
+set's repository (`configs/data.yaml` maps each set to a repository key of
+`configs/hub.yaml`), extracts only the episode directories its selection
+names, and reports the final count (500 for a strict set, 1000 for a
+recovery set). Re-running skips shards that are already extracted.
 
 ## Build the cache
 
 ```bash
 scripts/build_cache.sh strict --verify        # data/cache/strict_*    69,402 frames
 scripts/build_cache.sh recovery --verify      # data/cache/recovery_*  106,868 frames
+scripts/build_cache.sh strict_nosmooth        # data/cache/strict_nosmooth_*      (no recorded fingerprint)
+scripts/build_cache.sh recovery_nosmooth      # data/cache/recovery_nosmooth_*
+scripts/build_cache.sh strict_nostandoff      # data/cache/strict_nostandoff_*
+scripts/build_cache.sh recovery_nostandoff    # data/cache/recovery_nostandoff_*
 ```
 
 Each build writes the memmaps, the state/action/grasp arrays, the verdict
@@ -64,7 +80,11 @@ on a mismatch (use it for the downloaded sets only):
 
 Matching fingerprints mean the cache is frame-for-frame the one the released
 checkpoints were trained on. A regenerated data set (below) produces different
-fingerprints by construction.
+fingerprints by construction. The no-smoothing and no-standoff sets build with
+the same flags as the main pair (strict flags for the strict sets, recovery
+flags for the recovery sets) but carry no recorded fingerprint
+(`fingerprint: null` in `configs/data.yaml`): `--verify` reports that for
+them and skips the comparison.
 
 ## Regenerate instead of downloading
 
@@ -101,3 +121,12 @@ perturbed farthest from the grasp (perturbation fraction below about 0.5).
 Expected counts for a regenerated set: 500 strict episodes (from roughly
 1000-1300 attempts), about 2000 recovery draws of which about 1950 are kept,
 1000 far-selected. Per-episode size is ~60 MB (~330 frames).
+
+The no-smoothing and no-standoff sets were recorded with the same recorders
+under different reach settings (no-smoothing: `blend false`, the grasp
+candidate's own standoff, no joint-rate limit, speed scale 1.0; no-standoff:
+`standoff 0`, no joint-rate limit, speed scale 1.0; the values are recorded in
+the `recipe` of their strict selection files). The shipped generation
+recipes and wrappers target the main pair; regenerating a variant means
+running `simretract-generate` with those settings and assembling the
+selections with the same commands.

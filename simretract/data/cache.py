@@ -57,7 +57,8 @@ Episode selection and trimming rules (all applied in this order):
 
 The build ends with a 20-frame bitwise spot check against fresh PNG decodes
 (``VERIFY PASS``) and, optionally, an md5 fingerprint comparison of the
-state-side arrays against the reference values in ``configs/data.yaml``.
+state-side arrays against the reference values in ``configs/data.yaml``
+(sets without a recorded fingerprint report that and skip the comparison).
 """
 from __future__ import annotations
 
@@ -84,17 +85,26 @@ CLOSE_MARGIN = 25
 """Frames kept after the carriage reaches its final width (1 s at 25 fps)."""
 N_SPOT_CHECK = 20
 
+_STRICT_FLAGS = dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=False)
+_RECOVERY_FLAGS = dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=True)
+
 SET_PRESETS: dict[str, dict[str, Any]] = {
-    "strict": dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=False),
-    "recovery": dict(pretrim=True, keep_only=True, seed_min=200000, skip_gmk=True, perturb_trim=True),
+    "strict": dict(_STRICT_FLAGS),
+    "recovery": dict(_RECOVERY_FLAGS),
+    "strict_nosmooth": dict(_STRICT_FLAGS),
+    "recovery_nosmooth": dict(_RECOVERY_FLAGS),
+    "strict_nostandoff": dict(_STRICT_FLAGS),
+    "recovery_nostandoff": dict(_RECOVERY_FLAGS),
 }
-"""Production flag sets per dataset kind."""
+"""Production flag sets per cache set (configs/data.yaml ``sets.<name>.cache_flags``):
+every strict set uses the strict flags, every recovery set the recovery flags."""
 
 REFERENCE_FINGERPRINTS: dict[str, dict[str, Any]] = {
     "strict": {"frames": 69402, "md5": {"action": "7d0e2c3b", "plane": "034cb12d", "gpose": "6a415e21"}},
     "recovery": {"frames": 106868, "md5": {"action": "636630ba", "plane": "93dda3b0", "gpose": "7f918202"}},
 }
-"""Reference fingerprints of the released builds (configs/data.yaml overrides)."""
+"""Reference fingerprints of the main pair (configs/data.yaml overrides; a set whose
+``fingerprint`` is null there has none, and ``--verify`` skips it with a message)."""
 
 
 class Episode(NamedTuple):
@@ -417,9 +427,12 @@ def reference_fingerprint(set_key: str) -> dict[str, Any] | None:
     try:
         from simretract import config as _cfg
 
-        entry = ((_cfg.data_config().get("sets") or {}).get(set_key) or {}).get("fingerprint")
-        if entry and "frames" in entry:
-            return {"frames": int(entry["frames"]), "md5": dict(entry.get("md5_8") or entry.get("md5") or {})}
+        sets = _cfg.data_config().get("sets") or {}
+        if set_key in sets:
+            entry = (sets[set_key] or {}).get("fingerprint")
+            if entry and "frames" in entry:
+                return {"frames": int(entry["frames"]), "md5": dict(entry.get("md5_8") or entry.get("md5") or {})}
+            return None  # fingerprint: null -> no reference build recorded for this set
     except Exception as exc:  # unreadable config: fall back to the built-in table
         log.warning("[VERIFY] configs/data.yaml unavailable (%s); using built-in fingerprints", exc)
     return REFERENCE_FINGERPRINTS.get(set_key)
@@ -459,12 +472,13 @@ def _flag(p: argparse.ArgumentParser, name: str, env: str, help_: str) -> None:
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         description="Build one frame-cache set from raw episode directories. Flags default to the "
-                    "production preset of --set (strict: pretrim, keep-only, seed-min 200000, skip-gmk, "
-                    "no perturb-trim; recovery: the same plus perturb-trim); explicit flags and the "
-                    "legacy environment variables override it.",
+                    "production preset of --set (strict sets: pretrim, keep-only, seed-min 200000, "
+                    "skip-gmk, no perturb-trim; recovery sets: the same plus perturb-trim); explicit "
+                    "flags and the legacy environment variables override it. Sets: strict, recovery, "
+                    "strict_nosmooth, recovery_nosmooth, strict_nostandoff, recovery_nostandoff.",
     )
     p.add_argument("--set", choices=sorted(SET_PRESETS), default="strict",
-                   help="dataset kind selecting the flag preset (default strict)")
+                   help="cache set: selects the flag preset and the default --name (default strict)")
     p.add_argument("--raw", default=os.environ.get("RAW_ROOT"), required="RAW_ROOT" not in os.environ,
                    help="directory of ep_* raw episode dirs (env RAW_ROOT)")
     p.add_argument("--out", default=os.environ.get("OUT_DIR"), required="OUT_DIR" not in os.environ,
@@ -533,7 +547,8 @@ def main(argv: list[str] | None = None) -> int:
     if a.verify:
         ref = reference_fingerprint(a.set)
         if ref is None:
-            log.warning("[VERIFY] no reference fingerprint for set %s", a.set)
+            log.warning("[VERIFY] no reference fingerprint recorded for set %s (configs/data.yaml "
+                        "fingerprint: null); the fingerprint comparison is skipped", a.set)
         elif not verify_fingerprint(cfg.out, cfg.name, ref):
             rc = 1
     return rc

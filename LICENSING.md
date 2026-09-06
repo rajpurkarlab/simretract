@@ -38,11 +38,12 @@ code; the constraints are:
 
 ## Checkpoint terms
 
-`LICENSE-CHECKPOINTS.md`. In short: every pi0 row (baseline, no recovery,
-no depth, half data) and the released pi0 base copy embed a PaliGemma
-backbone and are used under the Gemma Terms of Use in addition to the
-Apache-2.0 notices of the lerobot conversion they descend from; the SmolVLA
-row descends from Apache-2.0 weights; the ACT row is trained from scratch
+`LICENSE-CHECKPOINTS.md`. In short: every released row (the eight presets,
+all pi0) and the released pi0 base copy embed a PaliGemma backbone and are
+used under the Gemma Terms of Use in addition to the Apache-2.0 notices of
+the lerobot conversion they descend from. No checkpoint of the other
+backbones is released; a model trained with `--policy smolvla` descends from
+Apache-2.0 weights, one trained with `--policy act` is trained from scratch
 (with torchvision's BSD-licensed ImageNet ResNet-18 encoder) and carries the
 code license. No checkpoint contains asset geometry.
 

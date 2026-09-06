@@ -20,9 +20,15 @@ Every repository id comes from ``configs/hub.yaml`` through
 Raw dataset repos follow the shard contract: ``manifest.json`` maps
 ``shard_NNNN.tar`` to the episode directory names it contains
 (``{"shards": {"shard_0000.tar": ["ep_200005", ...]}}``) and each tar holds
-those directories at its top level. :func:`download_raw` fetches only the
-shards intersecting the wanted episodes and extracts only the wanted
-members, so the far-1000 recovery subset never pulls the whole repository.
+those directories at its top level. A repository may carry further
+``<dir>/manifest.json`` files (later additions) whose shard names are
+relative to that directory; :func:`download_raw` reads every manifest,
+fetches only the shards intersecting the wanted episodes and extracts only
+the wanted members, so a far-1000 recovery subset never pulls the whole
+repository. ``simretract-download data --set <name>`` takes any cache set
+of ``configs/data.yaml`` (``strict``, ``recovery``, ``strict_nosmooth``,
+``recovery_nosmooth``, ``strict_nostandoff``, ``recovery_nostandoff``); the
+set's ``hub_repo`` names the repos key and its ``selection`` the episodes.
 
 Checkpoint verification compares sizes and sha256 with the entries of the
 row when they are filled in and warns (without failing) when they are
@@ -109,6 +115,39 @@ def extract_members(tar_path: Path, out_dir: Path, wanted: set[str] | None) -> i
     return len(seen)
 
 
+MANIFEST = "manifest.json"
+
+
+def repo_manifests(repo_id: str) -> list[str]:
+    """Every manifest in a raw dataset repo: the top-level ``manifest.json``
+    plus any ``<dir>/manifest.json`` of later additions, sorted."""
+    from huggingface_hub import list_repo_files
+
+    names = list_repo_files(repo_id, repo_type="dataset")
+    found = sorted(n for n in names if n == MANIFEST or n.endswith("/" + MANIFEST))
+    if not found:
+        raise RuntimeError(f"{repo_id}: no {MANIFEST} in the repository")
+    return found
+
+
+def merge_manifests(manifests: dict[str, dict[str, Any]]) -> dict[str, list[str]]:
+    """Merge ``{manifest path: parsed manifest}`` into one ``{shard path:
+    [episode names]}`` table; shard names are relative to their manifest's
+    directory (``testfix/manifest.json`` + ``shard_0000.tar`` ->
+    ``testfix/shard_0000.tar``)."""
+    shards: dict[str, list[str]] = {}
+    for path, manifest in sorted(manifests.items()):
+        prefix = path[: -len(MANIFEST)]
+        for shard, eps in (manifest.get("shards") or {}).items():
+            shards[prefix + shard] = [str(e) for e in eps]
+    return shards
+
+
+def load_shards(repo_id: str, stage: Path) -> dict[str, list[str]]:
+    """Download every manifest of ``repo_id`` into ``stage`` and merge them."""
+    return merge_manifests({m: json.load(open(_hf_download(repo_id, m, stage))) for m in repo_manifests(repo_id)})
+
+
 def download_raw(
     repo_id: str,
     out_dir: str | Path,
@@ -128,8 +167,7 @@ def download_raw(
     if isinstance(selection, (str, Path)):
         selection = json.load(open(selection))
     wanted = wanted_episodes(selection)
-    manifest = json.load(open(_hf_download(repo_id, "manifest.json", stage)))
-    shards: dict[str, list[str]] = manifest["shards"]
+    shards = load_shards(repo_id, stage)
     in_repo = {e for eps in shards.values() for e in eps}
     total_wanted = wanted if wanted is not None else in_repo
     missing = total_wanted - in_repo
@@ -241,13 +279,33 @@ def download_base_weights(key: str, out_root: str | Path | None = None, cfg: dic
     return path
 
 
+FALLBACK_SETS = ("strict", "recovery")
+
+
+def data_sets() -> dict[str, dict[str, Any]]:
+    """``sets:`` of ``configs/data.yaml`` (cache set name -> entry); the main
+    pair alone when the config cannot be read."""
+    try:
+        from simretract import config as _cfg
+
+        sets = dict(_cfg.data_config().get("sets") or {})
+    except Exception:  # noqa: BLE001 - unreadable config: main pair only
+        sets = {}
+    return sets or {k: {} for k in FALLBACK_SETS}
+
+
 def _default_selection(cfg_key: str) -> Path:
     from simretract import config as _cfg
 
-    sel = ((_cfg.data_config().get("sets") or {}).get(cfg_key) or {}).get("selection")
+    sel = (data_sets().get(cfg_key) or {}).get("selection")
     if not sel:
         raise KeyError(f"configs/data.yaml: sets.{cfg_key}.selection is missing")
     return _cfg.selection_path(sel)
+
+
+def _repo_key(cfg_key: str) -> str:
+    """The ``repos:`` key of a cache set (``sets.<name>.hub_repo``, default ``<name>_raw``)."""
+    return str((data_sets().get(cfg_key) or {}).get("hub_repo") or f"{cfg_key}_raw")
 
 
 def _checkpoints_root(override: str | None) -> Path:
@@ -262,7 +320,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(description="Download raw data, checkpoints or base weights from the hub (configs/hub.yaml).")
     sub = p.add_subparsers(dest="cmd", required=True)
     d = sub.add_parser("data", help="raw episode shards of a selection")
-    d.add_argument("--set", choices=("strict", "recovery"), required=True, help="which raw dataset repo")
+    d.add_argument("--set", choices=tuple(data_sets()), required=True,
+                   help="cache set of configs/data.yaml: picks the raw dataset repo (sets.<name>.hub_repo) and the selection")
     d.add_argument("--selection", default=None,
                    help="selection json (seeds or episodes); default: the shipped selection of --set from configs/data.yaml")
     d.add_argument("--out", required=True, help="raw output directory (ep_* dirs)")
@@ -283,7 +342,7 @@ def main(argv: list[str] | None = None) -> int:
     try:
         cfg = load_hub_config()
         if a.cmd == "data":
-            repo = _require_repo(cfg, f"{a.set}_raw")
+            repo = _require_repo(cfg, _repo_key(a.set))
             download_raw(repo, a.out, a.selection or _default_selection(a.set), keep_tars=a.keep_tars)
         elif a.cmd == "checkpoints":
             names = a.names or [n for n in (cfg.get("checkpoints") or {}) if n != "pi0_base"]

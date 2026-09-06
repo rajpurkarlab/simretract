@@ -1,9 +1,9 @@
 # Late-trajectory input dropout and plane deterioration
 
-The dropout rule is part of the baseline recipe and of every released
-checkpoint. Everything else in the recipe (data, inputs, augmentation v4.2,
+The dropout rule is part of the baseline recipe and of every preset except
+`no_dropout`. Everything else in the recipe (data, inputs, augmentation v4.2,
 normalization, schedule, base weights) is unchanged by it; `--no-dropout`
-disables it.
+(the `no_dropout` preset) disables it.
 
 ## 1. Where it lives
 

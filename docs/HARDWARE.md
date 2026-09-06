@@ -47,7 +47,7 @@ System requirements beyond the environments:
 - The data loader reads the memmapped cache with 8 workers; keep the cache on
   local SSD. Cache sizes: strict ~130 GB, recovery ~200 GB (uncompressed
   640x480 frames); plus ~1.5 GB of plane sidecars, state and action arrays.
-- Run `simretract-train --preset act --smoke` (60 steps, batch 4) before a long
+- Run `simretract-train --policy act --smoke` (60 steps, batch 4) before a long
   run to validate the cache and the environment.
 - pi0 needs the gated `google/paligemma-3b-pt-224` tokenizer in the Hugging
   Face cache (`HF_HUB_OFFLINE=1` works once it is cached) and the released
