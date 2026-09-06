@@ -2,7 +2,7 @@
 # Download the released checkpoints listed in configs/hub.yaml into checkpoints/<row>/,
 # verifying size and sha256. `all` fetches every row; --base-weights adds pi0_base.
 # Needs configs/hub.yaml `org` filled in (the shipped placeholder is refused with one line).
-# Usage: scripts/download_checkpoints.sh [baseline|no_dropout|no_recovery|half_data|no_plane|no_mask|no_smooth|no_standoff|all] [--base-weights]
+# Usage: scripts/download_checkpoints.sh [baseline|no_dropout|no_recovery|half_data|no_plane|no_mask|no_smooth|no_standoff|smolvla|all] [--base-weights]
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
 ROW="${1:-baseline}"; shift || true

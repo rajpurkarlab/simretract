@@ -25,7 +25,8 @@ PRESET_SWITCHES: dict[str, Any] = {
 }
 
 #: Switch-level view of the rows in configs/train/presets.yaml, in table order.
-#: Every row is pi0 with the dropout rule on, except ``no_dropout``; the
+#: Every row has the dropout rule on, except ``no_dropout``; every row is pi0,
+#: except ``smolvla`` (the SmolVLA backbone on the baseline flags and data); the
 #: ``no_smooth`` / ``no_standoff`` rows keep the baseline flags and train on
 #: the no-smoothing / no-standoff cache pairs (configs/data.yaml).
 BUILTIN_PRESETS: dict[str, dict[str, Any]] = {
@@ -45,6 +46,8 @@ BUILTIN_PRESETS: dict[str, dict[str, Any]] = {
                   "dropout": True, "sets": "strict_nosmooth,recovery_nosmooth"},
     "no_standoff": {"policy": "pi0", "data": "full", "ablation": "none",
                     "dropout": True, "sets": "strict_nostandoff,recovery_nostandoff"},
+    "smolvla": {"policy": "smolvla", "data": "full", "ablation": "none",
+                "dropout": True, "smolvla_full": True},
 }
 
 #: Preset names in table order (the order of configs/train/presets.yaml).

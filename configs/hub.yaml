@@ -33,11 +33,13 @@ checkpoints:
   no_mask:       {path: no_mask,       files: [config.json, model.safetensors, norm.json], sha256: {}}
   no_smooth:     {path: no_smooth,     files: [config.json, model.safetensors, norm.json], sha256: {}}
   no_standoff:   {path: no_standoff,   files: [config.json, model.safetensors, norm.json], sha256: {}}
+  smolvla:       {path: smolvla,       files: [config.json, model.safetensors, norm.json], sha256: {}}
 
 # Third-party weights and tokenizers pulled from their canonical hub locations.
 # Gated entries need `huggingface-cli login` after accepting the licence.
 # The backbone entries serve `simretract-train --policy <name>` (docs/ABLATIONS.md,
-# "Other backbones"); no shipped preset uses them.
+# "Other backbones"); the smolvla preset initialises from `smolvla`, no other
+# preset uses them.
 base_weights:
   paligemma_tokenizer: google/paligemma-3b-pt-224        # gated (Gemma terms); pi0 prompt tokenizer
   sam3: facebook/sam3                                    # gated (SAM licence); file sam3.pt

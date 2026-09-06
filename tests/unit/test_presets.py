@@ -1,6 +1,6 @@
 """Training presets resolve to exactly the launch configuration of their rows.
 
-Each of the eight presets is translated back into the environment block and
+Each of the nine presets is translated back into the environment block and
 argument list of its launch configuration (the legacy environment-variable
 form of the trainer knobs) and compared against those literal sets.  Number
 formatting goes through ``%g`` on both sides so ``0.25``, ``8`` and
@@ -21,7 +21,7 @@ from simretract.train import presets as _presets
 pytestmark = pytest.mark.unit
 
 PRESETS = ("baseline", "no_dropout", "no_recovery", "half_data", "no_plane", "no_mask",
-           "no_smooth", "no_standoff")
+           "no_smooth", "no_standoff", "smolvla")
 
 #: Cache set names of the main pair as recorded in norm.json of checkpoints trained
 #: before the rename (configs/data.yaml legacy_name); the other sets keep their names.
@@ -152,6 +152,9 @@ EXPECTED: dict[str, tuple[dict[str, str], dict[str, str]]] = {
     "no_smooth": ({**COMMON_ENV, "SETS": "strict_nosmooth,recovery_nosmooth"}, dict(COMMON_ARGS)),
     # baseline flags on the no-standoff cache pair
     "no_standoff": ({**COMMON_ENV, "SETS": "strict_nostandoff,recovery_nostandoff"}, dict(COMMON_ARGS)),
+    # the SmolVLA backbone (full unfreeze) on the baseline flags and data
+    "smolvla": ({**COMMON_ENV, "SMOLVLA_FULL": "1"},
+                {**COMMON_ARGS, "--policy": "smolvla", "--init": "lerobot/smolvla_base"}),
 }
 
 
@@ -190,7 +193,8 @@ def test_switch_semantics_agree_with_concrete_flags() -> None:
     """The switches and the flags the trainer actually reads never disagree."""
     for name in config.preset_names():
         f = config.preset_flags(name)
-        assert f["policy"] == "pi0"
+        assert f["policy"] == ("smolvla" if name == "smolvla" else "pi0")
+        assert f["smolvla_full"] is True
         if f["data"] == "strict_only":
             assert f["sets"] == ["strict"] and f["set_frac"] is None
         else:
@@ -205,7 +209,10 @@ def test_switch_semantics_agree_with_concrete_flags() -> None:
         else:
             assert (f["drop_mask_p"], f["plane_sig_end"], f["plane_glitch_end"], f["plane_rand_frac"]) == (0.0, 3.0, 0.03, 0.0)
         assert (f["drop_plane_p"], f["drop_start"], f["plane_sig"], f["plane_glitch_p"]) == (0.0, 0.5, 3.0, 0.03)
-        assert str(f["init"]).endswith("/pi0_base") and "/" in str(f["init"])
+        if f["policy"] == "pi0":
+            assert str(f["init"]).endswith("/pi0_base") and "/" in str(f["init"])
+        else:
+            assert f["init"] == config.hub()["base_weights"][f["policy"]]
 
 
 def test_each_preset_changes_one_thing() -> None:
@@ -220,6 +227,7 @@ def test_each_preset_changes_one_thing() -> None:
         "no_mask": {"ablation", "input_mode"},
         "no_smooth": {"sets"},
         "no_standoff": {"sets"},
+        "smolvla": {"policy", "init"},   # smolvla_full is already on in the defaults
     }
     for name in PRESETS[1:]:
         f = config.preset_flags(name)

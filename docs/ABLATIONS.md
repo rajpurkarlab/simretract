@@ -15,10 +15,24 @@ Presets carry flags and a description only. Benchmark results are not
 recorded in this repository; `docs/PROTOCOL.md` is the procedure that
 produces them from a checkpoint.
 
+## Released models
+
+| model | preset | checkpoint |
+|---|---|---|
+| SimRetract | `baseline` | [link](https://YOUR_HOST/simretract/checkpoints/baseline) |
+| w/o dropout | `no_dropout` | [link](https://YOUR_HOST/simretract/checkpoints/no_dropout) |
+| w/o recovery | `no_recovery` | [link](https://YOUR_HOST/simretract/checkpoints/no_recovery) |
+| half data (250 + 500) | `half_data` | [link](https://YOUR_HOST/simretract/checkpoints/half_data) |
+| w/o plane normal | `no_plane` | [link](https://YOUR_HOST/simretract/checkpoints/no_plane) |
+| w/o mask | `no_mask` | [link](https://YOUR_HOST/simretract/checkpoints/no_mask) |
+| w/o smoothing | `no_smooth` | [link](https://YOUR_HOST/simretract/checkpoints/no_smooth) |
+| w/o standoff | `no_standoff` | [link](https://YOUR_HOST/simretract/checkpoints/no_standoff) |
+| smolvla | `smolvla` | [link](https://YOUR_HOST/simretract/checkpoints/smolvla) |
+
 ## Presets
 
-Every preset is pi0 with the dropout rule on, except `no_dropout`. The
-`baseline` flags are `--policy pi0 --data full --ablation none --dropout
+Every preset has the dropout rule on, except `no_dropout`; every preset is
+pi0, except `smolvla`. The `baseline` flags are `--policy pi0 --data full --ablation none --dropout
 --sets strict,recovery --set-frac 0.5,0.5 --input-mode masked_rgbd --state
 qpos_plane --init checkpoints/pi0_base` plus the schedule above; the table
 lists what each preset changes.
@@ -33,6 +47,7 @@ lists what each preset changes.
 | `no_mask` | `--ablation no_mask` = `--input-mode full_rgbd` | as baseline | unmasked RGB and depth to the policy; the mask still feeds the plane fit |
 | `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | the no-smoothing caches (`data/README.md`) | the training data: demonstrations generated without reach smoothing (two straight segments, the grasp candidate's own standoff, no joint-rate limit) |
 | `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the no-standoff caches (`data/README.md`) | the training data: demonstrations generated without the reach standoff (the smoothed reach curves straight to the grasp) |
+| `smolvla` | `--policy smolvla --init lerobot/smolvla_base --smolvla-full` | strict + recovery caches, SmolVLA base weights + SmolVLM2 tokenizer | the backbone: SmolVLA with the VLM and vision tower unfrozen under the baseline optimizer regime, on the baseline flags and data |
 
 The two data variants keep every baseline flag, including the dropout rule;
 only the cache pair changes. `--data half` works on any pair (`--preset
@@ -53,9 +68,10 @@ silent override.
 ## Other backbones
 
 The trainer's `--policy` switch runs the same data path and inputs through
-other policy classes. There is no preset for them; combine the switch with any
-preset (`--preset baseline --policy act`) or with the explicit flags, and the
-regime is recorded in `norm.json["train_regime"]` like any other run.
+other policy classes. Only `smolvla` has a preset; for the others combine the
+switch with any preset (`--preset baseline --policy act`) or with the explicit
+flags, and the regime is recorded in `norm.json["train_regime"]` like any other
+run.
 
 | `--policy` | knobs | init (`configs/hub.yaml` `base_weights`) | environment |
 |---|---|---|---|
@@ -80,4 +96,4 @@ scripts/eval_sim.sh runs/no_plane/final                     # eval/no_plane/tabl
 
 The trainer records the resolved preset in `norm.json["train_regime"]`, so a
 checkpoint can always be traced back to its flags; the unit tests assert that
-each of the eight presets resolves to its flag set.
+each of the nine presets resolves to its flag set.

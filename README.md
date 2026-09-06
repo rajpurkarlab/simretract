@@ -149,27 +149,17 @@ simretract-train --preset baseline --cache data/cache --out runs/baseline --init
 simretract-eval-sim --ckpt runs/baseline/final --seeds data/selections/test_core50.json --passes 3 --out eval/baseline
 ```
 
-## Models and ablations
+## Models
 
-`simretract-train --preset <name>` expands to the exact flag set; every row
-is pi0 and differs from the baseline in exactly one thing. The dropout rule
-is on in every preset except `no_dropout`.
-
-| preset | flags | what it removes or swaps |
-|---|---|---|
-| `baseline` | `--policy pi0 --data full --ablation none --dropout` | nothing (strict-500 + recovery far-1000, 50/50 sampling, late-trajectory dropout) |
-| `no_dropout` | `--no-dropout` | the dropout rule (no blind frames, constant plane noise) |
-| `no_recovery` | `--data strict_only` | recovery co-training (strict-500 only) |
-| `half_data` | `--data half` | half of both sets (deterministic bin-balanced selection) |
-| `no_plane` | `--ablation no_plane` | the plane normal from the state vector |
-| `no_mask` | `--ablation no_mask` | the tool mask from the image streams |
-| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | reach smoothing in the demonstrations (data recorded using a straight-segment reach) |
-| `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the reach standoff in the demonstrations (data recorded curving straight to the grasp) |
-
-Other backbones (SmolVLA, ACT, pi0.5, pi0-FAST, Fast-WAM) and the remaining
-ablation switches are trainer flags without a preset. Flags per preset, the
-backbone flags and the dropout rule: `docs/ABLATIONS.md`, `docs/DROPOUT.md`;
-the benchmark procedure: `docs/PROTOCOL.md`.
+- [SimRetract](https://YOUR_HOST/simretract/checkpoints/baseline)
+- [w/o dropout](https://YOUR_HOST/simretract/checkpoints/no_dropout)
+- [w/o recovery](https://YOUR_HOST/simretract/checkpoints/no_recovery)
+- [half data (250 + 500)](https://YOUR_HOST/simretract/checkpoints/half_data)
+- [w/o plane normal](https://YOUR_HOST/simretract/checkpoints/no_plane)
+- [w/o mask](https://YOUR_HOST/simretract/checkpoints/no_mask)
+- [w/o smoothing](https://YOUR_HOST/simretract/checkpoints/no_smooth)
+- [w/o standoff](https://YOUR_HOST/simretract/checkpoints/no_standoff)
+- [smolvla](https://YOUR_HOST/simretract/checkpoints/smolvla)
 
 ## Hardware
 

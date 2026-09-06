@@ -23,7 +23,8 @@
 #             on in every preset except no_dropout
 #   sets      the cache pair a row trains on (configs/data.yaml): the no_smooth and
 #             no_standoff rows keep the baseline flags and swap the data
-#   policy    pi0 in every preset; other backbones are trainer flags (docs/ABLATIONS.md)
+#   policy    pi0 in every preset except smolvla (the SmolVLA backbone on the baseline
+#             flags and data); the other backbones are trainer flags (docs/ABLATIONS.md)
 
 schema: 1
 
@@ -111,3 +112,9 @@ presets:
   no_standoff:
     description: baseline flags on the no-standoff data (smoothed reach curving straight to the grasp)
     sets: [strict_nostandoff, recovery_nostandoff]
+
+  smolvla:
+    description: baseline flags and data with the SmolVLA backbone (VLM + vision tower unfrozen, baseline optimizer), dropout rule on
+    policy: smolvla
+    init: "${hub.base_weights.smolvla}"
+    smolvla_full: true

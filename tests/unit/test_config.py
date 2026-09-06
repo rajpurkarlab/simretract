@@ -138,8 +138,9 @@ def test_hub_placeholder_and_substitution() -> None:
     assert h["repos"]["checkpoints"] == "YOUR_HF_ORG/simretract-checkpoints"
     assert "${" not in json.dumps(h)
     assert h["checkpoints"]["pi0_base"]["path"] == "pi0_base"
-    for row in ("baseline", "no_dropout", "no_recovery", "half_data", "no_plane", "no_mask", "no_smooth", "no_standoff"):
+    for row in ("baseline", "no_dropout", "no_recovery", "half_data", "no_plane", "no_mask", "no_smooth", "no_standoff", "smolvla"):
         assert row in h["checkpoints"]
+    assert [n for n in h["checkpoints"] if n != "pi0_base"] == config.preset_names()
     for key in ("strict_raw", "recovery_raw", "strict_nosmooth_raw", "recovery_nosmooth_raw",
                 "strict_nostandoff_raw", "recovery_nostandoff_raw"):
         assert h["repos"][key].startswith("YOUR_HF_ORG/simretract-"), key

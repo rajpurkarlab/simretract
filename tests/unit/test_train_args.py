@@ -30,7 +30,7 @@ def _clean_env(monkeypatch):
         monkeypatch.delenv("SIMRETRACT_" + name, raising=False)
 
 
-#: The launch configuration of the eight presets, translated to trainer
+#: The launch configuration of the nine presets, translated to trainer
 #: flags (cache set names strict/recovery replace the legacy set prefixes).
 #: Every row: FLOAT_DEPTH=1 NOGRIP=1 SAVE_EVERY=5000, --input_mode masked_rgbd
 #: --state qpos_plane --episodes all --steps 15000 --batch 16 --accum 4,
@@ -67,6 +67,8 @@ PRESET_ROWS = {
     "no_smooth": {**COMMON, **FULL, "set_list": ["strict_nosmooth", "recovery_nosmooth"]},
     # baseline flags on the no-standoff pair
     "no_standoff": {**COMMON, **FULL, "set_list": ["strict_nostandoff", "recovery_nostandoff"]},
+    # the SmolVLA backbone (full unfreeze) on the baseline flags and data
+    "smolvla": {**COMMON, **FULL, "policy": "smolvla", "smolvla_full": True},
 }
 
 
@@ -85,7 +87,7 @@ def test_presets_match_their_launch_rows(name, use_config):
     assert got["preset"] == name
 
 
-def test_preset_table_is_exactly_the_eight_rows():
+def test_preset_table_is_exactly_the_nine_rows():
     assert presets.preset_names(use_config=False) == list(PRESET_ROWS)
     if _yaml_available():
         assert presets.preset_names(use_config=True) == list(PRESET_ROWS)
@@ -127,7 +129,7 @@ def test_yaml_and_builtin_tables_agree():
         b = presets.resolve(name, use_config=False)
         for key in ("policy", "data", "ablation", "dropout", "input_mode", "state",
                     "set_list", "set_frac_list", "no_aug", "chunk_h", "video_t",
-                    *train.DROPOUT_DEFAULTS):
+                    "smolvla_full", *train.DROPOUT_DEFAULTS):
             assert y[key] == b[key], f"{name}: {key} yaml={y[key]!r} builtin={b[key]!r}"
 
 
@@ -208,10 +210,10 @@ def test_fastwam_defaults_and_policy_switch():
 
 
 def test_other_backbones_are_flags_not_presets():
-    """The backbone switch and its knobs stay on the trainer; no preset names them."""
+    """The backbone switch and its knobs stay on the trainer; only smolvla has a preset."""
     assert set(train.POLICIES) == {"pi0", "smolvla", "act", "fastwam", "pi05", "pi0_fast"}
     for policy in train.POLICIES:
-        assert policy not in presets.preset_names(use_config=False)
+        assert (policy in presets.preset_names(use_config=False)) == (policy == "smolvla")
     a = train.parse_args(["--preset", "baseline", "--policy", "act", "--act-opt", "official", "--init", ""],
                          use_config=False)
     assert a.policy == "act" and a.act_opt == "official" and a.set_list == ["strict", "recovery"]
