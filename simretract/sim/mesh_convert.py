@@ -3,9 +3,8 @@
 Loads one tool from a STEP file (trimesh's OCCT backend, with gmsh and
 FreeCAD fallbacks) or from a mesh/scene file (FBX / OBJ / STL / PLY / glTF);
 multi-object files need ``--select <node>``. The mesh is scaled to metres
-and, when the recipe says so, pre-rotated into the pack frame of the export
-the released data was recorded with (``--pre-rotate``, applied together
-with the scale before every other step), then repaired, centred on its
+and, when the recipe says so, pre-rotated (``--pre-rotate``, applied
+together with the scale before every other step), then repaired, centred on its
 volumetric centroid, rotated so the blade axis is +z (``--align-z``),
 exported as ``visual.obj`` and decomposed with CoACD into
 ``collision/coll_NNN.obj``. The decomposition reads the exported
@@ -14,8 +13,8 @@ not on the trimesh version that produced it.
 
 Which settings apply comes from three places, in this order: the command
 line; the tool's recipe ``configs/assets/<tool>.yaml`` when the input file
-matches one of its sources (by sha256, or by file name with a warning:
-``select``, ``scale``, ``pre_rotate`` per source, ``align_z`` and
+matches its source (by sha256, or by file name with a warning: ``select``,
+``scale``, ``pre_rotate`` for the source, ``align_z`` and
 ``coacd_threshold`` for the tool); the tracked ``meta.json``; the built-in
 defaults. The input itself defaults to the recipe's drop-in file
 ``assets/source/<pack>/<file>`` unless ``tool_source`` overrides it
@@ -439,8 +438,8 @@ def main(argv: list[str] | None = None) -> int:
                     help="STEP / FBX / OBJ / STL / glTF path (default: the tool_source override, else "
                          "the recipe's drop-in file assets/source/<pack>/<file>; docs/ASSETS.md)")
     ap.add_argument("--select", default=None,
-                    help="object/node name for multi-object files (default: the recipe source the "
-                         "input matches, else the reference meta.json)")
+                    help="object/node name for multi-object files (default: the recipe source when "
+                         "the input matches it, else the reference meta.json)")
     ap.add_argument("--tool", default=None, help="tool name (default: slug of --select or stem)")
     ap.add_argument("--out-dir", default=None, help="output dir (default: assets/tools/<tool>)")
     ap.add_argument("--scale", type=float, default=None,
@@ -506,7 +505,7 @@ def main(argv: list[str] | None = None) -> int:
                   f"{entry['actual_size']} bytes vs {entry['size_bytes']}): another revision of the "
                   f"pack; the recipe settings are applied and the fingerprint check decides", flush=True)
         else:
-            print(f"[SOURCE] {inp.name}: matches no source in {asset_recipe.recipe_path(name).name}; "
+            print(f"[SOURCE] {inp.name}: is not the source named in {asset_recipe.recipe_path(name).name}; "
                   f"settings come from the command line and the reference meta.json", flush=True)
     recipe_settings = asset_recipe.settings_for(entry, recipe) if recipe is not None else None
     layers = [(f"recipe source '{entry['label']}'" if entry else "recipe", recipe_settings),

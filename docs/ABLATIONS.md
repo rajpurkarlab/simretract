@@ -31,15 +31,15 @@ lists what each preset changes.
 | `half_data` | `--data half` | as baseline | deterministic half selection of both sets (250 strict seeds, far-500, RNG 0); normalization statistics still from the full sets |
 | `no_plane` | `--ablation no_plane` = `--state qpos` | as baseline | removes the plane normal (7-D state) |
 | `no_mask` | `--ablation no_mask` = `--input-mode full_rgbd` | as baseline | unmasked RGB and depth to the policy; the mask still feeds the plane fit |
-| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | the no-smoothing caches (`data/README.md`) | the training data: demonstrations recorded without reach smoothing (two straight segments, the grasp candidate's own standoff, no joint-rate limit) |
-| `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the no-standoff caches (`data/README.md`) | the training data: demonstrations recorded without the reach standoff (the smoothed reach curves straight to the grasp) |
+| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | the no-smoothing caches (`data/README.md`) | the training data: demonstrations generated without reach smoothing (two straight segments, the grasp candidate's own standoff, no joint-rate limit) |
+| `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the no-standoff caches (`data/README.md`) | the training data: demonstrations generated without the reach standoff (the smoothed reach curves straight to the grasp) |
 
 The two data variants keep every baseline flag, including the dropout rule;
 only the cache pair changes. `--data half` works on any pair (`--preset
 no_smooth --data half`): the strict selection of the first set supplies the
 per-seed grasp heights the selection stratifies on (`--strict-json` overrides
 it). Every preset trains from the released raw sets or their regenerated
-equivalents; no preset needs data that is not released.
+counterparts; no preset needs data that is not released.
 
 ## Other switches
 

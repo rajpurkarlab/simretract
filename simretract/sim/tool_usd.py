@@ -33,9 +33,9 @@ STEEL_DENSITY_KG_M3 = 7900.0
 DEFAULT_TOOL = "retractor_rake"
 
 #: Tolerances of the collision-set check. CoACD splits a mesh differently
-#: for sub-micrometre coordinate differences (another export of the same
-#: model, another platform), so the number of convex parts is checked within
-#: a few parts and the summed hull volume within a few percent.
+#: for sub-micrometre coordinate differences, from run to run and across
+#: platforms, so the number of convex parts is checked within a few parts
+#: and the summed hull volume within a few percent.
 PARTS_TOL = 3
 HULL_VOLUME_REL_TOL = 0.05
 

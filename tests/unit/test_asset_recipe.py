@@ -58,17 +58,9 @@ def test_recipe_names_the_drop_in_source(recipe: dict) -> None:
     assert R is not None and np.array_equal(R, np.diag([-1.0, 1.0, -1.0]))
 
 
-def test_recipe_lists_the_recorded_export(recipe: dict) -> None:
-    alts = {a["name"]: a for a in recipe["alternative_sources"]}
-    cg = alts["cgtrader_set_of_7"]
-    assert cg["file"] == "uploads_files_5268240_surginstruments.fbx"
-    assert cg["sha256"] == "8f7182fd5867b5da7c023b366ab37c73a37f13030ca119a0ff3011524bed6de3"
-    assert cg["select"] == "so7si_retractor_2_body" and cg["scale"] == 0.01
-    assert ar.parse_pre_rotate(cg.get("pre_rotate")) is None
-    assert "recorded" in cg["role"]
-    labels = [s["label"] for s in ar.sources(recipe)]
-    assert labels == ["vretractor", "cgtrader_set_of_7"]
-    assert ar.sources(recipe)[0]["default"] is True
+def test_recipe_names_one_source_only(recipe: dict) -> None:
+    assert "alternative_sources" not in recipe
+    assert ar.source_entry(recipe)["label"] == "vretractor"
 
 
 def test_recipe_fingerprint_is_the_released_mesh(recipe: dict) -> None:
@@ -89,21 +81,19 @@ def test_recipe_agrees_with_meta_json(recipe: dict, meta: dict) -> None:
                 "collision_hull_volume_m3", "suggested_tip", "suggested_bend"):
         assert exp[key] == meta[key], key
     assert recipe["conversion"] == {"align_z": meta["align_z"], "coacd_threshold": meta["coacd_threshold"]}
-    # meta.json describes the build from the recorded export
-    cg = recipe["alternative_sources"][0]
-    assert (meta["select"], meta["scale"], meta["pre_rotate"]) == (cg["select"], cg["scale"], None)
-    assert meta["center_removed_pre_m"] == cg["expected_center_removed_pre_m"]
+    # meta.json describes the build from the recipe source
+    src = recipe["source"]
+    assert (meta["select"], meta["scale"]) == (src["select"], src["scale"])
+    assert np.array_equal(ar.parse_pre_rotate(meta["pre_rotate"]), ar.parse_pre_rotate(src["pre_rotate"]))
+    assert meta["center_removed_pre_m"] == src["expected_center_removed_pre_m"]
     assert "source" not in meta and "/" not in json.dumps(meta)
 
 
-def test_settings_for_sources(recipe: dict) -> None:
-    fab, cg = ar.sources(recipe)
-    s = ar.settings_for(fab, recipe)
+def test_settings_for_source(recipe: dict) -> None:
+    s = ar.settings_for(ar.source_entry(recipe), recipe)
     assert s["select"] == "ovrsi_retractor_body" and s["scale"] == pytest.approx(0.01474075)
     assert np.array_equal(s["pre_rotate"], np.diag([-1.0, 1.0, -1.0]))
     assert s["align_z"] is True and s["coacd_threshold"] == 0.015
-    s = ar.settings_for(cg, recipe)
-    assert s["select"] == "so7si_retractor_2_body" and s["scale"] == 0.01 and s["pre_rotate"] is None
     assert ar.settings_for(None, recipe) == {"align_z": True, "coacd_threshold": 0.015}
 
 
@@ -136,16 +126,14 @@ def _mini_recipe(tmp_path: Path, payload: bytes) -> tuple[dict, Path]:
     f.write_bytes(payload)
     rec = {"tool": "t", "source": {"pack": "pack", "file": "model.fbx", "sha256": hashlib.sha256(payload).hexdigest(),
                                    "size_bytes": len(payload), "select": "n", "scale": 0.5,
-                                   "pre_rotate": [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]},
-           "alternative_sources": [{"name": "alt", "file": "other.fbx", "sha256": "00" * 32, "size_bytes": 3,
-                                    "select": "m", "scale": 1.0}]}
+                                   "pre_rotate": [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]}}
     return rec, f
 
 
 def test_identify_source_by_sha256_then_name(tmp_path: Path) -> None:
     rec, f = _mini_recipe(tmp_path, b"model bytes")
     entry, how = ar.identify_source(f, rec)
-    assert how == "sha256" and entry["label"] == "pack" and entry["default"] is True
+    assert how == "sha256" and entry["label"] == "pack"
     f.write_bytes(b"model bytes, revised")
     entry, how = ar.identify_source(f, rec)
     assert how == "name" and entry["label"] == "pack"
@@ -243,8 +231,8 @@ def test_sub_margin_noise_keeps_the_grid_hash_only() -> None:
     V, F = _box(offset=(0.0123455, -0.0042, 0.00007))   # x coordinates sit on a 1 um rounding boundary
     fp = ar.mesh_fingerprint(V, F)
     rng = np.random.default_rng(0)
-    # the size of another export's float32 rounding (a few 1e-8 m): well inside the
-    # 0.25 um grid margin, the 0.1 um extents tolerance and the 1e-6 volume tolerance
+    # a few 1e-8 m of noise: well inside the 0.25 um grid margin, the 0.1 um
+    # extents tolerance and the 1e-6 volume tolerance
     noisy = V + rng.uniform(-3e-8, 3e-8, V.shape)
     assert ar.vertex_sha256(noisy) != fp["vertex_sha256"]   # some coordinate crossed the boundary
     problems, notes = ar.compare_fingerprint(noisy, F, fp)

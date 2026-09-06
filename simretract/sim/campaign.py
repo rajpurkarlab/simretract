@@ -14,7 +14,7 @@ launch count reaches ``tries``. Re-running the same command resumes.
 Quota mode (strict sets) targets ``per_bin`` kept episodes per grasp-height
 bin: fresh seeds are pre-screened without the simulator (a seed whose hand
 occluder blocks the target bin entirely is skipped, and a soft cap keeps the
-tilt distribution balanced), then recorded with the bin as a hard height
+tilt distribution balanced), then recorded under the bin as a hard height
 constraint until every bin is full.
 """
 

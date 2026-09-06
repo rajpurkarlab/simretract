@@ -65,22 +65,28 @@ shipped placeholder they stop with a one-line message.
 
 The retractor 3D model is a third-party asset that is not part of this
 repository. Every simulation command (generation, benchmark, the asset
-build) needs it prepared locally from your own licensed copy: buy the Fab
+build) needs it prepared locally from your own licensed copy: obtain the Fab
 listing named in `configs/assets/retractor_rake.yaml`, drop the downloaded
 folder under `assets/source/` as it is, and build:
 
 ```bash
-# assets/source/vretractor/{vretractor.fbx, textures/}  <- the purchased folder, unchanged (git-ignored)
+# assets/source/vretractor/{vretractor.fbx, textures/}  <- the downloaded folder, unchanged (git-ignored)
 scripts/build_assets.sh --accept-eula      # checksum, tool meshes, fingerprint check, USD, grasp-candidate check
 ```
 
 The converter installs nothing itself: `docs/ASSETS.md` lists the two
-optional packages it needs, explains why the Fab download rebuilds the
-released tool exactly (the recorded data was made from another export of
-the same model) and what each check line means. Real-robot deployment does
-not need the asset.
+optional packages it needs and what each check line means. Building from
+this Fab file with the shipped recipe reproduces the released tool geometry
+within 0.25 um, and the released grasp candidates were generated from it.
+Real-robot deployment does not need the asset.
 
 ## Quick start
+
+The quick start assumes the same hardware setup as ours: a Trossen
+WidowX-AI follower arm with the flat-pad fingers, an Intel RealSense D405
+wrist camera, and a workstation with a CUDA GPU for the policy server and
+the SAM 3 mask server (`docs/HARDWARE.md`). Without that hardware only the
+simulation parts apply.
 
 ```bash
 scripts/download_checkpoints.sh baseline            # -> checkpoints/baseline/
@@ -143,21 +149,6 @@ simretract-train --preset baseline --cache data/cache --out runs/baseline --init
 simretract-eval-sim --ckpt runs/baseline/final --seeds data/selections/test_core50.json --passes 3 --out eval/baseline
 ```
 
-Expected sizes and times on the reference hardware (1x RTX 5090 for
-simulation, 1x H200 for training):
-
-| stage | output | size | time |
-|---|---|---|---|
-| strict generation | 500 kept episodes (~330 frames each) | ~27 GB | 1-2 days at 3 lanes (about half of attempted seeds are kept) |
-| recovery generation | ~2000 draws, 1000 selected | ~110 GB (~55 GB selected) | 1-2 days at 3 lanes |
-| cache, strict | 69,402 frames | ~130 GB | 1-2 h + plane sidecar |
-| cache, recovery | 106,868 frames | ~200 GB | 1-2 h + plane sidecar |
-| train pi0 (15k steps, 16x4) | 16 GB checkpoint | ~107 GB GPU | ~7.5 h |
-| train SmolVLA / ACT (`--policy`, no preset) | 1.2 GB / 0.2 GB | | ~2.6 h / ~1.1 h |
-| sim benchmark, one row | 50 seeds x up to 3 attempts | | 5-7 h |
-
-Smaller training GPUs: `--batch 8 --accum 8` keeps the effective batch of 64.
-
 ## Models and ablations
 
 `simretract-train --preset <name>` expands to the exact flag set; every row
@@ -172,7 +163,7 @@ is on in every preset except `no_dropout`.
 | `half_data` | `--data half` | half of both sets (deterministic bin-balanced selection) |
 | `no_plane` | `--ablation no_plane` | the plane normal from the state vector |
 | `no_mask` | `--ablation no_mask` | the tool mask from the image streams |
-| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | reach smoothing in the demonstrations (data recorded with a straight-segment reach) |
+| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | reach smoothing in the demonstrations (data recorded using a straight-segment reach) |
 | `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the reach standoff in the demonstrations (data recorded curving straight to the grasp) |
 
 Other backbones (SmolVLA, ACT, pi0.5, pi0-FAST, Fast-WAM) and the remaining
@@ -196,7 +187,7 @@ configs/        hub ids, paths, interpreters, the tool asset recipe, generation 
 envs/           requirements per environment and envs/setup.sh
 third_party/    trossen_ai_isaac submodule (robot USD + controller)
 assets/         tool annotations (meta.json, grasp candidates), gripper fingers, silhouette LUT;
-                source/<pack>/ holds your purchased asset folder (git-ignored); the tool meshes
+                source/<pack>/ holds your asset folder (git-ignored); the tool meshes
                 and USD are built locally and never tracked (docs/ASSETS.md)
 data/           selections/ (shipped seed lists), raw/ and cache/ (downloaded or generated)
 checkpoints/    downloaded checkpoints and base weights
@@ -215,7 +206,7 @@ scripts/smoke_test.sh all        # unit (< 1 min) + gpu (~1 min) + sim (~10 min)
 
 Each tier is a pytest module under `tests/` that drives the real console
 commands; `simretract-smoke --tier <tier>` is the same entry point from
-Python. The sim tier starts by building the tool assets from the purchased
+Python. The sim tier starts by building the tool assets from the asset
 file under `assets/source/` and skips that step with a message when there
 is none. Details and outputs: `tests/README.md`.
 
@@ -237,19 +228,13 @@ the paper cited there.
 
 We release our code, policy checkpoints, and robot-action/grasp-point datasets. The third-party retractor asset by HQ3DMOD must be obtained separately under its publisher's license. Asset acquisition and local preparation instructions are provided in this repository.
 
-- `LICENSING.md`: the split between the code license (`LICENSE`, chosen by
-  the authors), the checkpoint terms (`LICENSE-CHECKPOINTS.md`: the pi0 rows
-  and the released pi0 base copy inherit the Gemma Terms of Use and the
-  upstream Apache-2.0 notices, the SmolVLA row an Apache-2.0 lineage, the
-  ACT row the code license), the dataset terms (`LICENSE-DATA.md`) and the
+- `LICENSING.md`: the code license (`LICENSE`), the checkpoint terms
+  (`LICENSE-CHECKPOINTS.md`), the dataset terms (`LICENSE-DATA.md`) and the
   third-party asset rule.
-- `docs/ASSETS.md`: the Fab listing to buy, the export the reported
-  experiments were recorded with, the measurements showing that the Fab
-  download rebuilds the released tool, and the local preparation that
+- `docs/ASSETS.md`: the Fab listing to obtain and the local preparation that
   turns your copy into the meshes, USD and grasp candidates. No file that
   carries the asset's geometry is tracked; `assets/LICENSES.md` lists every
   asset file as tracked or built locally.
-- `THIRD_PARTY_NOTICES.md`: Isaac Sim, the vendor robot package, lerobot,
-  ultralytics, the PaliGemma tokenizer, SAM 3, torchvision weights and the
-  asset listings, with their licenses and how each is obtained.
-- `scripts/smoke_test.sh release` checks the publication gates.
+- `THIRD_PARTY_NOTICES.md`: third-party software, weights, tokenizers and
+  the asset listing, with their sources and licenses.
+- `scripts/smoke_test.sh release` checks the release gates.

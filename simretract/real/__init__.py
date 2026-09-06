@@ -95,7 +95,7 @@ def resolve_preset(cfg: dict[str, Any], name: str) -> dict[str, Any]:
 
 
 def preset_client_args(preset: dict[str, Any]) -> list[str]:
-    """Translate a preset dict into the equivalent client command-line flags."""
+    """Translate a preset dict into the matching client command-line flags."""
     args = [
         "--exec-h", str(int(preset["exec_h"])),
         "--exec-min", str(int(preset["exec_min"])),

@@ -392,11 +392,11 @@ def build_candidate_db(tool: str, n_grasps: int = N_GRASPS, seed: int = SAMPLER_
 
 
 #: Tolerances of ``--compare``: positions and widths to 1 um; rotation-matrix
-#: entries to 1e-4 (0.006 degrees). Another export of the same model puts the
-#: coordinates within 0.25 um of the released mesh, which moves the face
-#: normals of millimetre-sized triangles (the closing axis of the flat-clamp
-#: family) by up to a few 1e-5 rad while every centre, width and standoff
-#: stays; a different mesh or sampler changes the candidate set outright.
+#: entries to 1e-4 (0.006 degrees). A build whose coordinates lie within
+#: 0.25 um of the released mesh (the recipe's grid fingerprint) can move the
+#: face normals of millimetre-sized triangles (the closing axis of the
+#: flat-clamp family) by up to a few 1e-5 rad while every centre, width and
+#: standoff stays; a different mesh or sampler changes the candidate set outright.
 COMPARE_ATOL_M = 1e-6
 COMPARE_ATOL_ROT = 1e-4
 

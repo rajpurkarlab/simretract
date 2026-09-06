@@ -58,6 +58,6 @@ markers = [
   "gpu: needs a CUDA GPU and the policy environment",
   "sim: needs Isaac Sim and a GPU",
   "real_dry: needs the real-robot software stack (hardware optional)",
-  "release: publication gates (licence files, hub ids, asset exclusion, release wording); expected to fail before the release",
+  "release: release gates (licence files, hub ids, asset exclusion, release wording); expected to fail before the release",
 ]
 addopts = "-ra"

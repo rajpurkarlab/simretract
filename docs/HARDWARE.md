@@ -32,21 +32,17 @@ System requirements beyond the environments:
 
 ## Training defaults (H200)
 
-| policy | batch x accum | steps | GPU memory | time per step | wall time | checkpoint |
-|---|---|---|---|---|---|---|
-| pi0 (all pi0 rows) | 16 x 4 | 15,000 | ~107 GB | 1.6-1.8 s | ~7.5 h | 16.1 GB |
-| SmolVLA (full fine-tune) | 16 x 4 | 15,000 | | | ~2.6 h | 1.2 GB |
-| ACT (from scratch) | 16 x 4 | 15,000 | | 0.26 s | ~1.1 h | 0.2 GB |
-| Fast-WAM (optional) | 16 x 4 | 15,000 | ~92 GB | ~5 s | ~21 h | 12 GB |
+Every preset trains 15,000 steps at batch 16 x accum 4 (effective batch 64).
+pi0 needs about 107 GB of GPU memory at that setting; Fast-WAM about 92 GB;
+SmolVLA and ACT fit on far smaller cards.
 
-- The effective batch is 64. `--batch 32 --accum 2` does not fit pi0 on 141 GB;
-  on smaller cards use `--batch 8 --accum 8` (same effective batch, same
-  schedule, roughly the same wall time per step of progress).
-- `--save-every 5000` writes intermediate snapshots (16 GB each for pi0); the
-  default keeps only `final/`.
+- `--batch 32 --accum 2` does not fit pi0 on 141 GB; on smaller cards use
+  `--batch 8 --accum 8` (same effective batch, same schedule).
+- `--save-every 5000` writes intermediate snapshots; the default keeps only
+  `final/`.
 - The data loader reads the memmapped cache with 8 workers; keep the cache on
-  local SSD. Cache sizes: strict ~130 GB, recovery ~200 GB (uncompressed
-  640x480 frames); plus ~1.5 GB of plane sidecars, state and action arrays.
+  local SSD (the strict and recovery caches together take a few hundred GB
+  of uncompressed 640x480 frames).
 - Run `simretract-train --policy act --smoke` (60 steps, batch 4) before a long
   run to validate the cache and the environment.
 - pi0 needs the gated `google/paligemma-3b-pt-224` tokenizer in the Hugging
@@ -55,15 +51,14 @@ System requirements beyond the environments:
 
 ## Inference and simulation budgets (RTX 5090, 32 GB)
 
-| process | GPU | host RAM | notes |
-|---|---|---|---|
-| policy server, pi0 bf16 (`--half`) | ~15 GB | ~8 GB peak while loading (default lean load), ~4 GB steady | without lean load the fp32 instantiation peaks at ~30 GB host RAM |
-| policy server, SmolVLA bf16 | ~3 GB | | |
-| policy server, ACT fp32 | ~1 GB | | |
-| policy server, Fast-WAM | up to ~23 GB while loading | | `--fastwam-cpu-load` loads on the CPU first and avoids the peak |
-| SAM 3 mask server | 5-15 GB | ~15 GB | real robot only |
-| Isaac Sim evaluator, one seed | 3-5 GB | ~4 GB | 6-8 min per seed including release, settling and the load battery |
-| Isaac Sim recorder lane | 3-5 GB | ~4 GB | 5-8 min per attempted seed |
+GPU memory per process: the pi0 policy server needs about 15 GB in bf16
+(`--half`; host RAM peaks at about 8 GB while loading with the default lean
+load, about 30 GB without it). The SmolVLA server needs about 3 GB, the ACT
+server about 1 GB, and the Fast-WAM server up to about 23 GB while loading
+(`--fastwam-cpu-load` loads on the CPU first and avoids the peak). The SAM 3
+mask server needs 5-15 GB of GPU memory and about 15 GB of host RAM (real
+robot only). Each Isaac Sim evaluator or recorder lane needs 3-5 GB of GPU
+memory and about 4 GB of host RAM.
 
 Rules that follow from the budget:
 
@@ -74,9 +69,8 @@ Rules that follow from the budget:
   the GPU, up to 7 lanes on an otherwise idle card. Lanes that share a
   saturated GPU can hang at the first frame; the lane driver's timeout
   (`--timeout 4800` s per chunk, `--tries 2`) re-records them.
-- Disk: raw episodes are ~60 MB each (~27 GB for strict-500, ~110 GB for the
-  full recovery set); evaluation outputs are ~50 MB per seed (review video +
-  frames).
+- Disk: raw episodes are about 60 MB each; evaluation outputs are about
+  50 MB per seed (review video + frames).
 - Every Isaac process is started with `start_new_session=True` and killed as a
   process group on timeout; a force-killed Isaac process can leave shader-cache
   debris that crash-loops later boots, in which case clear the Kit cache

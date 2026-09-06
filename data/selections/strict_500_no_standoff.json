@@ -509,7 +509,7 @@
   "0..+3",
   "+3..+6"
  ],
- "rule": "500 expert take-over episodes recorded without the reach standoff (the reach curves straight to the grasp), filled as 125 per 3 cm grasp-height band over -6..+6 cm at recording time; grasp_z_cm is the per-seed grasp height recomputed from the stored grasp point",
+ "rule": "500 expert take-over episodes generated without the reach standoff (the reach curves straight to the grasp), filled as 125 per 3 cm grasp-height band over -6..+6 cm at recording time; grasp_z_cm is the per-seed grasp height recomputed from the stored grasp point",
  "recipe": {
   "reach": "smoothed, curving straight to the grasp",
   "standoff": 0.0,

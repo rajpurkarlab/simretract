@@ -2,7 +2,7 @@
 
 The retractor mesh is a third-party asset that is never part of the
 repository: the user obtains it under its publisher's license, drops the
-purchased folder under ``assets/source/<pack>/`` as downloaded, and this
+folder under ``assets/source/<pack>/`` as downloaded, and this
 command converts it into everything the simulation needs (``docs/ASSETS.md``).
 Every step runs in the simulator environment as a subprocess (the tool USD
 needs Isaac Sim; the converter and the samplers need trimesh/scipy which

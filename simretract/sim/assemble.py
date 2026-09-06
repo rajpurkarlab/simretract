@@ -57,8 +57,8 @@ def grasp_z_m(seed: int, grasp_w) -> float:
 
 
 def recipe_summary(kind: str = "strict") -> dict[str, Any]:
-    """Scalar recorder knobs of ``configs/generation/<kind>.yaml`` (what the
-    set was recorded with), recorded in the selection JSON as ``recipe``.
+    """Scalar recorder knobs of ``configs/generation/<kind>.yaml`` (the
+    settings the set was recorded under), stored in the selection JSON as ``recipe``.
     Output-only keys are left out; ``{}`` when the file is unavailable."""
     from simretract import config
 

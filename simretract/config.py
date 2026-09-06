@@ -7,7 +7,7 @@ used by the package comes from the YAML files under ``configs/``:
 * ``configs/envs.yaml``           interpreter paths per role and the optional ``tool_source``
                                   override (template; ``envs/setup.sh`` writes the
                                   machine-specific ``configs/envs.local.yaml``)
-* ``configs/assets/<tool>.yaml``  tool asset recipe: the purchased source file, its conversion
+* ``configs/assets/<tool>.yaml``  tool asset recipe: the source file, its conversion
                                   and the fingerprints of the released mesh
 * ``configs/hub.yaml``            hub organisation, repository ids, checkpoint and
                                   base-weight names

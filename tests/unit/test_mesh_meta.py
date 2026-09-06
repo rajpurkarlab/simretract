@@ -51,8 +51,8 @@ def test_each_reference_key_is_checked(reference: dict) -> None:
 
 
 def test_collision_set_tolerance(reference: dict) -> None:
-    """Another export of the same model splits into 20 or 21 parts with a
-    hull volume within 2% on the reference machine; both pass."""
+    """The reference mesh splits into 20 or 21 parts with a hull volume
+    within 2% from run to run on the reference machine; both pass."""
     n, hull = reference["n_collision_parts"], reference["collision_hull_volume_m3"]
     for dn, dv in ((0, 0.0), (-1, 0.02), (1, -0.02), (3, 0.049), (-3, -0.049)):
         new = dict(reference, n_collision_parts=n + dn, collision_hull_volume_m3=hull * (1 + dv))
@@ -90,12 +90,11 @@ def test_usd_summary_check(reference: dict) -> None:
     assert tool_usd.check_against_meta(bad, reference)
 
 
-def test_reference_meta_describes_the_recorded_build(reference: dict) -> None:
-    """meta.json is the build from the export the released data was recorded
-    with; the recipe maps the drop-in source onto it."""
-    assert reference["select"] == "so7si_retractor_2_body"
-    assert reference["scale"] == 0.01
-    assert reference["pre_rotate"] is None
+def test_reference_meta_describes_the_recipe_build(reference: dict) -> None:
+    """meta.json is the build of the recipe source with the recipe settings."""
+    assert reference["select"] == "ovrsi_retractor_body"
+    assert reference["scale"] == 0.01474075
+    assert reference["pre_rotate"] == [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
     assert reference["align_z"] is True
     assert reference["coacd_threshold"] == 0.015
     assert reference["n_collision_parts"] == 21

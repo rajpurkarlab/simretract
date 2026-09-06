@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Build the simulation assets locally from your licensed copy of the retractor
-# (docs/ASSETS.md): the purchased file under assets/source/<pack>/ (or the
+# (docs/ASSETS.md): the source file under assets/source/<pack>/ (or the
 # tool_source override) is checksummed and converted into the tool meshes,
 # checked against meta.json and the recipe fingerprints, the tool USD is built
 # (Isaac Sim required) and the tracked grasp candidates are re-sampled and

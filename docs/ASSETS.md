@@ -1,4 +1,4 @@
-# Tool asset: acquisition, identity and local preparation
+# Tool asset: acquisition and local preparation
 
 The retractor the policy hands over is a third-party 3D model. The
 repository never contains it in any form that carries its geometry: no
@@ -7,7 +7,7 @@ reconstruction captures. What the repository tracks for the tool is
 annotation and recipe only: `assets/tools/retractor_rake/meta.json`
 (extents, volume, tip/bend points, the collision-set summary and the
 settings of the build that produced them), `configs/assets/retractor_rake.yaml`
-(which purchased file to convert, how, and the fingerprints the result must
+(which file to convert, how, and the fingerprints the result must
 reproduce) and `assets/grasp_candidates/retractor_rake.json` (the sampled
 grasp poses the recorders draw from). Everything else is built on your
 machine from your own licensed copy of the asset with
@@ -16,9 +16,8 @@ references so you know whether your copy reproduces the released setup.
 
 ## Drop-in folder
 
-Place the purchased pack under `assets/source/<pack>/` exactly as
-downloaded, without renaming or converting anything. For the default
-source:
+Place the pack under `assets/source/<pack>/` exactly as downloaded,
+without renaming or converting anything:
 
 ```
 assets/source/vretractor/
@@ -41,8 +40,6 @@ is rendered with a steel shader).
 
 ## Acquisition
 
-### The default source: the Fab listing
-
 | item | value |
 |---|---|
 | asset | Operating Volkman Retractor Surgical Instrument |
@@ -54,88 +51,30 @@ is rendered with a steel shader).
 | FBX node | `ovrsi_retractor_body` (the file's only mesh node) |
 | conversion | scale `0.01474075`, pre-rotation = half-turn about y, then the converter's own steps (recipe `source` block) |
 
-Keep the purchase record and the terms that applied at purchase with your
-own records. The converter verifies the checksum of the file it converts
+Obtain the asset from the listing under its license and drop the folder in
+as shown above. The converter verifies the checksum of the file it converts
 and prints `[SOURCE] vretractor.fbx: recipe source 'vretractor' (sha256
 verified)`; a later revision of the pack with a different digest is
 reported and converted anyway, and the fingerprint check then decides
 whether it still reproduces the released tool.
 
-### The export the released data was recorded with
+Building this file with the shipped recipe reproduces the released tool
+geometry within 0.25 um (the recipe's grid fingerprint): the same 3152
+vertices and 6308 faces in the same order, the same extents and volume, and
+the same tip and bend points. The released grasp candidates were generated
+from it and re-sample identically from the local build (`--grasps
+--compare`, 1 um on positions and 1e-4 on rotation entries). The collision
+decomposition is the one step that is not deterministic: CoACD
+(`coacd==1.0.11`, threshold 0.015) splits the mesh into 20 or 21 convex parts
+with a summed hull volume between 7.82 and 8.00 cm3 from run to run, so the
+reference checks accept the collision set within 3 parts and 5% of the hull
+volume. Physics-driven outputs (regenerated demonstrations, benchmark
+rollouts) are not bit-reproducible in any case (`README.md`, "Rebuild from
+scratch").
 
-The released datasets, checkpoints and benchmark numbers were produced
-with the rake retractor of the CGTrader pack "Set of 7 surgical
-instruments" (<https://www.cgtrader.com/3d-models/science/medical/set-of-7-surgical-instruments>):
-file `uploads_files_5268240_surginstruments.fbx`, 3,518,400 bytes, sha256
-`8f7182fd5867b5da7c023b366ab37c73a37f13030ca119a0ff3011524bed6de3`, node
-`so7si_retractor_2_body`, converted at scale 0.01 with no pre-rotation. The
-tracked `meta.json` describes that build, and this provenance of the
-recorded data stays as it is: the datasets are not relabelled as having
-been made from the Fab file. The recipe lists this export under
-`alternative_sources`; a copy of it is recognised by sha256 and converted
-with its own settings, and it reproduces `visual.obj` byte for byte.
-
-## Asset identity
-
-The two files are two exports of the same model, and the Fab download
-converted with the shipped recipe reproduces the released tool. Measured
-with the repository's converter (`pyassimp` 5.2.5 with assimp 5.4, `trimesh`
-4.5.1) on the reference machine:
-
-- **Same mesh.** Both nodes hold 3152 vertices and 6308 triangles, and the
-  face arrays are identical: same connectivity over the same vertex order.
-- **Pack frames.** A vertex-wise similarity fit of the Fab node onto the
-  recorded export's node gives a uniform scale of 1.474075 and a rotation
-  within 1.1e-7 rad of an exact half-turn about y, with a residual of at
-  most 1.9e-8 m (mean 6.5e-9 m) once both are in metres. The residual is
-  the exports' own rounding: both FBX files store their vertex arrays as
-  doubles whose values are exactly representable in single precision, each
-  in its own frame, so the two coordinate sets differ by single-precision
-  rounding and cannot be made bit-identical by any transform.
-- **Recipe.** Total scale 0.01 x 1.474075 = 0.01474075 and the pre-rotation
-  `[[-1, 0, 0], [0, 1, 0], [0, 0, -1]]`, applied to the Fab coordinates
-  before the converter's own repair, centring and alignment steps, put the
-  file into the pack frame of the recorded export; the converter then does
-  to it what it did to that export. (The direct transform from the Fab
-  pack frame to the released tool frame is scale 1.474075 with rotation
-  `[[0, 0, 1], [0.0161, 0.9999, 0], [-0.9999, 0.0161, 0]]`, Fab x onto
-  tool z with a 0.92 degree roll: the half-turn composed with the
-  converter's alignment rotation. The recipe applies only the half-turn so
-  that the alignment step, whose roll follows from the input orientation,
-  runs on the same input as for the recorded export.)
-- **Result.** The `visual.obj` built from the Fab file has the same 3152
-  vertices and 6308 faces in the same order (`face_sha256` identical),
-  every vertex within 2.9e-8 m of the released mesh (mean 9e-9 m), the
-  same extents to 1e-8 m (0.03059319 x 0.00967014 x 0.21631345 m), the same
-  volume to 5e-8 relative (6.61087e-06 m3), and the same tip and bend
-  points at the 1e-5 m resolution of `meta.json`. Of its 9456 coordinates,
-  26 fall on the other side of a 1 um rounding boundary, so the exact
-  fingerprint of the released file (`vertex_sha256`, coordinates rounded to
-  1e-6 m) is not reproduced and 2272 of the 9462 lines of the OBJ differ in
-  their eighth decimal. The tolerant fingerprint (`vertex_grid_sha256`, the
-  coordinates snapped to a 1 um grid with a per-coordinate phase that keeps
-  every coordinate of the released mesh at least 0.25 um from a snapping
-  boundary) is reproduced; the Fab build's coordinates stay at least 0.23 um
-  from every boundary. The build prints `[VERIFY] vertex_sha256 differs,
-  vertex_grid_sha256 OK` followed by `[VERIFY] ... OK`. A copy of the
-  recorded export prints `[VERIFY] vertex_sha256: exact`.
-- **Collision set.** CoACD (`coacd==1.0.11`, threshold 0.015) is not
-  deterministic: on the reference machine the recorded export's mesh
-  splits into 21 convex parts with a summed hull volume of 7.848 cm3 (the
-  released collision set, recorded in `meta.json`) on one run and into 20
-  parts with 7.898 cm3 on another, and the Fab build into 20 or 21 parts
-  with 7.82 to 8.00 cm3. The reference checks therefore accept the
-  collision set within 3 parts and 5% of the hull volume.
-- **Grasp candidates.** All 444 candidates re-sample identically from the
-  Fab build: the same surface samples, sites, order and random draws;
-  centres within 5e-8 m, widths within 3e-8 m, standoffs exact, rotation
-  matrices within 2.3e-5 (the closing axis of the flat-clamp family is a
-  face normal, and a 3e-8 m shift of a vertex tilts the normal of a
-  millimetre-sized triangle by that much). `--grasps --compare` uses 1 um on
-  positions and 1e-4 on rotation entries.
-
-Physics-driven outputs (regenerated demonstrations, benchmark rollouts) are
-not bit-reproducible in any case (`README.md`, "Rebuild from scratch").
+Users may obtain other retractor assets and run the same pipeline ("Using a
+different asset"); the shipped grasp candidates and metadata are for this
+Fab model.
 
 ## Dependencies
 
@@ -191,9 +130,9 @@ simretract-build-assets --tool retractor_rake --verify
 simretract-build-assets --lut --accept-eula
 ```
 
-Every setting has a default from the recipe source the input file matches
-(`--select`, `--scale`, `--pre-rotate`) or from the recipe (`--align-z`,
-`--coacd-threshold`), then from `meta.json`; spelled out for the Fab file:
+Every setting has a default from the recipe source when the input file
+matches it (`--select`, `--scale`, `--pre-rotate`) or from the recipe
+(`--align-z`, `--coacd-threshold`), then from `meta.json`; spelled out:
 
 ```bash
 simretract-build-assets --from-mesh assets/source/vretractor/vretractor.fbx --tool retractor_rake \
@@ -203,7 +142,8 @@ simretract-build-assets --from-mesh assets/source/vretractor/vretractor.fbx --to
 
 Expected console lines: `[SOURCE] vretractor.fbx: recipe source 'vretractor'
 (sha256 verified)`, `[MESH] check vs .../meta.json: OK (reference kept)`,
-`[VERIFY] .../visual.obj vs configs/assets/retractor_rake.yaml: OK`,
+`[VERIFY] ... vertex_grid_sha256 OK: every coordinate within 0.25 um of the
+released mesh` and `[VERIFY] .../visual.obj vs configs/assets/retractor_rake.yaml: OK`,
 `[BUILD] check vs .../meta.json: OK`, `[GRASPS] compare vs
 .../retractor_rake.json: OK`. Step 1 takes seconds; step 2 boots Isaac Sim
 (a minute or two, longer on the first boot while shaders compile); step 3
@@ -219,12 +159,11 @@ takes about a minute.
    coordinates are the pack's world frame. Other mesh formats are read with
    trimesh (`--select` picks a geometry of a scene file).
 2. **Scale and pre-rotate.** Coordinates are multiplied by `--scale`
-   (metres per source unit; the recipe's per-source value) and by the
-   recipe's `pre_rotate` matrix in one step. The pre-rotation brings a
-   source into the pack frame of the recorded export so that the alignment
-   below sees the same input; it is the identity for the recorded export.
-   The converter warns and names the scale that would land a tool at about
-   0.2 m when the result is far from that.
+   (metres per source unit; the recipe's value) and by the recipe's
+   `pre_rotate` matrix in one step. The pre-rotation fixes the input
+   orientation the alignment step below sees, which sets the rotation
+   about the tool axis. The converter warns and names the scale that would
+   land a tool at about 0.2 m when the result is far from that.
 3. **Repair.** Merge coincident vertices, drop duplicate and degenerate
    faces, remove unreferenced vertices, fix face winding, fill holes.
 4. **Centre.** Translate so the volumetric centroid (the centre of mass of
@@ -239,7 +178,7 @@ takes about a minute.
    shaft along z, rake tip at +z, handle at -z. Only +z is fixed by the
    converter; the rotation about z is whatever the alignment rotation
    leaves, so it follows from the input orientation, which is why the
-   recipe's pre-rotation matters. For the reference tool x comes out as the
+   recipe's pre-rotation is part of the recipe. For the reference tool x comes out as the
    blade-width direction (about 3.1 cm of extent) and y as the blade
    thickness (about 1 cm). The scene's `tip_down` option flips local +z to
    world-down when the tool is presented.
@@ -275,30 +214,29 @@ collision set against `meta.json` again.
 
 ## Reference values
 
-`assets/tools/retractor_rake/meta.json`, the build from the recorded export
+`assets/tools/retractor_rake/meta.json`, the build from the recipe source
 (the recipe's `expected_meta` block repeats the checked values):
 
 | key | value |
 |---|---|
-| `select` / `scale` / `pre_rotate` | `so7si_retractor_2_body` / 0.01 / none (the recorded export; the recipe's `source` block holds the Fab values) |
+| `select` / `scale` / `pre_rotate` | `ovrsi_retractor_body` / 0.01474075 / `[[-1, 0, 0], [0, 1, 0], [0, 0, -1]]` |
 | `align_z` / `coacd_threshold` | true / 0.015 |
 | `extents_m` | [0.03059, 0.00967, 0.21631] |
 | `longest_m` | 0.21631 |
 | `watertight` / `volume_m3` | true / 6.611e-06 (6.61 cm3, about 52 g of steel) |
-| `center_removed_pre_m` | [-0.02444, 0.00234, 0.11637] (the Fab file: [-0.01806, 0.00234, 0.0]) |
+| `center_removed_pre_m` | [-0.01806, 0.00234, 0.0] |
 | `n_collision_parts` / `collision_hull_volume_m3` | 21 / 7.848e-06 |
 | `suggested_tip` | [-0.00677, 0.0012, 0.12624] |
 | `suggested_bend` | [-0.0, 0.00033, 0.09956] |
 
 `configs/assets/retractor_rake.yaml`, `fingerprint` block of the released
-`visual.obj` (3152 vertices, 6308 faces, byte for byte the mesh of the
-reported experiments):
+`visual.obj` (3152 vertices, 6308 faces):
 
 | key | value |
 |---|---|
 | `face_sha256` (int64 faces, C-order bytes) | `7e88d550b79ee89005e815d9f42e7d4c26d4076b31461a385f4ecd7bb218d9b7` |
 | `vertex_sha256` (float64 vertices rounded to 1e-6 m, C-order bytes) | `9f71ad5b457d967f3a9d623159dcbe37ed828eed0e292e020ed92266d7c61c34` |
-| `vertex_grid_sha256` (1 um grid under `vertex_grid_phase`) | reproduced by every build within 0.25 um of the released mesh |
+| `vertex_grid_sha256` (1 um grid under `vertex_grid_phase`) | the identity check: reproduced by every build within 0.25 um of the released mesh |
 | `extents_m` / `volume_m3` / `watertight` | [0.03059319, 0.00967014, 0.21631345] / 6.610871554e-06 / true |
 
 The phase bits are one bit per coordinate (the second bit below the
@@ -306,7 +244,7 @@ micrometre) and carry no shape information. To fingerprint a mesh of your
 own: `python -m simretract.sim.asset_recipe --obj FILE --print-fingerprint`.
 
 The collision set is verified on one machine; CoACD is not guaranteed to
-split identically across platforms or runs (see "Asset identity"), and a
+split identically across platforms or runs (see "Acquisition"), and a
 count within 3 of the reference with a hull volume within 5% is the same
 tool with a slightly different convex approximation, not a wrong asset. A
 count outside that (a different CoACD build or threshold) fails the check;
@@ -318,12 +256,12 @@ candidates still have to match).
 
 | path | produced by | tracked |
 |---|---|---|
-| `configs/assets/retractor_rake.yaml` | the recipe: sources, settings, expected values, fingerprints | yes |
+| `configs/assets/retractor_rake.yaml` | the recipe: source, settings, expected values, fingerprints | yes |
 | `assets/source/README.md` | the drop-in convention | yes |
 | `assets/tools/retractor_rake/meta.json` | reference; `--from-mesh --accept-meta` rewrites it | yes |
 | `assets/grasp_candidates/retractor_rake.json` | `--grasps` (verify with `--grasps --compare`) | yes |
 | `assets/gmask_lut.npz` | `--lut` (gripper silhouettes; no tool geometry) | yes |
-| `assets/source/<pack>/...` | you (the purchased folder as downloaded) | never |
+| `assets/source/<pack>/...` | you (the asset folder as downloaded) | never |
 | `assets/tools/retractor_rake/visual.obj` | `--from-mesh` | never |
 | `assets/tools/retractor_rake/collision/coll_NNN.obj` | `--from-mesh` | never |
 | `assets/usd/retractor_rake.usd` | `--usd` | never |
@@ -352,14 +290,14 @@ simretract-build-assets --tool retractor_rake --usd --accept-eula
 simretract-build-assets --tool retractor_rake --grasps                             # re-samples the candidates (overwrites the JSON)
 ```
 
-A file that matches no recipe source is reported as such and converted
+A file that is not the recipe source is reported as such and converted
 with the command-line settings, falling back to `meta.json`; pass
 `--pre-rotate identity` unless the model needs a turn. Check the printed
 longest extent (a hand retractor is about 0.2 m; the warning names the
 scale that would land it there), the tip/bend suggestion and, after
 `--usd`, the part count. Regenerated demonstrations then use the new
-geometry; the released datasets and checkpoints remain tied to the
-recorded export and are not reproduced by a different model. To keep the
+geometry; the shipped grasp candidates, metadata, datasets and checkpoints
+are for the Fab model above and are not reproduced by a different model. To keep the
 fingerprint check for your own model, record its block with
 `python -m simretract.sim.asset_recipe --obj assets/tools/retractor_rake/visual.obj --print-fingerprint`
 in a recipe of your own.

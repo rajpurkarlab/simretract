@@ -10,9 +10,9 @@ training and test set (schemas in `docs/DATA_FORMAT.md`):
 | `strict_500.json` | the strict training set: 500 seeds, 125 per 2.5 cm grasp-height bin, with per-seed grasp height and the recorder recipe |
 | `recovery_train_2000.json` | the exact-4 recovery selection (1954 training episodes + 39 surplus) |
 | `recovery_far1000.json` | the 1000 recovery episodes with the smallest perturbation fraction - the set the models train on |
-| `strict_500_no_smoothing.json` | the no-smoothing strict set: 500 seeds of the same task recorded with a two-segment straight reach and the grasp candidate's own standoff, 125 per 2.5 cm grasp-height bin (`no_smooth` preset) |
+| `strict_500_no_smoothing.json` | the no-smoothing strict set: 500 seeds of the same task recorded using a two-segment straight reach and the grasp candidate's own standoff, 125 per 2.5 cm grasp-height bin (`no_smooth` preset) |
 | `recovery_far1000_no_smoothing.json` | its recovery set: 1000 far recovery draws (perturbation fraction at most 0.5) on those seeds |
-| `strict_500_no_standoff.json` | the no-standoff strict set: 500 seeds recorded with the smoothed reach curving straight to the grasp, band-balanced over the grasp height (`no_standoff` preset) |
+| `strict_500_no_standoff.json` | the no-standoff strict set: 500 seeds recorded using the smoothed reach curving straight to the grasp, band-balanced over the grasp height (`no_standoff` preset) |
 | `recovery_far1000_no_standoff.json` | its recovery set: the 1000 recovery draws with the smallest perturbation fraction on those seeds |
 | `test_pool.json` | the frozen held-out pool (115 seeds); excluded from every cache |
 | `test_core40.json`, `test_extra10.json`, `test_core50.json` | benchmark seed sets; `test_core50.json` is the protocol set |
@@ -29,8 +29,8 @@ simulation with a third-party retractor model used under its publisher's
 license. They carry no source file, mesh, collision part, USD, texture or
 point cloud of that asset; the tool appears in the wrist-camera renders
 (tool-masked RGB, depth images and masks) and as grasp poses. The asset
-itself is obtained and prepared locally (`docs/ASSETS.md`). Terms and the
-review status of the rendered frames: `LICENSE-DATA.md`.
+itself is obtained and prepared locally (`docs/ASSETS.md`). Terms:
+`LICENSE-DATA.md`.
 
 ## Download the released raw sets
 
@@ -89,7 +89,7 @@ them and skips the comparison.
 ## Regenerate instead of downloading
 
 ```bash
-scripts/build_assets.sh --accept-eula       # tool meshes + USD from the purchased file under assets/source/, checks (once; docs/ASSETS.md)
+scripts/build_assets.sh --accept-eula       # tool meshes + USD from the source file under assets/source/, checks (once; docs/ASSETS.md)
 scripts/generate_strict.sh                  # data/raw/strict: quota mode, 125 kept episodes per bin
 simretract-assemble strict --raw data/raw/strict --per-bin 125 \
     --out data/selections/strict_500.json --train-dir data/raw/strict_train
@@ -122,7 +122,7 @@ Expected counts for a regenerated set: 500 strict episodes (from roughly
 1000-1300 attempts), about 2000 recovery draws of which about 1950 are kept,
 1000 far-selected. Per-episode size is ~60 MB (~330 frames).
 
-The no-smoothing and no-standoff sets were recorded with the same recorders
+The no-smoothing and no-standoff sets were recorded by the same recorders
 under different reach settings (no-smoothing: `blend false`, the grasp
 candidate's own standoff, no joint-rate limit, speed scale 1.0; no-standoff:
 `standoff 0`, no joint-rate limit, speed scale 1.0; the values are recorded in

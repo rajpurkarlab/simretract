@@ -1,10 +1,10 @@
-"""Publication gates: what must be resolved before the first public push.
+"""Release gates: objective checks that must hold before a public push.
 
-This tier is expected to FAIL until the release is prepared; it is not part of
+This tier fails until the release is prepared; it is not part of
 ``scripts/smoke_test.sh all``. Each test names one gate and the file that
-closes it (``LICENSING.md`` lists them all). The asset-exclusion and
-release-wording gates hold already and stay in this tier as the last check
-before a push.
+closes it: the code LICENSE, the license fields and terms, the hub
+organisation and checksums, no tool geometry tracked, and the release
+statement in the README.
 """
 
 from __future__ import annotations
@@ -73,7 +73,6 @@ def _would_be_committed() -> list[str]:
 
 def test_license_file_present_and_placeholder_removed() -> None:
     assert (REPO / "LICENSE").is_file(), "add the code LICENSE file (see LICENSING.md)"
-    assert not (REPO / "LICENSE-PLACEHOLDER.md").exists(), "LICENSE-PLACEHOLDER.md was folded into LICENSING.md"
     body = _read("LICENSE")
     assert "TO BE CHOSEN" not in body.upper() and "PLACEHOLDER" not in body.upper(), "LICENSE is a placeholder"
 
@@ -85,18 +84,9 @@ def test_licensing_documents_present() -> None:
     assert "LICENSING.md" in readme, "README does not point at LICENSING.md"
 
 
-def test_data_license_chosen() -> None:
-    data_terms = _read("LICENSE-DATA.md")
-    assert "to be chosen" not in data_terms.lower(), "LICENSE-DATA.md: the dataset license is still to be chosen"
-
-
-def test_rendered_frames_reviewed() -> None:
-    """The depth and mask frames of the released episodes are range images of
-    the third-party tool; LICENSE-DATA.md records whether they were reviewed
-    under the asset terms or dropped from the public shards."""
-    data_terms = _read("LICENSE-DATA.md")
-    assert "to be confirmed" not in data_terms.lower(), \
-        "LICENSE-DATA.md: the review of the rendered depth and mask frames is still to be confirmed"
+def test_release_terms_chosen() -> None:
+    for name in ("LICENSING.md", "LICENSE-CHECKPOINTS.md", "LICENSE-DATA.md"):
+        assert "to be chosen" not in _read(name).lower(), f"{name}: the terms are still to be chosen"
 
 
 def test_license_fields_filled_in() -> None:

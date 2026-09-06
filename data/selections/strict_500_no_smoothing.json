@@ -509,7 +509,7 @@
   "0..+2.5",
   "+2.5..+5"
  ],
- "rule": "500 expert take-over episodes recorded without reach smoothing, 125 per 2.5 cm grasp-height bin over -5..+5 cm along the tool axis; over-full bins trimmed",
+ "rule": "500 expert take-over episodes generated without reach smoothing, 125 per 2.5 cm grasp-height bin over -5..+5 cm along the tool axis; over-full bins trimmed",
  "recipe": {
   "reach": "two straight segments, no blending",
   "standoff": "the grasp candidate's own (5-9 cm)",

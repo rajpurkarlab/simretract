@@ -5,7 +5,7 @@ Tiers (``tests/<tier>``, pytest marker of the same name):
 * ``unit``      no GPU, no Isaac Sim                              (< 1 min)
 * ``gpu``       synthetic cache -> ACT smoke training -> policy server ping,
                 regime check and one query; stub server              (~1 min)
-* ``sim``       build the tool assets from the purchased file under
+* ``sim``       build the tool assets from the asset file under
                 ``assets/source/`` (or the ``tool_source`` override; skipped
                 with a message without one), with the fingerprint, USD and
                 grasp-candidate checks; record a strict
@@ -14,7 +14,7 @@ Tiers (``tests/<tier>``, pytest marker of the same name):
                 (~10 min; up to ~25 min when a Kit worker is retried)
 * ``real-dry``  client dry run against the servers (skipped without the SAM 3
                 weights, a robot address and a D405)                 (~2 min)
-* ``release``   publication gates (licence files, hub ids, asset exclusion,
+* ``release``   release gates (licence files, hub ids, asset exclusion,
                 release wording, checksum tables); fails until every gate is
                 met                                                   (seconds)
 

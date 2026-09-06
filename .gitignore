@@ -12,7 +12,7 @@ eval/
 configs/envs.local.yaml
 
 # third-party tool asset: never tracked, built locally from the user's licensed
-# copy by `simretract-build-assets` (docs/ASSETS.md). The purchased folder is
+# copy by `simretract-build-assets` (docs/ASSETS.md). The asset folder is
 # dropped under assets/source/<pack>/ as downloaded (only the README there is
 # tracked); under assets/tools/<tool>/ only meta.json is tracked (no geometry).
 assets/source/*

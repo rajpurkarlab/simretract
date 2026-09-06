@@ -10,7 +10,7 @@ directory (``SIMRETRACT_SMOKE_DIR``, default ``<repo>/smoke_tmp``).
 
 The tool asset is third-party and never part of the repository: the first
 step runs the default asset build, ``simretract-build-assets --tool
-retractor_rake``, which converts the purchased file the recipe
+retractor_rake``, which converts the source file the recipe
 (``configs/assets/retractor_rake.yaml``) names under ``assets/source/`` (or
 the ``tool_source`` override) into the tool meshes, checks them against the
 tracked ``meta.json`` and the recipe fingerprints, builds the USD and
@@ -81,7 +81,7 @@ def test_interpreters_configured() -> None:
     assert config.interpreter("policy").is_file()
 
 
-NO_SOURCE = ("no tool source: drop the purchased pack under assets/source/<pack>/ as the recipe "
+NO_SOURCE = ("no tool source: drop the asset pack under assets/source/<pack>/ as the recipe "
              "configs/assets/retractor_rake.yaml names it, or set tool_source in configs/envs.local.yaml "
              "(or SIMRETRACT_TOOL_SOURCE); docs/ASSETS.md")
 

@@ -1,16 +1,12 @@
 """Tool asset recipes and the mesh fingerprint verifier.
 
 A recipe, ``configs/assets/<tool>.yaml``, is the tracked description of how
-a purchased source file becomes the tool mesh under ``assets/tools/<tool>/``:
+the source file becomes the tool mesh under ``assets/tools/<tool>/``:
 
 * ``source``: the pack to drop under ``assets/source/<pack>/`` as downloaded
   (file name, expected sha256 and size, listing and license), the node to
-  take from it, the scale to metres and the pre-rotation that brings the
-  file into the pack frame of the export the released data was recorded
-  with;
-* ``alternative_sources``: other exports of the same model that the
-  converter recognises by sha256 (or file name), each with its own node,
-  scale and pre-rotation;
+  take from it, the scale to metres and the pre-rotation applied with it
+  before the converter's own steps;
 * ``conversion``: the source-independent settings (``align_z``,
   ``coacd_threshold``);
 * ``expected_meta``: the reference values the tracked ``meta.json`` holds;
@@ -19,19 +15,16 @@ a purchased source file becomes the tool mesh under ``assets/tools/<tool>/``:
 The fingerprint has an exact part and a tolerant part. ``face_sha256`` (the
 int64 face array) is exact: a rebuild must produce the same triangles over
 the same vertex order. ``vertex_sha256`` (float64 vertices rounded to
-1e-6 m) is exact for the export the released mesh was made from; another
-export of the same model carries its own float32 rounding of the
-coordinates (a few 1e-8 m), which moves a few coordinates across a 1 um
-rounding boundary, so the exact hash is not the identity test for it.
-``vertex_grid_sha256`` is: every coordinate is snapped to a 1 um grid whose
-phase (recorded per coordinate in ``vertex_grid_phase``, one bit each) was
-chosen on the released mesh so that no coordinate lies within 0.25 um of a
-snapping boundary. A build reproduces that hash exactly when every
-coordinate is within 0.25 um of the released mesh, and fails when any
-coordinate is off by more than 0.75 um. The phase bits carry no shape
-information (they are the second bit below the micrometre of each
-coordinate). Extents (0.1 um) and the signed volume (1e-6 relative) are
-checked as readable summaries of the same identity.
+1e-6 m) is the exact vertex hash. ``vertex_grid_sha256`` is the identity
+test: every coordinate is snapped to a 1 um grid whose phase (recorded per
+coordinate in ``vertex_grid_phase``, one bit each) was chosen on the
+released mesh so that no coordinate lies within 0.25 um of a snapping
+boundary. A build reproduces that hash exactly when every coordinate is
+within 0.25 um of the released mesh, and fails when any coordinate is off
+by more than 0.75 um. The phase bits carry no shape information (they are
+the second bit below the micrometre of each coordinate). Extents (0.1 um)
+and the signed volume (1e-6 relative) are checked as readable summaries of
+the same identity.
 
 The module needs numpy and PyYAML only, so it runs in every role
 environment: the converter calls it after the export (in the simulator
@@ -87,9 +80,6 @@ def load_recipe(tool: str) -> dict[str, Any] | None:
     src = rec.get("source")
     if not isinstance(src, dict) or "pack" not in src or any(k not in src for k in SOURCE_KEYS):
         raise config.ConfigError(f"{p}: 'source' needs pack, {', '.join(SOURCE_KEYS)}")
-    for i, alt in enumerate(rec.get("alternative_sources") or []):
-        if not isinstance(alt, dict) or "name" not in alt or any(k not in alt for k in SOURCE_KEYS):
-            raise config.ConfigError(f"{p}: alternative_sources[{i}] needs name, {', '.join(SOURCE_KEYS)}")
     fp = rec.get("fingerprint")
     if fp is not None and any(k not in fp for k in FINGERPRINT_KEYS):
         missing = [k for k in FINGERPRINT_KEYS if k not in fp]
@@ -97,17 +87,13 @@ def load_recipe(tool: str) -> dict[str, Any] | None:
     return rec
 
 
-def sources(recipe: dict[str, Any]) -> list[dict[str, Any]]:
-    """Every source the recipe knows: the drop-in one first (``label`` = its
-    pack name), then the alternatives (``label`` = their ``name``)."""
-    out = [dict(recipe["source"], label=str(recipe["source"]["pack"]), default=True)]
-    for alt in recipe.get("alternative_sources") or []:
-        out.append(dict(alt, label=str(alt["name"]), default=False))
-    return out
+def source_entry(recipe: dict[str, Any]) -> dict[str, Any]:
+    """The recipe's drop-in source with its ``label`` (the pack name)."""
+    return dict(recipe["source"], label=str(recipe["source"]["pack"]))
 
 
 def source_dir(recipe: dict[str, Any]) -> pathlib.Path:
-    """``assets/source/<pack>/``: where the purchased folder is dropped in."""
+    """``assets/source/<pack>/``: where the asset folder is dropped in."""
     return config.paths()["assets"] / "source" / str(recipe["source"]["pack"])
 
 
@@ -128,7 +114,7 @@ def sha256_file(path: pathlib.Path, chunk: int = 1 << 20) -> str:
 
 
 def identify_source(path: pathlib.Path, recipe: dict[str, Any]) -> tuple[dict[str, Any] | None, str]:
-    """Match a file to a recipe source.
+    """Match a file to the recipe source.
 
     Returns ``(entry, how)`` with ``how`` = ``"sha256"`` (size and digest
     match), ``"name"`` (file name matches but the digest does not: another
@@ -137,12 +123,11 @@ def identify_source(path: pathlib.Path, recipe: dict[str, Any]) -> tuple[dict[st
     path = pathlib.Path(path)
     size = path.stat().st_size
     digest = sha256_file(path)
-    for entry in sources(recipe):
-        if digest == str(entry["sha256"]).lower() and int(entry["size_bytes"]) == size:
-            return entry, "sha256"
-    for entry in sources(recipe):
-        if path.name == str(entry["file"]):
-            return dict(entry, actual_sha256=digest, actual_size=size), "name"
+    entry = source_entry(recipe)
+    if digest == str(entry["sha256"]).lower() and int(entry["size_bytes"]) == size:
+        return entry, "sha256"
+    if path.name == str(entry["file"]):
+        return dict(entry, actual_sha256=digest, actual_size=size), "name"
     return None, "unknown"
 
 
@@ -167,7 +152,7 @@ def resolve_source(tool: str, explicit: str | pathlib.Path | None = None) -> tup
     p = default_source_path(recipe)
     if p.is_file():
         return p, f"recipe default assets/source/{recipe['source']['pack']}/{recipe['source']['file']}"
-    return None, (f"no tool source: place the purchased pack as downloaded under "
+    return None, (f"no tool source: place the asset pack as downloaded under "
                   f"assets/source/{recipe['source']['pack']}/ (expected {p.name}), or set tool_source in "
                   f"configs/envs.local.yaml / SIMRETRACT_TOOL_SOURCE (docs/ASSETS.md)")
 
@@ -207,7 +192,7 @@ def format_pre_rotate(R: np.ndarray | None) -> str:
 
 
 def settings_for(entry: dict[str, Any] | None, recipe: dict[str, Any] | None) -> dict[str, Any]:
-    """Conversion settings from a matched source entry and the recipe's
+    """Conversion settings from the matched source entry and the recipe's
     source-independent block; keys absent from both are omitted."""
     out: dict[str, Any] = {}
     if entry is not None:
@@ -357,8 +342,7 @@ def compare_fingerprint(V: np.ndarray, F: np.ndarray, expected: dict[str, Any]) 
         phase = decode_phase(expected["vertex_grid_phase"], V.size)
         if vertex_grid_sha256(V, phase) == str(expected["vertex_grid_sha256"]):
             notes.append(f"vertex_sha256 differs, vertex_grid_sha256 OK: every coordinate within "
-                         f"{GRID_MARGIN_M * 1e6:.2f} um of the released mesh (the source export's own "
-                         f"float32 rounding of the coordinates)")
+                         f"{GRID_MARGIN_M * 1e6:.2f} um of the released mesh")
         else:
             problems.append(f"vertex_grid_sha256 differs: some coordinate is more than "
                             f"{GRID_MARGIN_M * 1e6:.2f} um from the released mesh")

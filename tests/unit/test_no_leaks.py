@@ -40,6 +40,10 @@ PATTERNS: list[tuple[str, bool]] = [
     ("owner " + "20", False),
     ("20" + "26-", False),
     ("1038" + "lab", False),
+    ("cg" + "trader", True),
+    ("so7" + "si", True),
+    ("5268" + "240", True),
+    ("purch" + "as", True),
 ]
 
 BINARY_SUFFIXES = {".npz", ".npy", ".usd", ".usda", ".usdc", ".obj", ".mtl", ".png", ".jpg", ".jpeg",

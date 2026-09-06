@@ -2,10 +2,10 @@
 #
 # Every model row trains on a strict set plus a recovery set. Three pairs ship:
 #   strict / recovery                    the main pair (baseline and every single-change row)
-#   strict_nosmooth / recovery_nosmooth  the same task recorded without reach smoothing
+#   strict_nosmooth / recovery_nosmooth  the same task generated without reach smoothing
 #                                        (two straight segments, the candidate's own standoff)
 #   strict_nostandoff / recovery_nostandoff
-#                                        recorded without the reach standoff (the smoothed reach
+#                                        generated without the reach standoff (the smoothed reach
 #                                        curves straight to the grasp)
 # Each strict set holds 500 expert take-over episodes (bin-balanced over the grasp height);
 # each recovery set holds 1000 perturbation-recovery episodes drawn on those seeds, the

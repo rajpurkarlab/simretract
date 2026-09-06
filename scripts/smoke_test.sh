@@ -2,11 +2,11 @@
 # Run the smoke-test tiers with pytest and print the wall time of each.
 #   unit     no GPU, no Isaac                          (< 1 min)
 #   gpu      GPU: synthetic cache, ACT smoke training, policy server (~ 1 min)
-#   sim      Isaac Sim + GPU: asset build from the purchased file under assets/source/ or the
+#   sim      Isaac Sim + GPU: asset build from the source file under assets/source/ or the
 #            tool_source override (skips without one), generation, cache, benchmark
 #            (~ 10 min, up to ~ 25)
 #   real-dry client dry run; skipped without SAM 3 weights, robot address, D405
-#   release  publication gates (licence files, hub ids, asset exclusion, release wording);
+#   release  release gates (licence files, hub ids, asset exclusion, release wording);
 #            fails until they are met
 #   all      unit + gpu + sim
 # Every tier's pytest process runs in the policy environment; the CLIs under

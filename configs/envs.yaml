@@ -14,7 +14,7 @@ policy_python: CHANGE_ME
 mask_python: CHANGE_ME
 fastwam_python: CHANGE_ME
 # Optional override of the tool source: by default `simretract-build-assets`
-# converts the purchased file the recipe configs/assets/<tool>.yaml names under
+# converts the source file the recipe configs/assets/<tool>.yaml names under
 # assets/source/<pack>/ (docs/ASSETS.md). Point tool_source at a copy kept
 # elsewhere (FBX / OBJ / STL / glTF / STEP) to use that instead; environment
 # override SIMRETRACT_TOOL_SOURCE. The file is never part of the repository.

@@ -1,13 +1,14 @@
-# Tool asset recipe: how the purchased source file becomes the tool mesh
-# under assets/tools/retractor_rake/, and what the result must reproduce.
+# Tool asset recipe: how the source file becomes the tool mesh under
+# assets/tools/retractor_rake/, and what the result must reproduce.
 # Read by simretract-build-assets and simretract.sim.mesh_convert; the
-# procedure and the verification numbers are explained in docs/ASSETS.md.
+# procedure and the checks are explained in docs/ASSETS.md.
 tool: retractor_rake
 
-# The drop-in source. Place the purchased folder as downloaded under
+# The drop-in source. Place the folder as downloaded under
 # assets/source/<pack>/ (git-ignored except assets/source/README.md); the
 # converter takes <file> from it unless tool_source (configs/envs.local.yaml
-# or SIMRETRACT_TOOL_SOURCE) overrides the path.
+# or SIMRETRACT_TOOL_SOURCE) overrides the path. The file is recognised by
+# sha256 (or by file name, with a warning).
 source:
   pack: vretractor
   file: vretractor.fbx
@@ -21,37 +22,17 @@ source:
   ai_usage: "the listing states: Allows usage with AI: Yes"
   folder_contents: [vretractor.fbx, textures/]    # the textures are not used by the simulation
   select: ovrsi_retractor_body                     # the only mesh node of the file
-  # source units -> metres: the recorded export's 0.01 times the size ratio
-  # 1.474075 between the two exports of the model (docs/ASSETS.md, "Asset identity")
-  scale: 0.01474075
-  # half-turn about y: brings this export into the pack frame of the export the
-  # released data was recorded with, so the converter's own alignment step then
-  # produces the same tool frame
+  scale: 0.01474075                                # source units -> metres
+  # half-turn about y, applied with the scale before the converter's own
+  # repair, centring and alignment steps (docs/ASSETS.md)
   pre_rotate: [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
   # what the converter prints for this file (informational): the centroid offset
   # removed, and the collision sets seen with coacd==1.0.11 on the reference
-  # machine (CoACD varies from run to run; meta.json records 21 parts / 7.848 cm3
-  # for the recorded export, the check accepts 3 parts and 5% hull volume)
+  # machine (CoACD varies from run to run; meta.json records 21 parts / 7.848 cm3,
+  # the check accepts 3 parts and 5% hull volume)
   expected_center_removed_pre_m: [-0.01806, 0.00234, 0.0]
   observed_collision_parts: [20, 21]
   observed_collision_hull_cm3: [7.82, 8.00]
-
-# Other exports of the same model. Recognised by sha256 (or by file name with
-# a warning) and converted with their own settings.
-alternative_sources:
-  - name: cgtrader_set_of_7
-    role: "the export the released datasets were recorded with and the released checkpoints were trained on; meta.json describes this build"
-    listing: "Set of 7 surgical instruments"
-    listing_url: https://www.cgtrader.com/3d-models/science/medical/set-of-7-surgical-instruments
-    file: uploads_files_5268240_surginstruments.fbx
-    sha256: 8f7182fd5867b5da7c023b366ab37c73a37f13030ca119a0ff3011524bed6de3
-    size_bytes: 3518400
-    select: so7si_retractor_2_body
-    scale: 0.01
-    pre_rotate: null
-    expected_center_removed_pre_m: [-0.02444, 0.00234, 0.11637]
-    observed_collision_parts: [20, 21]
-    observed_collision_hull_cm3: [7.848, 7.898]
 
 # Source-independent conversion settings.
 conversion:
@@ -73,11 +54,11 @@ expected_meta:
 
 # Fingerprints of the released visual.obj (simretract.sim.asset_recipe).
 # face_sha256: the int64 face array, exact. vertex_sha256: float64 vertices
-# rounded to 1e-6 m, exact for the recorded export. vertex_grid_sha256: the
-# vertices snapped to a 1 um grid under the per-coordinate phase bits below;
-# reproduced by every build whose coordinates are within 0.25 um of the
-# released mesh (the Fab export: within 0.03 um). Extents to 0.1 um, volume
-# to 1e-6 relative.
+# rounded to 1e-6 m, exact. vertex_grid_sha256: the vertices snapped to a
+# 1 um grid under the per-coordinate phase bits below; reproduced by every
+# build whose coordinates are within 0.25 um of the released mesh, which is
+# the identity check --verify applies. Extents to 0.1 um, volume to 1e-6
+# relative.
 fingerprint:
   n_vertices: 3152
   n_faces: 6308

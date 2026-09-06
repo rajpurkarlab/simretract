@@ -109,7 +109,7 @@ policy's own chunks depend on those observations. Two evaluations of the same
 checkpoint on the same 50 seeds can differ by several seeds in every funnel
 column, and rollout variance on small seed sets is large. Report the full 50
 seeds with the three-attempt rule, and compare rows only under identical
-settings (in particular the same `exec_h`; rows recorded with `exec_h 20` are
+settings (in particular the same `exec_h`; rows evaluated at `exec_h 20` are
 not comparable to `exec_h 50` rows). Training is not bit-reproducible either
 (unseeded sampler and augmentation), so a retrained row is expected to land
 near, not on, an earlier evaluation of the same preset.
