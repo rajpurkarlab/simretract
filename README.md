@@ -222,9 +222,7 @@ We release our code, policy checkpoints, and robot-action/grasp-point datasets. 
   (`LICENSE-CHECKPOINTS.md`), the dataset terms (`LICENSE-DATA.md`) and the
   third-party asset rule.
 - `docs/ASSETS.md`: the Fab listing to obtain and the local preparation that
-  turns your copy into the meshes, USD and grasp candidates. No file that
-  carries the asset's geometry is tracked; `assets/LICENSES.md` lists every
-  asset file as tracked or built locally.
+  turns your copy into the meshes, USD and grasp candidates.
 - `THIRD_PARTY_NOTICES.md`: third-party software, weights, tokenizers and
   the asset listing, with their sources and licenses.
 - `scripts/smoke_test.sh release` checks the release gates.
