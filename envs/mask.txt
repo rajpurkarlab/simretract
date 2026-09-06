@@ -1,0 +1,10 @@
+# simretract-mask: SAM 3 mask server for the real robot (Python 3.11).
+# ultralytics is AGPL-3.0 and therefore runs in its own process and environment.
+# The camera is owned by the client; this process only receives frames over TCP.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+ultralytics==8.4.64
+opencv-python
+numpy<2
+pyyaml

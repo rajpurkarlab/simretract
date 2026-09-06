@@ -1,0 +1,27 @@
+# simretract-sim: Isaac Sim 5.1 (Python 3.11).
+#
+# envs/setup.sh installs this file in two passes: the isaacsim line alone (from
+# the NVIDIA index), then the remaining pins on top of it with the isaacsim line
+# filtered out. The two cannot be requested together: isaacsim-kernel declares
+# numpy==1.26.0 and pip's resolver would reject the numpy 1.26.4 pin; installed
+# afterwards, pip only warns about that declared conflict. Isaac Sim requires
+# OMNI_KIT_ACCEPT_EULA=YES at runtime.
+--extra-index-url https://pypi.nvidia.com
+isaacsim[all,extscache]==5.1.0
+numpy==1.26.4
+scipy==1.15.3
+trimesh==4.5.1
+pillow==11.3.0
+opencv-python-headless==4.11.0.86
+imageio==2.34.2
+imageio-ffmpeg==0.6.0
+av==12.3.0
+matplotlib==3.10.0
+pyyaml
+# Optional extras for simretract-build-assets, the local preparation of the
+# third-party tool asset (docs/ASSETS.md); not installed by default:
+#   pip install "coacd==1.0.11" "pyassimp==5.2.5"
+#   conda install -c conda-forge assimp        # the shared library pyassimp loads
+#   coacd==1.0.11   convex decomposition of the collision mesh (the version the
+#                   reference decomposition was made with; --no-coacd skips it)
+#   pyassimp        FBX / multi-object scene import (needs libassimp)

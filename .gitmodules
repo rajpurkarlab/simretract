@@ -1,0 +1,3 @@
+[submodule "third_party/trossen_ai_isaac"]
+	path = third_party/trossen_ai_isaac
+	url = https://github.com/TrossenRobotics/trossen_ai_isaac.git

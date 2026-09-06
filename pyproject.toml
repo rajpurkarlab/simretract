@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simretract"
+version = "1.0.0"
+description = "Sim-to-real tool hand-over: Isaac Sim data generation, policy training, simulation benchmark and real-robot deployment for a surgical retractor take-over task"
+readme = "README.md"
+requires-python = ">=3.11"
+authors = [{ name = "SimRetract authors" }]
+keywords = ["robotics", "imitation-learning", "isaac-sim", "sim-to-real", "lerobot"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Operating System :: POSIX :: Linux",
+  "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
+# License: add a LICENSE file (the code license) and a `license` entry here
+# before publishing; LICENSING.md explains the code / checkpoint / dataset /
+# third-party-asset split.
+# The package is installed editable with --no-deps into every role environment
+# (envs/setup.sh); each environment carries its own pinned requirements file under
+# envs/.  Only the configuration layer depends on a third-party package.
+dependencies = ["pyyaml>=6.0"]
+
+[project.optional-dependencies]
+test = ["pytest>=8", "numpy"]
+# simretract-build-assets --from-mesh: local preparation of the licensed tool asset
+# (install into the sim environment; pyassimp also needs the assimp shared library;
+# see docs/ASSETS.md and envs/sim.txt)
+mesh = ["trimesh", "pyassimp==5.2.5", "coacd==1.0.11"]
+
+[project.scripts]
+simretract-build-assets = "simretract.cli.build_assets:main"
+simretract-generate = "simretract.cli.generate:main"
+simretract-assemble = "simretract.cli.assemble:main"
+simretract-build-cache = "simretract.cli.build_cache:main"
+simretract-train = "simretract.cli.train:main"
+simretract-serve = "simretract.cli.serve:main"
+simretract-eval-sim = "simretract.cli.eval_sim:main"
+simretract-run-real = "simretract.cli.run_real:main"
+simretract-download = "simretract.cli.download:main"
+simretract-smoke = "simretract.cli.smoke:main"
+
+[project.urls]
+Homepage = "https://github.com/YOUR_GITHUB_ORG/simretract"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["simretract*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "unit: no GPU, no Isaac Sim (policy environment)",
+  "gpu: needs a CUDA GPU and the policy environment",
+  "sim: needs Isaac Sim and a GPU",
+  "real_dry: needs the real-robot software stack (hardware optional)",
+  "release: publication gates (licence files, hub ids, asset exclusion, release wording); expected to fail before the release",
+]
+addopts = "-ra"

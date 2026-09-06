@@ -1,0 +1,73 @@
+# Dataset ids, selection files, cache flags and fingerprints.
+#
+# Two training sets feed every model row:
+#   strict     500 expert take-over episodes, 125 per 2.5 cm grasp-height bin over -5..+5 cm
+#   recovery   1000 perturbation-recovery episodes (the far-1000 selection of the 2000-episode
+#              recovery pool: smallest perturbation fraction = injected farthest from the grasp)
+#
+# Selection files under data/selections/ (schemas in docs/DATA_FORMAT.md):
+#   strict_500.json           the strict training set (500 seeds)
+#   recovery_train_2000.json  the exact-4 recovery pool (+ per-episode perturb_frac)
+#   recovery_far1000.json     the far-1000 recovery training set
+#   test_pool.json            115 held-out seeds, excluded from every cache
+#   test_core40.json, test_extra10.json, test_core50.json   benchmark seed sets (core50 = the protocol set)
+#
+# Cache set names double as file prefixes inside data/cache
+# (<name>_{rgb,dep,msk,gmk,state,action,gpose,plane,plane_conf}.npy + meta.json + <name>_verdicts.json).
+# `legacy_name` is the set name recorded in norm.json of the released checkpoints; it must not change.
+
+sets:
+  strict:
+    selection: strict_500.json
+    hub_repo: strict_raw                # key into configs/hub.yaml repos
+    episodes: 500
+    legacy_name: rake_e5
+    cache_flags:                        # simretract-build-cache --set strict
+      pretrim: true                     # cache only frames before gripper close + margin (PRETRIM)
+      keep_only: true                   # store only arc-length-kept frames (KEEP_ONLY)
+      seed_min: 200000                  # minimum seed id admitted to the cache (legacy env ERA_MIN)
+      skip_gmk: true                    # no gripper-mask memmap; models never see it (SKIP_GMK)
+      perturb_trim: false               # no perturbation window in expert episodes (PERTURB_TRIM)
+    fingerprint:                        # reference build; simretract-build-cache --verify compares
+      frames: 69402
+      md5_8: {action: 7d0e2c3b, plane: 034cb12d, gpose: 6a415e21}
+
+  recovery:
+    selection: recovery_far1000.json    # episodes actually cached and trained on
+    pool_selection: recovery_train_2000.json
+    hub_repo: recovery_raw
+    episodes: 1000
+    legacy_name: step1e5far1000
+    cache_flags:                        # simretract-build-cache --set recovery
+      pretrim: true
+      keep_only: true
+      seed_min: 200000
+      skip_gmk: true
+      perturb_trim: true                # start each episode after the perturbation window
+    fingerprint:
+      frames: 106868
+      md5_8: {action: 636630ba, plane: 93dda3b0, gpose: 7f918202}
+
+# Frozen test seeds. Every cache build excludes `exclude_from_training` seeds
+# (logged), regardless of what the raw directory contains.
+test:
+  pool: test_pool.json                  # 115 held-out seeds (superset of every test set)
+  core40: test_core40.json              # 40 seeds, 4x4-stratified over the presented-pose box
+  extra10: test_extra10.json            # 10 additional seeds
+  core50: test_core50.json              # core40 + extra10: the benchmark protocol set
+  exclude_from_training: test_pool.json
+
+# Half-data row (--data half): deterministic subset drawn in-process by the trainer.
+half:
+  rng_seed: 0
+  strict_seeds: 250                     # per grasp-height bin: 63, 62, 63, 62
+  recovery_episodes: 500                # far episodes of the selected seeds, trimmed/topped up bin-balanced
+
+# Raw-episode contract shared by the recorders, the hub shards and the cache builder.
+raw_episode:
+  frames: [rgb, depth, mask, gmask, omask]      # <name>_%04d.png; depth = uint16 millimetres
+  meta: meta.npz                                # states (T,7) actions (T,7) grasp_pose (7,) info json ...
+  markers: [".filtered", ".wedged"]             # terminal non-keep outcomes next to the episode dir
+  fps: 25
+  image_size: [640, 480]
+  task: "take over the tool from the operator and hold its pose"

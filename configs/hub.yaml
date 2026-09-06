@@ -1,0 +1,39 @@
+# Hugging Face hub locations. Replace `org` with the organisation that hosts the
+# released data and checkpoints; every repo id below is derived from it.
+# sha256 fields are placeholders until the release is published
+# (simretract-download verifies a file only when its sha256 is filled in).
+org: YOUR_HF_ORG
+
+repos:
+  checkpoints: "${org}/simretract-checkpoints"      # model repo: one directory per row + pi0_base
+  selections: "${org}/simretract-selections"        # dataset repo: selection JSONs
+  strict_raw: "${org}/simretract-strict-raw"        # dataset repo: strict-500 raw shards + manifest.json
+  recovery_raw: "${org}/simretract-recovery-raw"    # dataset repo: recovery raw shards + manifest.json
+
+# Directory names inside `repos.checkpoints`. Each directory holds
+# config.json + model.safetensors + norm.json (fastwam adds context.pt).
+checkpoints:
+  pi0_base:
+    path: pi0_base
+    files: [config.json, model.safetensors]
+    sha256: {}                       # model.safetensors: <fill in>
+    note: pi0 initialisation weights; a local copy is required by simretract-train --policy pi0
+  baseline:      {path: baseline,      files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_recovery:   {path: no_recovery,   files: [config.json, model.safetensors, norm.json], sha256: {}}
+  no_depth:      {path: no_depth,      files: [config.json, model.safetensors, norm.json], sha256: {}}
+  half_data:     {path: half_data,     files: [config.json, model.safetensors, norm.json], sha256: {}}
+  smolvla:       {path: smolvla,       files: [config.json, model.safetensors, norm.json], sha256: {}}
+  act:           {path: act,           files: [config.json, model.safetensors, norm.json], sha256: {}}
+
+# Third-party weights and tokenizers pulled from their canonical hub locations.
+# Gated entries need `huggingface-cli login` after accepting the licence.
+base_weights:
+  smolvla: lerobot/smolvla_base                          # Apache-2.0
+  smolvlm_tokenizer: HuggingFaceTB/SmolVLM2-500M-Video-Instruct
+  paligemma_tokenizer: google/paligemma-3b-pt-224        # gated (Gemma terms)
+  sam3: facebook/sam3                                    # gated (SAM licence); file sam3.pt
+  resnet18: torchvision:ResNet18_Weights.IMAGENET1K_V1   # ACT backbone, fetched by torchvision
+  fastwam: lerobot/fastwam_base                          # optional row
+  pi05: lerobot/pi05_base                                # optional row
+  pi0_fast: lerobot/pi0fast-base                         # optional row
+  fast_tokenizer: lerobot/fast-action-tokenizer          # optional row (pi0_fast)

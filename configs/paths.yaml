@@ -1,0 +1,16 @@
+# Storage layout. Relative entries under `storage` resolve against SIMRETRACT_ROOT
+# when it is set, otherwise against the repository root; each one can also be
+# overridden individually (SIMRETRACT_DATA_RAW, SIMRETRACT_DATA_CACHE,
+# SIMRETRACT_CHECKPOINTS, SIMRETRACT_RUNS, SIMRETRACT_EVAL). Absolute values are
+# used as-is. Entries under `repo` always live inside the checkout.
+storage:
+  data_raw: data/raw          # raw episode directories (ep_<seed>[_p<draw>]/...)
+  data_cache: data/cache      # frame caches + plane sidecars built by simretract-build-cache
+  checkpoints: checkpoints    # downloaded final checkpoints and base weights
+  runs: runs                  # training runs (norm.json, step<N>/, final/)
+  eval: eval                  # simulation benchmark outputs (result_<seed>.json, table.md)
+repo:
+  assets: assets
+  selections: data/selections
+  third_party: third_party
+  configs: configs

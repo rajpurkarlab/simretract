@@ -1,0 +1,45 @@
+# simretract-policy: training, policy serving and the real-robot client (Python 3.12).
+#
+# lerobot is pinned to a commit (see envs/LEROBOT_PIN.md) and installed with
+# --no-deps by envs/setup.sh (the `lerobot` line is filtered out of the bulk
+# install and applied separately), so every runtime dependency it needs is
+# listed explicitly below.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0+cu128
+torchvision==0.23.0+cu128
+lerobot[pi,smolvla] @ git+https://github.com/huggingface/lerobot@a07f22e22ce88cddff1f6eddced9ea008fbfc37c
+# policy stack
+transformers==5.3.0
+safetensors==0.8.0
+huggingface_hub>=1.0,<2.0
+numpy==2.2.6
+# pinned: the augmentation golden tests are keyed by the OpenCV minor version
+opencv-python==4.13.0.92
+imageio-ffmpeg==0.6.0
+scipy
+einops
+num2words
+accelerate
+pillow
+pyyaml
+# lerobot core imports (would otherwise come with lerobot's own metadata)
+draccus==0.10.0
+gymnasium>=1.1.1,<2.0
+requests
+packaging
+termcolor
+tqdm
+deepdiff
+diffusers
+pandas
+pyarrow
+rich
+psutil
+pyserial
+jsonlines
+# real robot
+# pyrealsense2 wheels carry a build number in the version string (2.58.2.<build>)
+pyrealsense2==2.58.2.10647
+trossen-arm==1.10.0
+# tests
+pytest>=8

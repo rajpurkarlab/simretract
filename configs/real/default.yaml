@@ -1,0 +1,60 @@
+# Real-robot deployment settings (simretract-run-real, simretract.real.*).
+#
+# Everything the launcher needs that is not a checkpoint lives here: the
+# robot address, the two localhost service ports, the SAM 3 mask-server
+# settings and the client regime presets. Any value can be overridden on the
+# command line of the corresponding tool.
+
+robot:
+  # IPv4 address of the Trossen WidowX-AI follower controller on your LAN.
+  # The launcher refuses to start while this reads CHANGE_ME. Set it here or
+  # pass --follower-ip to simretract-run-real / simretract.real.client.
+  follower_ip: CHANGE_ME
+  model: wxai_v0
+
+services:
+  host: 127.0.0.1
+  policy_port: 8765
+  mask_port: 8766
+  # seconds to wait for a freshly booted server to answer a ping
+  boot_timeout_s: 450
+
+mask:
+  # SAM 3 weights; relative paths resolve against the repository root.
+  # Obtain the gated weights as described in checkpoints/README.md.
+  sam3_ckpt: checkpoints/sam3/sam3.pt
+  prompt: metal rake
+  conf: 0.2
+
+# Client regimes. `default` is the deployment regime; `parity` reproduces the
+# simulation-benchmark execution regime; `conservative` is a slow stop-and-go
+# regime for bring-up on a new bench. Keys map 1:1 onto client flags.
+presets:
+  default:
+    exec_h: 50
+    exec_min: 50
+    settle: 0.0
+    speed: 0.8
+    max_step: 0.06
+    smooth: 0.6
+    view: true
+    plane_top_cut: 0.10
+  parity:
+    exec_h: 20
+    exec_min: 20
+    settle: 0.0
+    speed: 1.0
+    max_step: 0.06
+    smooth: 0.45
+    view: false
+    plane_top_cut: 0.0
+  conservative:
+    exec_h: 10
+    # adaptive horizon: re-query every 5 actions once the tool is close
+    exec_min: 5
+    settle: 0.25
+    speed: 0.5
+    max_step: 0.03
+    smooth: 0.45
+    view: false
+    plane_top_cut: 0.10

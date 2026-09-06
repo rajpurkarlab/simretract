@@ -1,0 +1,18 @@
+# simretract-fastwam (optional): serving and training the Fast-WAM row (Python 3.12).
+# Needs a newer lerobot than the pinned policy environment; kept separate so the
+# reference rows stay on the frozen stack.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+lerobot[fastwam]==0.6.1
+diffusers==0.39.0
+transformers>=5.3,<5.6
+accelerate
+ftfy
+imageio
+imageio-ffmpeg
+num2words
+regex
+opencv-python-headless
+scipy
+pyyaml

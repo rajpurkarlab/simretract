@@ -1,0 +1,65 @@
+# Perturbation-recovery recipe (simretract-generate recovery).
+# A recovery episode replays a strict seed with its stored grasp, injects a
+# pose perturbation part-way along the approach and records the expert's
+# re-planned recovery. Reach shaping and keep filter are identical to the
+# strict recipe; legacy environment names are given in the comments.
+
+tool: retractor_rake                  # TOOL
+mu: 0.4                               # MU
+tries: 10                             # TRIES: candidate cap of the fallback search when the stored grasp is not
+                                      #   reusable (the recovery campaign never raised the recorder default)
+
+# Which strict seeds and how many draws
+strict_selection: strict_500.json     # SEED_JSON: seeds sorted ascending define the virtual index
+draws: 4                              # DRAWS: perturbation draws per seed; virtual index v -> (seeds[v // draws], v % draws)
+range: [0, 2000]                      # virtual index span of the main campaign (seeds x draws)
+stored_winners_required: true         # STORED_WINNER_ROOT: reuse the strict episode's grasp (re-validated)
+
+# Perturbation window
+pert_frac_lo: 0.25                    # PERT_FRAC_LO: earliest injection point as a fraction of the approach
+pert_frac_hi: 0.75                    # PERT_FRAC_HI
+rng_xor: 0x50455254                   # perturbation RNG seed = (seed * 100 + draw) ^ rng_xor
+
+# Scene randomisation
+hand_style: train                     # legacy env ERA4_HAND=1
+
+# Reach shaping (same as strict)
+blend: true                           # BLEND
+blend_rot_frac: 0.7                   # BLEND_ROT_FRAC
+standoff: 0.03                        # STANDOFF
+ctrl_back: 0.06                       # CTRL_BACK
+decel_arc: 0.0                        # DECEL_ARC
+curve_end: 0.25                       # CURVE_END
+entry_speed: 1.0                      # ENTRY_SPEED
+speed_scale: 0.9                      # SPEED_SCALE
+joint_rate_deg: 2.5                   # JOINT_RATE_DEG
+z_lo: -0.05                           # Z_LO (grasp switch target range when the stored grasp is unusable)
+z_hi: 0.05                            # Z_HI
+
+# Keep filter (same as strict)
+interfere_gate: true                  # INTERFERE_GATE
+interfere_t_mm: 3.0                   # INTERFERE_T_MM
+interfere_r_deg: 3.0                  # INTERFERE_R_DEG
+keep_mode: pose                       # KEEP_MODE
+skip_battery: true                    # SKIP_BATTERY
+
+# Output
+sample_every: 50                      # SAMPLE_EVERY
+
+# Top-up rounds (--topup): extra draws for seeds that have fewer than target_keeps
+topup:
+  draws: 8
+  target_keeps: 4
+
+# Assembly (simretract-assemble recovery)
+assemble:
+  exact_per_seed: 4                   # lowest draw indices per seed with a keep -> recovery_train_2000.json
+  far_n: 1000                         # smallest info.perturb.frac (ties by name) -> recovery_far1000.json
+
+# Campaign driver (simretract.sim.campaign; defaults of the --parallel/--stagger/--chunk/--timeout/--tries flags)
+campaign:
+  parallel: 3
+  stagger_s: 15
+  chunk: 8                            # virtual indices per Kit process
+  timeout_s: 2400
+  tries: 2

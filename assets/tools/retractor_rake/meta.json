@@ -1,0 +1,33 @@
+{
+  "name": "retractor_rake",
+  "select": "so7si_retractor_2_body",
+  "scale": 0.01,
+  "pre_rotate": null,
+  "align_z": true,
+  "coacd_threshold": 0.015,
+  "extents_m": [
+    0.03059,
+    0.00967,
+    0.21631
+  ],
+  "longest_m": 0.21631,
+  "watertight": true,
+  "volume_m3": 6.611e-06,
+  "center_removed_pre_m": [
+    -0.02444,
+    0.00234,
+    0.11637
+  ],
+  "n_collision_parts": 21,
+  "collision_hull_volume_m3": 7.848e-06,
+  "suggested_tip": [
+    -0.00677,
+    0.0012,
+    0.12624
+  ],
+  "suggested_bend": [
+    -0.0,
+    0.00033,
+    0.09956
+  ]
+}

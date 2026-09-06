@@ -1,0 +1,23 @@
+# Interpreter per process role. envs/setup.sh writes the machine-specific copy
+# configs/envs.local.yaml (git-ignored) with absolute paths; this template is
+# the fallback and can be edited by hand. Environment overrides:
+# SIMRETRACT_SIM_PYTHON, SIMRETRACT_POLICY_PYTHON, SIMRETRACT_MASK_PYTHON,
+# SIMRETRACT_FASTWAM_PYTHON.
+#
+# Role -> what must import in that interpreter:
+#   sim      isaacsim     (Isaac Sim 5.1, Python 3.11)   envs/sim.txt
+#   policy   lerobot      (torch cu128, Python 3.12)     envs/policy.txt
+#   mask     ultralytics  (SAM 3, Python 3.11)           envs/mask.txt
+#   fastwam  lerobot 0.6.1 (optional Fast-WAM row)       envs/fastwam.txt
+sim_python: CHANGE_ME
+policy_python: CHANGE_ME
+mask_python: CHANGE_ME
+fastwam_python: CHANGE_ME
+# Optional override of the tool source: by default `simretract-build-assets`
+# converts the purchased file the recipe configs/assets/<tool>.yaml names under
+# assets/source/<pack>/ (docs/ASSETS.md). Point tool_source at a copy kept
+# elsewhere (FBX / OBJ / STL / glTF / STEP) to use that instead; environment
+# override SIMRETRACT_TOOL_SOURCE. The file is never part of the repository.
+# Leave CHANGE_ME to use the drop-in folder (without a file there the asset
+# build is skipped and the sim smoke tier skips with a message).
+tool_source: CHANGE_ME

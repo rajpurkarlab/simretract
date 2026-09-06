@@ -1,0 +1,67 @@
+# Expert-recorder recipe for the strict-500 set (simretract-generate strict).
+# Each key is a recorder knob; the legacy environment-variable name that the
+# CLI still honours as a fallback is given in the comment.
+
+tool: retractor_rake                  # TOOL: assets/tools/<tool>, assets/usd/<tool>.usd, grasp candidates
+mu: 0.4                               # MU: tool + finger contact friction
+tries: 20                             # TRIES: candidates physically tried in the silent grasp search
+
+# Grasp-candidate picker
+e4_pick: true                         # E4_PICK: clearance pass/fail picker (1.0 cm hand gate, 1.5 cm corridor,
+                                      #   closing axis within 15 deg of the plate normal, target height z*)
+z_lo: -0.05                           # Z_LO: grasp-height target range along the tool axis (m)
+z_hi: 0.05                            # Z_HI
+z_strict: false                       # Z_STRICT: hard-reject candidates outside [z_lo, z_hi] (gap-fill lanes)
+upright_min: 0.0                      # UPRIGHT_MIN: reject candidates whose camera-side axis is below the horizon
+
+# Scene randomisation
+hand_style: train                     # legacy env ERA4_HAND=1: fist 75 % at 2.5-4.5 cm, hand z U(-0.12,-0.065) m
+                                      # (`test` = the benchmark occluder: fist 50 %, hand z U(-0.12,-0.05))
+
+# Reach shaping (quadratic Bezier reach with a short straight entry)
+blend: true                           # BLEND: single Bezier reach start -> control -> end
+blend_rot_frac: 0.7                   # BLEND_ROT_FRAC: orientation slerp completes over this fraction
+standoff: 0.03                        # STANDOFF: curve ends this far short of the grasp on the approach axis (m)
+ctrl_back: 0.06                       # CTRL_BACK: control point this far behind the grasp on-axis (m)
+decel_arc: 0.0                        # DECEL_ARC: no deceleration ramp at the end of the curve (m)
+curve_end: 0.25                       # CURVE_END: step-size floor of the (unused) deceleration ramp
+entry_speed: 1.0                      # ENTRY_SPEED: speed factor of the straight entry segment
+speed_scale: 0.9                      # SPEED_SCALE: scales the 0.12/60 m per-update arc step
+joint_rate_deg: 2.5                   # JOINT_RATE_DEG: per-joint per-update rate limit (never 0)
+tangent_orient: false                 # TANGENT_ORIENT: orient the approach axis along the path tangent
+
+# Keep filter
+interfere_gate: true                  # INTERFERE_GATE: reject when the presented tool moves before the close
+interfere_t_mm: 3.0                   # INTERFERE_T_MM
+interfere_r_deg: 3.0                  # INTERFERE_R_DEG
+keep_mode: pose                       # KEEP_MODE: keep iff drop < 20 mm and presented-vs-released pose < 10 mm / 10 deg
+skip_battery: true                    # SKIP_BATTERY: no load battery (verdict = battery_skipped)
+
+# Output
+sample_every: 5                       # SAMPLE_EVERY: write a review video every N kept episodes (0 = never)
+
+# Quota mode (--seed-start/--quota): keep recording until every grasp-height bin
+# holds `quota` kept episodes; seeds are pre-screened with the deterministic sampler.
+# Documentation of the production campaign; scripts/generate_strict.sh passes these
+# values as --quota / --bins / --z-range.
+quota:
+  per_bin: 125
+  bins: 4
+  z_range: [-0.05, 0.05]
+
+# Campaign driver (simretract.sim.campaign; defaults of the --parallel/--stagger/--chunk/--timeout/--tries flags)
+campaign:
+  parallel: 3                         # concurrent Kit processes
+  stagger_s: 15                       # seconds between worker launches (Kit boot spike)
+  chunk: 5                            # seeds per Kit process
+  timeout_s: 4800                     # per-chunk wall cap before SIGKILL
+  tries: 2                            # launches per chunk before it is marked failed
+
+# Fixed simulation constants (documented, not knobs)
+constants:
+  physics_hz: 500
+  control_decim: 20                   # 25 Hz control / capture
+  render_size: [640, 480]
+  rt_subframes: 8
+  wrist_fov_deg_v: 58                 # real D405 vertical field of view
+  smoke_seeds: [200350, 400851]

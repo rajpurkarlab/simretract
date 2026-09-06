@@ -1,0 +1,111 @@
+# Tool asset recipe: how the purchased source file becomes the tool mesh
+# under assets/tools/retractor_rake/, and what the result must reproduce.
+# Read by simretract-build-assets and simretract.sim.mesh_convert; the
+# procedure and the verification numbers are explained in docs/ASSETS.md.
+tool: retractor_rake
+
+# The drop-in source. Place the purchased folder as downloaded under
+# assets/source/<pack>/ (git-ignored except assets/source/README.md); the
+# converter takes <file> from it unless tool_source (configs/envs.local.yaml
+# or SIMRETRACT_TOOL_SOURCE) overrides the path.
+source:
+  pack: vretractor
+  file: vretractor.fbx
+  sha256: df9689bc33e997417d2898406cdb7214cbabde58744513b2ddd0013950061cbb
+  size_bytes: 210860
+  listing: "Operating Volkman Retractor Surgical Instrument"
+  creator: HQ3DMOD
+  listing_url: https://www.fab.com/listings/28243153-9617-4d27-a1c1-779d22e6f61a
+  license: Fab Standard License
+  license_url: https://www.fab.com/eula
+  ai_usage: "the listing states: Allows usage with AI: Yes"
+  folder_contents: [vretractor.fbx, textures/]    # the textures are not used by the simulation
+  select: ovrsi_retractor_body                     # the only mesh node of the file
+  # source units -> metres: the recorded export's 0.01 times the size ratio
+  # 1.474075 between the two exports of the model (docs/ASSETS.md, "Asset identity")
+  scale: 0.01474075
+  # half-turn about y: brings this export into the pack frame of the export the
+  # released data was recorded with, so the converter's own alignment step then
+  # produces the same tool frame
+  pre_rotate: [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
+  # what the converter prints for this file (informational): the centroid offset
+  # removed, and the collision sets seen with coacd==1.0.11 on the reference
+  # machine (CoACD varies from run to run; meta.json records 21 parts / 7.848 cm3
+  # for the recorded export, the check accepts 3 parts and 5% hull volume)
+  expected_center_removed_pre_m: [-0.01806, 0.00234, 0.0]
+  observed_collision_parts: [20, 21]
+  observed_collision_hull_cm3: [7.82, 8.00]
+
+# Other exports of the same model. Recognised by sha256 (or by file name with
+# a warning) and converted with their own settings.
+alternative_sources:
+  - name: cgtrader_set_of_7
+    role: "the export the released datasets were recorded with and the released checkpoints were trained on; meta.json describes this build"
+    listing: "Set of 7 surgical instruments"
+    listing_url: https://www.cgtrader.com/3d-models/science/medical/set-of-7-surgical-instruments
+    file: uploads_files_5268240_surginstruments.fbx
+    sha256: 8f7182fd5867b5da7c023b366ab37c73a37f13030ca119a0ff3011524bed6de3
+    size_bytes: 3518400
+    select: so7si_retractor_2_body
+    scale: 0.01
+    pre_rotate: null
+    expected_center_removed_pre_m: [-0.02444, 0.00234, 0.11637]
+    observed_collision_parts: [20, 21]
+    observed_collision_hull_cm3: [7.848, 7.898]
+
+# Source-independent conversion settings.
+conversion:
+  align_z: true
+  coacd_threshold: 0.015
+
+# The reference values in assets/tools/retractor_rake/meta.json (checked by
+# the converter and the USD builder: extents 0.1 mm, volume 1%, collision set
+# within 3 parts and 5% hull volume).
+expected_meta:
+  extents_m: [0.03059, 0.00967, 0.21631]
+  longest_m: 0.21631
+  watertight: true
+  volume_m3: 6.611e-06
+  n_collision_parts: 21
+  collision_hull_volume_m3: 7.848e-06
+  suggested_tip: [-0.00677, 0.0012, 0.12624]
+  suggested_bend: [-0.0, 0.00033, 0.09956]
+
+# Fingerprints of the released visual.obj (simretract.sim.asset_recipe).
+# face_sha256: the int64 face array, exact. vertex_sha256: float64 vertices
+# rounded to 1e-6 m, exact for the recorded export. vertex_grid_sha256: the
+# vertices snapped to a 1 um grid under the per-coordinate phase bits below;
+# reproduced by every build whose coordinates are within 0.25 um of the
+# released mesh (the Fab export: within 0.03 um). Extents to 0.1 um, volume
+# to 1e-6 relative.
+fingerprint:
+  n_vertices: 3152
+  n_faces: 6308
+  face_sha256: 7e88d550b79ee89005e815d9f42e7d4c26d4076b31461a385f4ecd7bb218d9b7
+  vertex_sha256: 9f71ad5b457d967f3a9d623159dcbe37ed828eed0e292e020ed92266d7c61c34
+  vertex_grid_sha256: 998de8d7eb5e19ef12e3acb2a7ffb3cb5aa93e63278fd11c412de6eccfb2b716
+  vertex_grid_phase: >-
+    EahqIMBtaeyAk+UxcD5DHeITRWGbQ7WkyG3jfB83vJpjn9wcmMzOgwbqL+5m2aGgNhb9rH0Rj33Z
+    msJjm4QzeO0K22GsFDDcbFArfWxz4/BysjygCEgHcaNOWf9MsvgJhoePqPPESUZCKVCd+vJEwUVd
+    IQ8QOd5WPlQn0mLWXXbB7+zxat4renk/0jP3DfGvWyU3WlgdiuRoaxf8qXQBP28MtBj+GeZNwsZN
+    ITcenYLPS8j6RieE6um+BPv9azG771/hPJuyn+aztgDxrp6r3piLvqQlxD8BTIEtNXorz59erM9A
+    5iUIKhZpJhxNsQ3GDWar48x0YtFM2xZlOjiiA0W2TdKpIjXsXEvFINDMBRPJyxXz26Pi5RoS34cj
+    u25tT5njkr1lum/KO2k90nTpuyWgv/0stZN+v2dFpittkqW+0+WGyq0t96c0R2MNgQKO26YZHknu
+    sJCYmjkr1kKmfaG389mD2Nuyeov3QsNssutiptoitpgtmumqSWyq1p57cMRSEtg0uq23SgSqqm4j
+    MEBegjIEBO7UEkowlvMsGxlPYQgVCLJTvfkd93A5Izl27aQJCJSBTIIIICQCLZLIgz8OoyigGKRM
+    u8k8GUn2q4vVAr4r6wrRKRRj6N6ER6JI7KBUkEMOZ43gl3WHQsB2WdMQ2cXdCZTJOO6HtDEs/9/M
+    Ua5Q4FN2Wwswn+J2Kz4CbRJUwF4KDbMj1fqsSBbLUKYLaAAZAd10vul/v1nu+8un/2k8kk+9sMHE
+    ZUpQPkuQTgSa+jQ1ssFv0ITWDBOaM1zJ7IYOKaXXOYbcu3m2oSZYcWFIKmmwJWQ1gjdaCzBdyzaJ
+    hxDDM51DQ9HSoI9HC8XTlWRUIIbjFB736vDeMsacggE7DV9KzJB4lhtnh+9w/kE92p7uGCLqpCvC
+    Jm+iV4KobISJHsYWYGnca6Md2ZW+WSIA6pL3xgWHvJ/6BzIb+JElNPy7I6ndgBUt/LH+nt/J7elf
+    2Z85bRVLlaeP8b3WiCtJdabxzvTATBh9URH+Nrkq4BsJJOYNW/vm4Ujtro/Et1uptsnhMiK7WfdD
+    vqvooIGWLMs0YQ0iCJFxKAueYtkKNJElnu0pqTqbaz1Q6p2E6aAwdSQ+KId5pMP5YesbU71o4+aR
+    N1330rBEvJH3VXJEkt1I2BTYbeSU1p6K3LCZKcBNiKpT+al8dlszs0qA85AIPVQ3n7W7uo026Rtx
+    XTcOBktpFlV1JtgJxolhVud+S2xJyr/rBRK4BJiKBySSwmRx04wREELYoZEELdTENoisoVNkyoNf
+    LJ1vduRLEZt3lWf/0sns/k3ssksv8nqxDhJaQKNeGAiCxoO8s1HZCSP0udMGUOe0m1mpr/pa0l+v
+    BLPM4pNMLeAzgJyaTEAGZStwvVeUKruKfBMpfRypxW9R8EF2+twcDrdbuXdreB9wcZor4jRcROk/
+    v1G8v2kk9k5RQDOk/v1DKe8qDX2gYEk6Zgojk9wJUrEqCdw9dygFfoXUlE0AsVr/Hb5oSBWOxghz
+    GUUPh7YMD/XmSuEodCGUecokHy8uMCql9v8v1DQz6X1MvUlMB0q+h+Qu
+  extents_m: [0.03059319, 0.00967014, 0.21631345]
+  volume_m3: 6.610871554e-06
+  watertight: true
