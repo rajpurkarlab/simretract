@@ -1,7 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
-  <title id="title">SimRetract</title>
-  <desc id="desc">A bent retractor between two open robot fingers.</desc>
-  <rect x="4" y="4" width="120" height="120" rx="28" fill="#eff7f6"/>
-  <path d="M64 102V39c0-11 7-18 18-18h11v15H82" fill="none" stroke="#163e48" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-  <path d="M22 98V83l19-19h11v18H41v16M106 98V83L87 64H76v18h11v16" fill="none" stroke="#178b84" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
-</svg>

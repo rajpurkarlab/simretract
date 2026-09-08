@@ -1,7 +1,7 @@
 # Demonstration media
 
-The README links to local MP4 files so the videos remain available with a clone
-of the repository. The poster is an unannotated frame from the first video.
+The MP4 files are retained here for later use. The poster is an unannotated
+frame from the first video.
 
 | File | View | Duration | Resolution |
 |---|---|---|---|
@@ -19,6 +19,3 @@ For practical repository size, the videos use H.264, 720-pixel height, CRF 27,
 limited peak bitrate, and MP4 fast-start metadata. These are presentation copies;
 lossless camera data and metric depth are not included in this media folder.
 Colors and overlays in the combined view are visualizations, not depth data.
-
-The SVG project mark in [../logo.svg](../logo.svg) is an original, schematic
-retractor and robot-gripper symbol. It contains no third-party model geometry.

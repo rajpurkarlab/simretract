@@ -22,7 +22,7 @@ existing checkpoint. All command examples assume the repository root.
 - `scripts/`: wrappers around the package's command-line entry points.
 - `configs/`: environment paths, asset recipes, data definitions, and run presets.
 - `envs/`: environment setup and pinned requirements.
-- `assets/`: project gripper assets, tool annotations, logo, and demonstration media.
+- `assets/`: project gripper assets, tool annotations, and demonstration media.
 - `data/selections/`: training selections and held-out evaluation seeds.
 - `tests/`: validation tiers and their fixtures.
 

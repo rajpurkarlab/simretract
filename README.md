@@ -1,5 +1,3 @@
-<p align="center"><img src="assets/logo.svg" width="96" alt="SimRetract"></p>
-
 # SimRetract
 
 Simulation-trained retractor take-over and holding with a WidowX-AI robot and a
@@ -9,17 +7,7 @@ Isaac Sim and uses masked RGB-D, joint state, and an estimated tool-plane normal
 This repository includes simulation, demonstration generation, training,
 evaluation, and real-robot deployment.
 
-## Demonstrations
-
-[![Real-robot retractor take-over demonstration](assets/media/demo-poster.jpg)](assets/media/demo-takeover-01.mp4)
-
-**[Watch the demonstration (3:20)](assets/media/demo-takeover-01.mp4)**
-
-- [Second external-camera demonstration (4:00)](assets/media/demo-takeover-02.mp4)
-- [Wrist RGB-D, masking, plane, and external views (1:38)](assets/media/demo-perception.mp4)
-
-These phantom demonstrations retain the full selected external-camera recordings
-and original playback speed. [Media details](assets/media/README.md).
+[Project website](https://example.com) (placeholder)
 
 ## Get started
 
