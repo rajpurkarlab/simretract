@@ -1,6 +1,6 @@
 # Third-party notices
 
-Nothing below is vendored; each component is obtained at setup time under its own license.
+Upstream components and adapted assets retain the notices and terms below.
 
 ## Software
 
@@ -13,6 +13,8 @@ Nothing below is vendored; each component is obtained at setup time under its ow
 | `transformers`, `safetensors`, `huggingface_hub`, `accelerate`, `diffusers` | PyPI | Apache-2.0 |
 | `torch`, `torchvision` | <https://download.pytorch.org/whl/cu128> | BSD-3-Clause |
 | `ultralytics` (SAM 3 predictor, mask server) | <https://pypi.org/project/ultralytics/> | AGPL-3.0 (separate process and environment) |
+| `clip` (SAM 3 text encoder utilities) | <https://github.com/ultralytics/CLIP> (pinned in `envs/mask.txt`) | AGPL-3.0 (license distributed with this fork) |
+| `timm` (SAM 3 vision modules) | PyPI (`envs/mask.txt`) | Apache-2.0 |
 | `pyrealsense2` | <https://pypi.org/project/pyrealsense2/> | Apache-2.0 |
 | `trimesh`, `scipy`, `numpy`, `opencv-python`, `pillow`, `imageio`, `imageio-ffmpeg`, `av`, `matplotlib`, `pyyaml`, `einops`, `num2words`, `draccus`, `gymnasium` | PyPI | MIT / BSD / Apache-2.0 / LGPL (`imageio-ffmpeg` bundles an LGPL ffmpeg build) |
 | `coacd` 1.0.11 (optional, asset build) | <https://pypi.org/project/coacd/> | MIT |
@@ -36,4 +38,4 @@ Nothing below is vendored; each component is obtained at setup time under its ow
 |---|---|---|
 | "Operating Volkman Retractor Surgical Instrument" by HQ3DMOD | <https://www.fab.com/listings/28243153-9617-4d27-a1c1-779d22e6f61a> | Fab Standard License (<https://www.fab.com/eula>); obtained separately, never redistributed (`docs/ASSETS.md`) |
 | WidowX-AI follower USD | `trossen_ai_isaac` submodule (above) | see above |
-| flat-pad fingers (`assets/gripper/`) | this repository | the code license (`LICENSE`) |
+| flat-pad finger mesh exports (`assets/gripper/`), modified to fit the Trossen WidowX-AI | [Source Robotics, SSG-48 adaptive electric gripper](https://github.com/Source-Robotics/SSG-48-adaptive-electric-gripper); [adaptation notice](assets/gripper/README.md) | upstream Apache-2.0; [license copy](assets/gripper/LICENSE) |

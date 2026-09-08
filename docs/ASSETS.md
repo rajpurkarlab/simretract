@@ -270,7 +270,7 @@ candidates still have to match).
 `.gitignore` excludes everything under `assets/source/` except the README,
 every geometry file under `assets/tools/`, all of `assets/usd/`, and
 `*.fbx`, `*.blend`, `*.max`, `*.ply`, `*.stl`, `*.glb`, `*.gltf`, `*.usd*`
-and `*.obj` anywhere, with the gripper's own OBJ files under
+and `*.obj` anywhere, with the attributed gripper OBJ exports under
 `assets/gripper/` as the only exception; `tests/unit/test_asset_exclusion.py`
 and the release tier check that nothing matching those patterns would be
 committed and that the tracked tool files hold poses and metadata only. Do

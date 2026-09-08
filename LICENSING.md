@@ -2,7 +2,8 @@
 
 | part | terms |
 |---|---|
-| Code (`simretract/`, `configs/`, `scripts/`, `tests/`, `envs/`, `docs/`, `data/selections/`, the gripper CAD under `assets/gripper/`, the tool annotations `assets/tools/retractor_rake/meta.json` and `assets/gmask_lut.npz`) | `LICENSE` (to be chosen by the authors; the same license goes into `pyproject.toml` and `CITATION.cff`) |
+| Code (`simretract/`, `configs/`, `scripts/`, `tests/`, `envs/`, `docs/`, `data/selections/`, the tool annotations `assets/tools/retractor_rake/meta.json` and `assets/gmask_lut.npz`) | `LICENSE` (to be chosen by the authors; the same license goes into `pyproject.toml` and `CITATION.cff`) |
+| Adapted gripper mesh exports (`assets/gripper/`) | Derived from Source Robotics' SSG-48 design; upstream Apache-2.0 terms and modification notice in `assets/gripper/README.md`. These upstream terms are separate from the project's pending code-license choice. |
 | Policy checkpoints | released under a license to be chosen by the authors; upstream notices in `LICENSE-CHECKPOINTS.md` |
 | Datasets (robot-action and grasp-point data) | released under a license to be chosen by the authors; `LICENSE-DATA.md` |
 | Third-party components (software, weights, tokenizers, the robot package) | listed with their licenses in `THIRD_PARTY_NOTICES.md` |

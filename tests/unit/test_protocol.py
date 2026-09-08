@@ -23,9 +23,15 @@ def _query():
 
 def test_roundtrip_query_and_reply_over_socketpair():
     a, b = socket.socketpair()
+    a.settimeout(5)
+    b.settimeout(5)
     try:
-        send_msg(a, _query())
+        # A full RGB-D observation exceeds a socket buffer; receive concurrently.
+        sender = threading.Thread(target=send_msg, args=(a, _query()), daemon=True)
+        sender.start()
         msg = recv_msg(b)
+        sender.join(timeout=5)
+        assert not sender.is_alive()
         assert msg["rgb"].shape == (480, 640, 3)
         assert msg["depth_mm"].dtype == np.uint16
         assert msg["plane_top_cut"] == 0.0

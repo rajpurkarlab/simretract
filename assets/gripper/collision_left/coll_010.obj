@@ -1,3 +1,7 @@
+# Derived from Source Robotics SSG-48 adaptive electric gripper.
+# Source: https://github.com/Source-Robotics/SSG-48-adaptive-electric-gripper
+# Modified for the Trossen WidowX-AI; exported for SimRetract simulation.
+# Upstream license: Apache-2.0. See assets/gripper/LICENSE and assets/gripper/README.md.
 # https://github.com/mikedh/trimesh
 v 0.04198095 -0.02018249 0.01597309
 v 0.04107578 -0.01944248 0.01597309

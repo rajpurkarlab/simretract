@@ -17,7 +17,7 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"
 TIER="${1:-unit}"; shift || true
 EXTRA=("$@")
-cd "$SIMRETRACT_ROOT"
+cd "$SIMRETRACT_WRAPPER_ROOT"
 
 run_tier() {  # run_tier ROLE DIR MARKER "expected wall time"
   local role="$1" dir="$2" marker="$3" eta="$4" py t0 rc

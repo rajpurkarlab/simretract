@@ -94,6 +94,7 @@ class ServeConfig:
     drop_px: int = 300
     plane_filter: bool = True
     plane_top_cut: float = 0.0
+    plane_top_cut_m: float = 0.0
     plane_top_cut_max_deg: float = 20.0
     stub: bool = False
 
@@ -225,6 +226,30 @@ def apply_eval_aug(msg: dict, rng: np.random.Generator, nogrip: bool) -> dict:
     return out_msg
 
 
+def prepare_metric_inputs(msg: dict, default_length: float = 0.0) -> dict:
+    """Crop current tool visibility once for both images and plane state."""
+    from simretract.serve.metric import metric_plane_inputs
+
+    length = float(msg.get("plane_top_cut_m", default_length))
+    if not np.isfinite(length) or length < 0:
+        raise ValueError("metric cut length must be finite and nonnegative")
+    if length == 0:
+        return msg
+    mask = np.asarray(msg.get("_aug_m_in", msg["mask"]))
+    depth = np.asarray(msg.get("_aug_dep_mm", msg["depth_mm"]))
+    result = metric_plane_inputs(mask, depth, length)
+    out = dict(msg, mask=result["mask"], _metric_inputs=result)
+    gripper = np.asarray(msg.get("metric_gripper_mask", msg["gmask"])) > 0
+    excluded = (mask > 0) & ~(result["mask"] > 0) & ~gripper
+    for name in ("rgb", "depth_mm", "_aug_rgb_masked", "_aug_dep01", "_aug_dep_mm"):
+        if name in msg:
+            out[name] = np.asarray(msg[name]).copy()
+            out[name][excluded] = 0
+    if "_aug_m_in" in msg:
+        out["_aug_m_in"] = result["mask"]
+    return out
+
+
 @dataclass
 class Preprocessor:
     """Builds the policy batch from a query message (the trainer's
@@ -317,8 +342,11 @@ class StubEngine:
     def __init__(self, cfg: ServeConfig) -> None:
         self.cfg = cfg
         self.last_plane: dict[str, list | None] = {"n": None, "c": None}
+        self.last_metric_input: dict | None = None
 
     def infer(self, msg: dict) -> np.ndarray:
+        if float(msg.get("plane_top_cut_m", self.cfg.plane_top_cut_m)) != 0:
+            raise ValueError("the hold-pose stub does not support metric preprocessing")
         q = np.asarray(msg["state"], np.float32).ravel()[:7]
         if q.shape[0] < 7:
             q = np.pad(q, (0, 7 - q.shape[0]))
@@ -344,6 +372,7 @@ class PolicyEngine:
         self.input_mode = cfg.input_mode or self.norm.input_mode or "masked_rgbd"
         self.drop_aug = self.norm.drop_aug
         self.last_plane: dict[str, list | None] = {"n": None, "c": None}
+        self.last_metric_input: dict | None = None
         self._aug_rng = np.random.default_rng() if cfg.eval_aug else None
         log.info("loading %s (%s) on %s", self.ckpt, self.policy_type, self.device)
         if self.norm.has_stats:
@@ -517,6 +546,14 @@ class PolicyEngine:
         ``want_plane`` reply."""
         from simretract.serve.plane import fit_plane_served
 
+        if float(msg.get("plane_top_cut_m", self.cfg.plane_top_cut_m)) > 0:
+            result = msg.get("_metric_inputs")
+            if result is None:
+                result = prepare_metric_inputs(msg, self.cfg.plane_top_cut_m)["_metric_inputs"]
+            plane = result["plane"]
+            self.last_plane = {key: None if plane is None else np.asarray(plane[key]).tolist()
+                               for key in ("n", "c")}
+            return np.zeros(3, np.float32) if plane is None else np.asarray(plane["n"], np.float32)
         if "_aug_m_in" in msg:            # eval aug: fit from corrupted inputs
             dep = np.asarray(msg["_aug_dep_mm"])
             mask_in = np.asarray(msg["_aug_m_in"])
@@ -542,6 +579,19 @@ class PolicyEngine:
 
         if self._aug_rng is not None:
             msg = apply_eval_aug(msg, self._aug_rng, self.nogrip)
+        msg = prepare_metric_inputs(msg, self.cfg.plane_top_cut_m)
+        self.last_metric_input = None
+        self.last_plane = {"n": None, "c": None}
+        metric = msg.get("_metric_inputs")
+        if metric is not None:
+            self.last_metric_input = {
+                "mask": metric["mask"].tobytes(),
+                "removed_mask": metric["removed_mask"].tobytes(),
+                "shape": tuple(metric["mask"].shape), "status": metric["status"],
+                "length_m": float(msg.get("plane_top_cut_m", self.cfg.plane_top_cut_m)),
+                "input_mode": self.input_mode, "nogrip": bool(self.nogrip)}
+            if self.state_dim != 10:
+                self.plane_from_msg(msg)
         if self.state_dim == 10:
             # qpos(7) + plane normal from THIS query's depth + mask
             msg = dict(msg)
@@ -550,6 +600,9 @@ class PolicyEngine:
             if self.drop_aug is not None and \
                     int((np.asarray(msg["mask"]) > 0).sum()) < self.cfg.drop_px:
                 pl = np.zeros(3, np.float32)   # lost mask -> blind frame, no plane
+                if metric is not None:
+                    self.last_plane = {"n": None, "c": None}
+                    self.last_metric_input["status"] += "; plane withheld: mask dropout"
             msg["state"] = np.concatenate([q, pl])
         norm = self.norm
         if norm.has_stats:
@@ -557,6 +610,14 @@ class PolicyEngine:
             st = np.asarray(msg["state"], np.float32).ravel()[:len(norm.state_mean)]
             msg["state"] = (st - norm.state_mean) / norm.state_std
         batch = self.pre.build_batch(msg)
+        if self.last_metric_input is not None:
+            for key, camera in (("wrist", "observation.images.wrist"),
+                                ("aux", "observation.images.mask")):
+                value = batch.get(camera)
+                image = None if value is None else value[0].permute(1, 2, 0).float().cpu().numpy()
+                self.last_metric_input[key] = None if image is None else image.tobytes()
+                if key == "wrist":
+                    self.last_metric_input["camera_shape"] = tuple(image.shape)
         if self.prompt_tok is not None:
             batch = self.prompt_tok(batch)
         if self.policy_type == "act":   # ImageNet normalization as in the trainer
@@ -604,6 +665,8 @@ def _regime(cfg: ServeConfig, policy_type: str, horizon: int, *, nogrip: bool,
         "plane_filter": bool(cfg.plane_filter),
         "drop_px": int(cfg.drop_px),
         "plane_top_cut": float(cfg.plane_top_cut),
+        "plane_top_cut_m": float(cfg.plane_top_cut_m),
+        "metric_plane_addon": int(policy_type != "stub"),
         "plane_top_cut_max_deg": float(cfg.plane_top_cut_max_deg),
         "nogrip": bool(nogrip),
         "chunk": H,
@@ -643,6 +706,8 @@ def serve(engine: PolicyEngine | StubEngine, host: str, port: int) -> None:
                     reply = {"ok": True, "ckpt": regime["ckpt"],
                              "eval_aug": "1" if regime["eval_aug"] else "0",
                              "nogrip": bool(regime["nogrip"]),
+                             "input_mode": regime["input_mode"],
+                             "metric_plane_addon": regime["metric_plane_addon"],
                              "regime": regime}
                     ensure_wire_safe(reply)
                     send_msg(conn, reply)
@@ -655,6 +720,8 @@ def serve(engine: PolicyEngine | StubEngine, host: str, port: int) -> None:
                         reply = {"chunk": chunk.tolist(),
                                  "plane_n": engine.last_plane["n"],
                                  "plane_c": engine.last_plane["c"]}
+                        if engine.last_metric_input is not None:
+                            reply["metric_inputs"] = engine.last_metric_input
                     else:
                         reply = chunk.tolist()
                     ensure_wire_safe(reply)
@@ -717,6 +784,8 @@ def build_parser() -> argparse.ArgumentParser:
                    help="fraction of the tool's pixel length removed from the top "
                         "end before the plane fit; a client may override per query "
                         "(sim protocol: 0) [env PLANE_TOP_CUT]")
+    p.add_argument("--plane-top-cut-m", type=float, default=float(_env("PLANE_TOP_CUT_M", "0")),
+                   help="metric crop in metres for plane and model inputs; clients override per query")
     p.add_argument("--plane-top-cut-max-deg", type=float,
                    default=float(_env("PLANE_TOP_CUT_MAX_DEG", "20")),
                    help="keep the uncut plane when the cut swings the normal by "
@@ -733,7 +802,8 @@ def config_from_args(a: argparse.Namespace) -> ServeConfig:
         lean_load=a.lean_load, fastwam_cpu_load=a.fastwam_cpu_load,
         eval_aug=a.eval_aug, nogrip=a.nogrip, input_mode=a.input_mode,
         drop_px=a.drop_px, plane_filter=a.plane_filter,
-        plane_top_cut=a.plane_top_cut, plane_top_cut_max_deg=a.plane_top_cut_max_deg,
+        plane_top_cut=a.plane_top_cut, plane_top_cut_m=a.plane_top_cut_m,
+        plane_top_cut_max_deg=a.plane_top_cut_max_deg,
         stub=a.stub)
 
 

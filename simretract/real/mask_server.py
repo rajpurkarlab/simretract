@@ -2,8 +2,8 @@
 
 The tool is detected once from a text prompt and then tracked frame to
 frame with SAM 3's video predictor: the temporal memory keeps the mask
-stable where per-image inference flickers, and detection still runs inside
-the tracker so a lost tool re-acquires automatically. Clients must stream
+stable where per-image inference flickers. The selected identity remains
+locked until an explicit episode reset, even while its visible mask is empty. Clients must stream
 frames continuously (a few fps), not only at policy queries, so that the
 memory stays fresh.
 
@@ -39,6 +39,9 @@ from simretract.serve.protocol import recv_msg, send_msg
 
 log = logging.getLogger("simretract.real.mask_server")
 
+PROTOCOL_VERSION = 2
+INITIAL_FRAME_CAPACITY = 256
+
 
 def env_default(cast, default: Any, *names: str) -> Any:
     """Default for a flag: the first set environment variable among ``names``, else ``default``."""
@@ -63,33 +66,99 @@ class Tracker:
         self.first = True
         self.lock_id, self.lock_mask, self.lost = None, None, 0
 
-    def reset(self, first_rgb: np.ndarray) -> None:
-        """(Re)build the predictor sized for ``first_rgb`` and clear the lock."""
+    def _load(self, first_rgb):
+        """Load model and configure its source once for this server process."""
         from ultralytics.models.sam import SAM3VideoSemanticPredictor
-        fd, seed = tempfile.mkstemp(prefix="sam3_seed_", suffix=".mp4")
-        os.close(fd)
-        try:
+        p = SAM3VideoSemanticPredictor(overrides=dict(
+            model=self.ckpt, mode="predict", save=False, verbose=False,
+            conf=self.conf))
+        p.setup_model(model=None)
+        p.model.mask_threshold = 0.0
+        # Ultralytics sets model sizes through setup_source. The loader is
+        # never iterated afterward: every frame comes from the socket.
+        with tempfile.TemporaryDirectory(prefix="sam3_stream_") as directory:
+            seed = os.path.join(directory, "seed.mp4")
             vw = cv2.VideoWriter(seed, cv2.VideoWriter_fourcc(*"mp4v"), 30,
                                  (first_rgb.shape[1], first_rgb.shape[0]))
-            for _ in range(2):
-                vw.write(first_rgb[..., ::-1])
-            vw.release()
-            p = SAM3VideoSemanticPredictor(overrides=dict(
-                model=self.ckpt, mode="predict", save=False, verbose=False, conf=self.conf))
-            p.setup_model(model=None)
-            p.model.mask_threshold = 0.0
-            p.setup_source(seed)
-            p.dataset.frames = 10 ** 9
-            p.dataset.frame = 1
-            SAM3VideoSemanticPredictor.init_state(p)
-        finally:
+            if not vw.isOpened():
+                raise RuntimeError("Could not create the SAM sizing video")
             try:
-                os.remove(seed)
-            except OSError:
-                pass
+                for _ in range(2):
+                    vw.write(first_rgb[..., ::-1])
+            finally:
+                vw.release()
+            p.setup_source(seed)
+            cap = getattr(p.dataset, "cap", None)
+            if cap is not None:
+                cap.release()
         self.pred = p
+        self.reset()
+
+    def reset(self):
+        """Forget an episode, retaining weights, text embeddings and kernels.
+
+        In Ultralytics 8.4.64, all semantic object IDs, masks and temporal
+        memories live under inference_state. Image caches on both predictor
+        instances must also be cleared so the next real frame is fresh.
+        """
+        if self.pred is not None:
+            p = self.pred
+            for predictor in (p, p.tracker):
+                predictor.inference_state = {}
+                predictor.reset_image()
+                predictor.prompts = {}
+                predictor.segment_all = False
+                predictor.batch = None
+                predictor.results = None
+                predictor.backbone_out = None
+            p.dataset.frames = INITIAL_FRAME_CAPACITY
+            p.dataset.frame = 1
+            type(p).init_state(p)
         self.first = True
         self.lock_id, self.lock_mask, self.lost = None, None, 0
+
+    def _ensure_frame_capacity(self):
+        """Grow bookkeeping with observed frames instead of allocating 8 GB.
+
+        Keep the horizon ahead of the current forward-only frame. Nested
+        tracker states use the same horizon for temporal pointer selection.
+        """
+        p = self.pred
+        state = p.inference_state
+        frame = p.dataset.frame - 1
+        prompts = state["per_frame_geometric_prompt"]
+        if frame < len(prompts):
+            return
+        capacity = max(INITIAL_FRAME_CAPACITY, 2 * len(prompts), frame + 1)
+        prompts.extend([None] * (capacity - len(prompts)))
+        state["num_frames"] = capacity
+        p.dataset.frames = capacity
+        for tracker_state in state["tracker_inference_states"]:
+            tracker_state["num_frames"] = capacity
+
+    def warmup(self):
+        """Exercise detector and one-object temporal tracking before serving."""
+        import torch
+        rgb = np.zeros((480, 640, 3), np.uint8)
+        if self.pred is None:
+            self._load(rgb)
+        self.mask(rgb)
+        p = self.pred
+        with torch.inference_mode():
+            # A blank detector image usually has no objects. Seed a private
+            # synthetic mask to also warm the interactive memory path; it
+            # never enters semantic metadata or a real episode's ID lock.
+            h, w = p.tracker._bb_feat_sizes[0]
+            seed = torch.zeros((1, h, w), device=p.device)
+            seed[:, h // 4:3 * h // 4, w // 4:3 * w // 4] = 1
+            states = p._tracker_add_new_objects(
+                frame_idx=0, num_frames=INITIAL_FRAME_CAPACITY,
+                new_obj_ids=[0], new_obj_masks=seed, tracker_states_local=[])
+            p.tracker.propagate_in_video(states[0], frame_idx=1)
+            del states, seed
+        if p.device.type == "cuda":
+            torch.cuda.synchronize(p.device)
+        self.reset()
 
     def candidates(self, r: Any, h: int, w: int, gmask: np.ndarray | None) -> list[tuple[Any, np.ndarray]]:
         """Instance masks of a result as (tracker id or None, bool mask), gripper instances dropped."""
@@ -150,8 +219,16 @@ class Tracker:
         """Tool mask (u8 0/255) for one RGB frame."""
         import torch
         if self.pred is None:
-            self.reset(rgb)
+            self._load(rgb)
         p = self.pred
+        self._ensure_frame_capacity()
+        if self.lock_id is not None:
+            # Retain the selected video memory through detector misses.
+            # Inference still produces a fresh, possibly empty mask.
+            metadata = p.inference_state.get("tracker_metadata", {}).get("metadata", {})
+            keep_alive = metadata.get("trk_keep_alive", {})
+            if self.lock_id in keep_alive:
+                keep_alive[self.lock_id] = p.max_trk_keep_alive
         bgr = np.ascontiguousarray(rgb[..., ::-1])
         p.batch = (["live.jpg"], [bgr], "")
         im = p.preprocess([bgr])
@@ -190,10 +267,12 @@ def serve(trk: Tracker, host: str, port: int) -> None:
                     break
                 if isinstance(msg, dict) and msg.get("op") == "ping":
                     send_msg(conn, {"ok": True, "prompt": trk.prompt, "conf": trk.conf,
-                                    "mode": "video-track"})
+                                    "mode": "video-track", "protocol_version": PROTOCOL_VERSION,
+                                    "warm_reset": True, "locked_track_keepalive": True,
+                                    "ckpt": os.path.realpath(trk.ckpt)})
                     continue
                 if isinstance(msg, dict) and msg.get("op") == "reset":
-                    trk.pred = None
+                    trk.reset()
                     n_f = 0
                     send_msg(conn, {"ok": True})
                     log.info("tracker reset")
@@ -226,7 +305,7 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--prompt", default=env_default(str, "metal rake", "SIMRETRACT_MASK_PROMPT", "PROMPT"),
                     help="text prompt used while acquiring the lock")
     ap.add_argument("--conf", type=float, default=env_default(float, 0.2, "SIMRETRACT_MASK_CONF", "CONF"),
-                    help="detection confidence gate (the mask threshold is fixed at 0)")
+                    help="predictor confidence setting (preserves SAM tracking thresholds)")
     ap.add_argument("--host", default=env_default(str, "127.0.0.1", "SIMRETRACT_HOST", "HOST"))
     ap.add_argument("--port", type=int, default=env_default(int, 8766, "SIMRETRACT_MASK_PORT", "PORT"))
     return ap
@@ -240,9 +319,7 @@ def main(argv: list[str] | None = None) -> int:
     trk = Tracker(a.ckpt, a.prompt, a.conf)
     log.info("warmup (prompt=%r) ...", a.prompt)
     t0 = time.time()
-    trk.reset(np.zeros((480, 640, 3), np.uint8))
-    trk.mask(np.zeros((480, 640, 3), np.uint8))
-    trk.pred = None  # drop the warmup state; re-init on the first real frame
+    trk.warmup()
     log.info("warmup %.2fs", time.time() - t0)
     serve(trk, a.host, a.port)
     return 0

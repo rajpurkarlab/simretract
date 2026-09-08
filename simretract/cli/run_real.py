@@ -20,6 +20,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+import math
 import os
 import signal
 import socket
@@ -145,7 +146,7 @@ def describe_ckpt(meta: dict[str, Any]) -> str:
             f"{'off' if meta['no_aug'] else 'on'}")
 
 
-def policy_regime_ok(pp: dict[str, Any] | None, ckpt: str) -> tuple[bool, str]:
+def policy_regime_ok(pp: dict[str, Any] | None, ckpt: str, *, metric_required: bool = False) -> tuple[bool, str]:
     """Whether a live policy server may be reused for ``ckpt``.
 
     It must serve this exact checkpoint without evaluation-time corruption,
@@ -159,11 +160,47 @@ def policy_regime_ok(pp: dict[str, Any] | None, ckpt: str) -> tuple[bool, str]:
     if str(pp.get("eval_aug", "0")) in ("1", "True", "true"):
         return False, "started with EVAL_AUG"
     regime = pp.get("regime") if isinstance(pp.get("regime"), dict) else pp
+    if metric_required and not pp.get("metric_plane_addon"):
+        return False, "metric crop support missing"
+    if float(regime.get("plane_top_cut_m", 0) or 0) != 0:
+        return False, "server-side metric crop must be zero"
     if "plane_filter" in regime and not regime["plane_filter"]:
         return False, "plane filter off"
     if "plane_top_cut" in regime and float(regime["plane_top_cut"] or 0.0) != 0.0:
         return False, f"server-side plane_top_cut {regime['plane_top_cut']}"
     return True, "ok"
+
+
+def mask_regime_ok(reply: dict | None, ckpt: str, prompt: str, conf: float) -> bool:
+    """Reuse only the requested warmed tracker with the selected-ID fix."""
+    return bool(reply and reply.get("ok") and reply.get("warm_reset")
+                and reply.get("locked_track_keepalive")
+                and reply.get("protocol_version") == 2
+                and os.path.realpath(str(reply.get("ckpt", ""))) == os.path.realpath(ckpt)
+                and reply.get("prompt") == prompt and float(reply.get("conf", -1)) == conf)
+
+
+def resolve_cut_options(preset: dict, fraction: float | None, metric: float | None,
+                        extra: list[str]) -> dict:
+    """Explicit legacy cuts disable the metric default, before or after mode."""
+    parser = argparse.ArgumentParser(add_help=False)
+    parser.add_argument("--plane-top-cut", type=float)
+    parser.add_argument("--plane-top-cut-m", type=float, nargs="?", const=0.01)
+    tail, _ = parser.parse_known_args([a for a in extra if a != "--"])
+    if tail.plane_top_cut is not None:
+        fraction = tail.plane_top_cut
+    if tail.plane_top_cut_m is not None:
+        metric = tail.plane_top_cut_m
+    result = dict(preset)
+    if fraction is not None:
+        result["plane_top_cut"] = fraction
+        if metric is None:
+            result["plane_top_cut_m"] = 0.0
+    if metric is not None:
+        result["plane_top_cut_m"] = metric
+    if not math.isfinite(result["plane_top_cut_m"]) or result["plane_top_cut_m"] < 0:
+        raise SystemExit("--plane-top-cut-m must be finite and nonnegative")
+    return result
 
 
 def boot(cmd: list[str], env: dict[str, str], log_path: Path) -> subprocess.Popen:
@@ -203,8 +240,19 @@ def resolve_follower_ip(cli_ip: str | None, cfg: dict[str, Any]) -> str:
 
 
 # ------------------------------------------------------------------ CLI
+class _RunParser(argparse.ArgumentParser):
+    def parse_known_args(self, args=None, namespace=None):
+        # A bare optional float must not consume the following positional mode.
+        args = list(sys.argv[1:] if args is None else args)
+        args = ["--plane-top-cut-m=0.01"
+                if value == "--plane-top-cut-m" and i + 1 < len(args)
+                and args[i + 1] in ("servers-only", "dry", "go") else value
+                for i, value in enumerate(args)]
+        return super().parse_known_args(args, namespace)
+
+
 def build_parser() -> argparse.ArgumentParser:
-    ap = argparse.ArgumentParser(
+    ap = _RunParser(
         prog="simretract-run-real",
         description="Boot/reuse the policy + SAM 3 servers and run the real-arm client. "
                     "Launcher options precede the mode; every argument after the mode "
@@ -218,7 +266,9 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--follower-ip", dest="follower_ip", default=None,
                     help="follower controller IP (default robot.follower_ip from the config)")
     ap.add_argument("--plane-top-cut", dest="plane_top_cut", type=float, default=None,
-                    help="override the preset's plane top-cut fraction (deployment default 0.10)")
+                    help="legacy plane-only pixel fraction; disables the metric default unless specified")
+    ap.add_argument("--plane-top-cut-m", type=float, nargs="?", const=0.01, default=None,
+                    help="crop tool tip from plane and model inputs in metres; 0 selects uncut legacy mode")
     ap.add_argument("--exec-h", dest="exec_h", type=int, default=None,
                     help="override the execution horizon (also used for --exec-min)")
     ap.add_argument("--fastwam-exec-h", dest="fastwam_exec_h", type=int, default=None,
@@ -245,9 +295,8 @@ def main(argv: list[str] | None = None) -> int:
     ckpt = resolve_ckpt_dir(a.ckpt)
     meta = read_ckpt_meta(ckpt)
     log.info("checkpoint %s: %s", ckpt, describe_ckpt(meta))
-    preset = resolve_preset(cfg, a.preset)
-    if a.plane_top_cut is not None:
-        preset["plane_top_cut"] = float(a.plane_top_cut)
+    preset = resolve_cut_options(resolve_preset(cfg, a.preset), a.plane_top_cut,
+                                 a.plane_top_cut_m, a.client_args)
     eh = a.exec_h if a.exec_h is not None else exec_h_for(meta, a.fastwam_exec_h)
     if eh is not None:
         preset["exec_h"] = preset["exec_min"] = int(eh)
@@ -273,26 +322,29 @@ def main(argv: list[str] | None = None) -> int:
 
     # ---- policy server -------------------------------------------------
     pp = ping(host, policy_port)
-    ok, why = policy_regime_ok(pp, ckpt)
+    ok, why = policy_regime_ok(pp, ckpt, metric_required=preset["plane_top_cut_m"] > 0)
     if a.keep_server and ok:
         log.info("reusing the live policy server on %d (%s)", policy_port, ckpt)
     else:
         if pp is not None:
             log.info("restarting the policy server on %d (%s)", policy_port, why)
         kill_port(policy_port)
-        env = dict(os.environ, HALF="1", EVAL_AUG="0", CKPT=ckpt, PORT=str(policy_port))
+        env = dict(os.environ, HALF="1", CKPT=ckpt, PORT=str(policy_port))
+        for key, value in {"EVAL_AUG": "0", "PLANE_FILTER": "1", "PLANE_TOP_CUT": "0",
+                           "PLANE_TOP_CUT_M": "0"}.items():
+            env[key] = env["SIMRETRACT_" + key] = value
         proc = boot([policy_py, "-m", POLICY_MODULE, "--ckpt", ckpt, "--port", str(policy_port), "--half"],
                     env, logs / f"policy_{policy_port}.log")
         pp = wait_for_ping(host, policy_port, proc, logs / f"policy_{policy_port}.log", boot_timeout,
                            "policy server")
-        ok, why = policy_regime_ok(pp, ckpt)
+        ok, why = policy_regime_ok(pp, ckpt, metric_required=preset["plane_top_cut_m"] > 0)
         if not ok:
             raise SystemExit(f"policy server regime mismatch after boot: {why} ({pp})")
     log.info("policy ping: %s", pp)
 
     # ---- mask server ---------------------------------------------------
     mp = ping(host, mask_port)
-    if mp is not None and mp.get("prompt") == prompt and float(mp.get("conf", conf)) == conf:
+    if mask_regime_ok(mp, str(sam3_ckpt), prompt, conf):
         log.info("reusing the live mask server on %d (prompt %r)", mask_port, prompt)
     else:
         if mp is not None:
@@ -302,6 +354,8 @@ def main(argv: list[str] | None = None) -> int:
                      "--conf", str(conf), "--host", host, "--port", str(mask_port)],
                     dict(os.environ), logs / f"mask_{mask_port}.log")
         mp = wait_for_ping(host, mask_port, proc, logs / f"mask_{mask_port}.log", boot_timeout, "mask server")
+    if not mask_regime_ok(mp, str(sam3_ckpt), prompt, conf):
+        raise SystemExit("mask server is missing the requested checkpoint or tracking fixes")
     log.info("mask ping: %s", mp)
     log.info("servers verified")
 

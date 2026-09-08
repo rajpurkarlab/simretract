@@ -85,6 +85,18 @@ def test_serve_act_ping_and_query(work: Path, state: dict) -> None:
         assert r["input_mode"] == "masked_rgbd" and r["state_dim"] == 10
         chunk = srv.query(smoke.synthetic_query())
         assert chunk.shape == (50, 7) and np.isfinite(chunk).all()
+        from simretract.serve.protocol import PolicyClient
+
+        query = smoke.synthetic_query()
+        query.update(plane_top_cut_m=.01, want_plane=True)
+        with PolicyClient("127.0.0.1", srv.port, timeout=120) as client:
+            reply = client.request(query)
+        assert np.isfinite(reply["chunk"]).all()
+        metric = reply["metric_inputs"]
+        assert metric["length_m"] == .01
+        assert np.frombuffer(metric["removed_mask"], np.uint8).any()
+        wrist = np.frombuffer(metric["wrist"], np.float32).reshape(metric["camera_shape"])
+        assert wrist.shape == (224, 224, 3) and np.isfinite(wrist).all()
 
 
 def test_serve_stub(work: Path) -> None:

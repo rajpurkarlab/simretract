@@ -146,9 +146,10 @@ fi
 echo "== wrote $ENVS_OUT"
 
 echo "== versions"
+failed_roles=()
 for role in "${ROLES[@]}"; do
   py="${PY[$role]}"
-  "$py" - "$role" "$(marker "$role")" <<'PYEOF'
+  if ! "$py" - "$role" "$(marker "$role")" <<'PYEOF'
 import importlib, importlib.metadata as md, sys
 role, marker = sys.argv[1], sys.argv[2]
 def ver(name):
@@ -158,17 +159,28 @@ def ver(name):
         return "-"
 pkgs = {"sim": ["isaacsim", "numpy", "scipy", "trimesh", "opencv-python-headless"],
         "policy": ["torch", "torchvision", "lerobot", "transformers", "safetensors", "huggingface_hub", "numpy"],
-        "mask": ["torch", "ultralytics", "opencv-python", "numpy"],
+        "mask": ["torch", "ultralytics", "clip", "timm", "opencv-python", "numpy"],
         "fastwam": ["torch", "lerobot", "transformers", "diffusers"]}[role]
 line = " ".join(f"{p}={ver(p)}" for p in pkgs)
 try:
     importlib.import_module(marker)
+    if role == "mask":
+        for dependency in ("clip", "timm"):
+            importlib.import_module(dependency)
     ok = "ok"
 except Exception as exc:  # noqa: BLE001
     ok = f"FAILED ({exc})"
 print(f"{role:8s} python={sys.version.split()[0]} {line} import {marker}: {ok}")
+sys.exit(0 if ok == "ok" else 1)
 PYEOF
+  then
+    failed_roles+=("$role")
+  fi
 done
+if [ "${#failed_roles[@]}" -gt 0 ]; then
+  echo "error: environment validation failed for: ${failed_roles[*]}. Fix the imports above and rerun setup." >&2
+  exit 1
+fi
 echo "== done."
 echo "   The simretract-* and hf commands live in the policy environment; activate it first:"
 echo "       conda activate simretract-policy"

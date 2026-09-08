@@ -6,15 +6,14 @@
 # configs/envs.local.yaml written by envs/setup.sh, then the tracked template
 # configs/envs.yaml.
 
-SIMRETRACT_ROOT="${SIMRETRACT_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-export SIMRETRACT_ROOT
+SIMRETRACT_WRAPPER_ROOT="${SIMRETRACT_REPO:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 
 # interp ROLE -> prints the interpreter path for ROLE (sim|policy|mask|fastwam).
 interp() {
   local role="$1" var value f
   var="SIMRETRACT_$(echo "$role" | tr '[:lower:]' '[:upper:]')_PYTHON"
   value="${!var:-}"
-  for f in "$SIMRETRACT_ROOT/configs/envs.local.yaml" "$SIMRETRACT_ROOT/configs/envs.yaml"; do
+  for f in "$SIMRETRACT_WRAPPER_ROOT/configs/envs.local.yaml" "$SIMRETRACT_WRAPPER_ROOT/configs/envs.yaml"; do
     [ -n "$value" ] && break
     [ -f "$f" ] || continue
     value="$(sed -n "s/^${role}_python:[[:space:]]*['\"]\{0,1\}\([^'\"#]*\)['\"]\{0,1\}[[:space:]]*$/\1/p" \
@@ -32,13 +31,13 @@ interp() {
 call_cli() {
   local role="$1" module="$2"; shift 2
   local py; py="$(interp "$role")" || return 1
-  (cd "$SIMRETRACT_ROOT" && "$py" -m "$module" "$@")
+  (cd "$SIMRETRACT_WRAPPER_ROOT" && "$py" -m "$module" "$@")
 }
 
 # run_cli ROLE MODULE ARGS... -> exec the CLI module under the ROLE interpreter.
 run_cli() {
   local role="$1" module="$2"; shift 2
   local py; py="$(interp "$role")" || exit 1
-  cd "$SIMRETRACT_ROOT" || exit 1
+  cd "$SIMRETRACT_WRAPPER_ROOT" || exit 1
   exec "$py" -m "$module" "$@"
 }

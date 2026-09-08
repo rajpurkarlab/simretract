@@ -30,11 +30,13 @@ Every run is recorded under ``<eval>/real/<checkpoint>/run_<stamp>/``:
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
 import json
 import logging
 import os
 import shutil
 import subprocess
+import sys
 import threading
 import time
 from pathlib import Path
@@ -46,6 +48,8 @@ import numpy as np
 from simretract.real import (FOLLOWER_IP_PLACEHOLDER, default_runs_root,
                              follower_ip_is_set, load_real_config, repo_root)
 from simretract.serve.protocol import PolicyClient
+from simretract.serve.metric import metric_plane_inputs
+from simretract.real.startup import StartupReadiness, StartupTrackingError
 
 log = logging.getLogger("simretract.real.client")
 
@@ -109,18 +113,22 @@ class D405:
         cfg = rs.config()
         cfg.enable_stream(rs.stream.color, 640, 480, rs.format.rgb8, 30)
         cfg.enable_stream(rs.stream.depth, 640, 480, rs.format.z16, 30)
-        prof = self.pipe.start(cfg)
-        self.align = rs.align(rs.stream.color)
-        self.scale = prof.get_device().first_depth_sensor().get_depth_scale()
-        i = prof.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
-        fy_target = 240.0 / np.tan(np.radians(FOVY_SIM) / 2)
-        self.crop = compute_crop(i.fy, i.ppx, i.ppy)
-        y0, x0, ch, cw = self.crop
-        log.info("camera depth_scale %.6f m/unit; fy %.1f -> crop %dx%d @(%d,%d) -> 640x480 "
-                 "(fy_eff %.1f, target %.1f)", self.scale, i.fy, cw, ch, x0, y0,
-                 i.fy * 480 / ch, fy_target)
-        for _ in range(warmup_frames):  # auto exposure settles
-            self.pipe.wait_for_frames()
+        try:
+            prof = self.pipe.start(cfg)
+            self.align = rs.align(rs.stream.color)
+            self.scale = prof.get_device().first_depth_sensor().get_depth_scale()
+            i = prof.get_stream(rs.stream.color).as_video_stream_profile().get_intrinsics()
+            fy_target = 240.0 / np.tan(np.radians(FOVY_SIM) / 2)
+            self.crop = compute_crop(i.fy, i.ppx, i.ppy)
+            y0, x0, ch, cw = self.crop
+            log.info("camera depth_scale %.6f m/unit; fy %.1f -> crop %dx%d @(%d,%d) -> 640x480 "
+                     "(fy_eff %.1f, target %.1f)", self.scale, i.fy, cw, ch, x0, y0,
+                     i.fy * 480 / ch, fy_target)
+            for _ in range(warmup_frames):  # auto exposure settles
+                self.pipe.wait_for_frames()
+        except BaseException:
+            self.stop()
+            raise
 
     def frame(self) -> tuple[np.ndarray, np.ndarray]:
         """Return (rgb u8 (480,640,3), depth_mm u16 (480,640)) in the cropped view."""
@@ -155,17 +163,21 @@ class Arm:
         import trossen_arm
         self.ta = trossen_arm
         self.d = trossen_arm.TrossenArmDriver()
-        self.d.configure(model=getattr(trossen_arm.Model, model),
-                         end_effector=getattr(trossen_arm.StandardEndEffector, f"{model}_follower"),
-                         serv_ip=ip, clear_error=True)
         try:
-            self.d.set_motor_parameters(
-                getattr(trossen_arm.StandardMotorParameters, f"{model}_latest"))
-            self._default_params = self.d.get_motor_parameters()
-        except Exception as e:
-            log.warning("could not reset motor gains (%r)", e)
-            self._default_params = None
-        self.present = np.array(self.d.get_all_positions(), float)
+            self.d.configure(model=getattr(trossen_arm.Model, model),
+                             end_effector=getattr(trossen_arm.StandardEndEffector, f"{model}_follower"),
+                             serv_ip=ip, clear_error=True)
+            try:
+                self.d.set_motor_parameters(
+                    getattr(trossen_arm.StandardMotorParameters, f"{model}_latest"))
+                self._default_params = self.d.get_motor_parameters()
+            except Exception as e:
+                log.warning("could not reset motor gains (%r)", e)
+                self._default_params = None
+            self.present = np.array(self.d.get_all_positions(), float)
+        except BaseException:
+            self.cleanup()
+            raise
 
     def enable_position_mode(self) -> None:
         """Switch all joints to position mode (holds the current pose)."""
@@ -231,6 +243,23 @@ def plane_top_cut(mask: np.ndarray, frac: float) -> tuple[np.ndarray, np.ndarray
     rem = np.zeros_like(mask)
     rem[v[~keep], u[~keep]] = 255
     return out, rem
+
+
+def metric_model_preview(rgb, dep_mm, mask, gmask, result,
+                         input_mode="masked_rgbd", nogrip=True):
+    """Local full-resolution preview using the server's metric visibility."""
+    effective = result["mask"] > 0
+    grip = gmask > 0
+    excluded = (mask > 0) & ~effective & ~grip
+    out = rgb.copy()
+    dep = np.clip(dep_mm.astype(np.float32) / 1500.0, 0, 1)
+    out[excluded] = 0
+    dep[excluded] = 0
+    if input_mode != "full_rgbd":
+        visible = effective | (grip if not nogrip else False)
+        out[~visible] = 0
+        dep *= visible
+    return out, dep
 
 
 def draw_plane(ov: np.ndarray, plane: dict[str, Any] | None, ext: float = 0.05) -> None:
@@ -318,9 +347,15 @@ class MaskStream:
     """
 
     def __init__(self, cam: D405, masker: PolicyClient, gmask_fn: Callable[[], np.ndarray],
-                 run_dir: str | None = None, top_cut: float = 0.0):
+                 run_dir: str | None = None, top_cut: float = 0.0,
+                 top_cut_m: float = 0.0, input_mode: str = "masked_rgbd",
+                 nogrip: bool = True, startup_min_tool_px: int = 300):
         self.cam, self.masker, self.gmask_fn = cam, masker, gmask_fn
         self.top_cut = float(top_cut)
+        self.top_cut_m = float(top_cut_m)
+        self.input_mode, self.nogrip = input_mode, bool(nogrip)
+        self.startup = StartupReadiness(startup_min_tool_px)
+        self.metric_inputs: dict[str, Any] | None = None
         self.lock = threading.Lock()
         self.latest: tuple[np.ndarray, np.ndarray, np.ndarray] | None = None
         self.stamp = 0.0
@@ -356,31 +391,55 @@ class MaskStream:
             except Exception as e:
                 self.err = e
                 return
-            # the top cut is a pure 2-D mask operation: computed and shown
-            # from the first masked frame; the depth-based guard only decides
-            # which plane is used
-            mask_fit, rem = plane_top_cut(mask, self.top_cut)
-            self.top_removed = rem
-            self.top_cut_guarded = False
-            pl = fit_plane_local(dep_mm, mask)
-            if rem is not None:
-                pl_cut = fit_plane_local(dep_mm, mask_fit)
-                if pl is None:
-                    pl = pl_cut
-                elif pl_cut is not None:
-                    ang = np.degrees(np.arccos(np.clip(abs(float(pl["n"] @ pl_cut["n"])), 0, 1)))
-                    if ang <= PLANE_TOP_CUT_MAX_DEG:
+            metric_result = None
+            guarded = False
+            if self.top_cut_m > 0:
+                metric_result = metric_plane_inputs(mask, dep_mm, self.top_cut_m)
+                rem, pl = metric_result["removed_mask"], metric_result["plane"]
+            else:
+                mask_fit, rem = plane_top_cut(mask, self.top_cut)
+                pl = fit_plane_local(dep_mm, mask)
+                if rem is not None:
+                    pl_cut = fit_plane_local(dep_mm, mask_fit)
+                    if pl is None:
                         pl = pl_cut
-                    else:
-                        self.top_cut_guarded = True
+                    elif pl_cut is not None:
+                        ang = np.degrees(np.arccos(np.clip(abs(float(pl["n"] @ pl_cut["n"])), 0, 1)))
+                        if ang <= PLANE_TOP_CUT_MAX_DEG:
+                            pl = pl_cut
+                        else:
+                            guarded = True
             with self.lock:
                 self.latest = (rgb, dep_mm, mask)
                 self.stamp = time.time()
                 self.src_stamp = cap_t
-                if pl is not None:
+                self.top_removed, self.top_cut_guarded = rem, guarded
+                self.metric_inputs = metric_result
+                self.startup.observe(cap_t, self.stamp, mask, dep_mm,
+                                     None if metric_result is None else metric_result["mask"])
+                if metric_result is not None:
+                    self.local_plane = pl or {}
+                elif pl is not None:
                     self.local_plane = pl
 
-    def _record_frame(self, rgb: np.ndarray, dep_mm: np.ndarray, mask: np.ndarray) -> None:
+    def tracking_snapshot(self) -> dict[str, Any]:
+        """Read a matched observation and its overlay metadata together."""
+        with self.lock:
+            return {"observation": self.latest, "source_time": self.src_stamp,
+                    "result_time": self.stamp, "metric_inputs": self.metric_inputs,
+                    "plane": self.local_plane, "removed_mask": self.top_removed,
+                    "guarded": self.top_cut_guarded}
+
+    def _record_frame(self, rgb: np.ndarray, dep_mm: np.ndarray, mask: np.ndarray,
+                      overlay: dict[str, Any] | None = None) -> None:
+        if overlay is not None and overlay["metric_inputs"] is not None:
+            panel = _live_panel(rgb, dep_mm, mask, self, self.n_frame, self.top_cut, overlay)
+            cv2.imwrite(os.path.join(self.frames_dir, f"f_{self.n_frame:06d}.png"), panel)
+            self.n_frame += 1
+            self.rec_t1 = time.time()
+            if self.rec_t0 is None:
+                self.rec_t0 = self.rec_t1
+            return
         ov = rgb.copy()
         m = mask > 0
         ov[m] = (0.45 * ov[m] + 0.55 * np.array([255, 60, 60])).astype(np.uint8)
@@ -414,10 +473,46 @@ class MaskStream:
                 with self.lock:
                     mask = self.latest[2] if self.latest is not None else np.zeros((480, 640), np.uint8)
                 if self.frames_dir is not None:
-                    self._record_frame(rgb, dep_mm, mask)
+                    overlay = self.tracking_snapshot()
+                    if self.top_cut_m > 0:
+                        if overlay["observation"] is not None:
+                            self._record_frame(*overlay["observation"], overlay=overlay)
+                    else:
+                        self._record_frame(rgb, dep_mm, mask)
         except Exception as e:
             self.err = e
             log.error("mask stream died: %r", e)
+
+    def startup_status(self):
+        if self.err is not None:
+            raise StartupTrackingError(f'mask stream failed: {self.err!r}')
+        with self.lock:
+            status = self.startup.snapshot(time.time())
+            status['observation'] = self.latest if status['ready'] else None
+            return status
+
+    def wait_startup_ready(self, after_ts=0., cancel_check=None, status_callback=None, timeout=30.):
+        deadline = time.monotonic() + timeout
+        reported, report_at = None, 0.
+        while True:
+            if cancel_check is not None:
+                cancel_check()
+            status = self.startup_status()
+            if status['ready'] and status['source_time'] >= after_ts:
+                return status['observation']
+            now = time.monotonic()
+            if status['reason'] != reported and now >= report_at:
+                reported, report_at = status['reason'], now + 1.
+                log.info("waiting for stable target: %s", reported)
+                if status_callback is not None:
+                    status_callback(reported)
+            if now >= deadline:
+                raise StartupTrackingError(f'No stable usable target within {timeout:g} seconds; '
+                                           'approach cancelled. Restart the trial to select the target again.')
+            time.sleep(.02)
+
+    def get_startup(self, after_ts=0.):
+        return self.wait_startup_ready(after_ts=after_ts)
 
     def get(self) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         """Latest triple; raises when the stream is dead, stale (> 2 s) or never started (15 s)."""
@@ -457,12 +552,37 @@ class MaskStream:
 
 
 def save_inspect(run_dir: str, k: int, rgb: np.ndarray, dep_mm: np.ndarray, mask: np.ndarray,
-                 gmask: np.ndarray) -> None:
+                 gmask: np.ndarray, metric_inputs: dict[str, Any] | None = None) -> None:
     """Write the query's 4-panel review row and the raw (depth, mask, rgb) arrays.
 
     The raw arrays allow plane-fit failures to be re-fit offline; the review
     row shows what the tool-only model sees (masked RGB and masked depth).
     """
+    if metric_inputs is not None:
+        shape = tuple(metric_inputs["shape"])
+        effective = np.frombuffer(metric_inputs["mask"], np.uint8).reshape(shape)
+        removed = np.frombuffer(metric_inputs["removed_mask"], np.uint8).reshape(shape)
+        camera_shape = tuple(metric_inputs["camera_shape"])
+        wrist = np.frombuffer(metric_inputs["wrist"], np.float32).reshape(camera_shape)
+        aux = (None if metric_inputs["aux"] is None else
+               np.frombuffer(metric_inputs["aux"], np.float32).reshape(camera_shape))
+        # These are the actual server cameras after masking and letterbox,
+        # before device/model normalization, including no-depth/no-mask modes.
+        panels = [cv2.cvtColor((np.clip(wrist, 0, 1) * 255).astype(np.uint8),
+                               cv2.COLOR_RGB2BGR)]
+        if aux is not None:
+            panels.append((np.clip(aux, 0, 1) * 255).astype(np.uint8))
+        cv2.imwrite(os.path.join(run_dir, f"q_{k:03d}.png"), np.hstack(panels))
+        np.savez_compressed(
+            os.path.join(run_dir, f"q_{k:03d}_raw.npz"),
+            dep_mm=dep_mm.astype(np.uint16), mask=mask, rgb=rgb, gmask=gmask,
+            effective_mask=effective, removed_mask=removed,
+            metric_status=metric_inputs["status"],
+            plane_top_cut_m=metric_inputs["length_m"],
+            input_mode=metric_inputs["input_mode"],
+            model_wrist=wrist, model_aux=(np.empty((0,), np.float32)
+                                          if aux is None else aux))
+        return
     visible = (mask > 0)
     gmask = np.zeros_like(mask)
     mrgb = np.zeros_like(rgb)
@@ -588,73 +708,99 @@ class LiveView:
                 pass
 
 
+def validate_server_capabilities(policy_ping: dict, mask_ping: dict, metric_length: float) -> None:
+    """Reject incompatible services before connecting a camera or robot."""
+    if not np.isfinite(metric_length) or metric_length < 0:
+        raise ValueError("metric cut length must be finite and nonnegative")
+    missing = [name for name in ("warm_reset", "locked_track_keepalive") if not mask_ping.get(name)]
+    if missing:
+        raise StartupTrackingError("restart the mask server; missing capabilities: " + ", ".join(missing))
+    if metric_length > 0 and not policy_ping.get("metric_plane_addon"):
+        raise RuntimeError("restart the policy server to enable metric preprocessing")
+
+
 # ------------------------------------------------------------------ main loop
 def run(a: argparse.Namespace) -> str:
     """Execute one take-over episode; returns the run directory."""
-    lut = np.load(a.lut)
-    lut_open, lut_masks = lut["openings"], lut["masks"]
-    policy = PolicyClient(a.host, a.port)
-    masker = PolicyClient(a.host, a.mask_port)
-    pp = policy.request({"op": "ping"})
-    # runs are grouped by the served checkpoint (its directory name; the
-    # trainer's <run>/final layout is named after <run>)
-    ck = Path(str(pp.get("ckpt", "")).rstrip("/"))
-    model_name = (ck.parent.name if ck.name == "final" else ck.name) or "unknown_model"
-    run_dir = a.out_dir or os.path.join(a.runs_root, model_name, time.strftime("run_%Y%m%d_%H%M%S"))
-    os.makedirs(run_dir, exist_ok=True)
-    log.info("recording -> %s", run_dir)
-    with open(os.path.join(run_dir, "settings.json"), "w") as f:
-        json.dump({"ckpt": pp.get("ckpt"), "model": model_name, "args": vars(a), "server_ping": pp,
-                   "start": time.strftime("%Y-%m-%d %H:%M:%S")}, f, indent=1, default=str)
-    # the server reads nogrip from norm.json and zeros the gripper mask
-    # itself; this is the client-side guarantee that it never leaves this
-    # process for a tool-only checkpoint
-    server_nogrip = bool(pp.get("nogrip", True))
-    mp = masker.request({"op": "ping"})
-    log.info("servers ok: %s (nogrip=%s) | mask prompt %r", pp.get("ckpt"), server_nogrip, mp.get("prompt"))
-    cam = D405()
-    arm = Arm(a.follower_ip, a.arm_model)
-    q0 = arm.read()
-    log.info("arm at %s", np.round(q0, 3))
-    if a.go:
-        arm.enable_position_mode()
-        if not a.yes:
-            input(f"*** LIVE on {a.follower_ip}: workspace clear, hand on e-stop? "
-                  "ENTER to start, Ctrl-C to abort *** ")
-        # every training episode starts at the simulation home with the
-        # gripper fully open; a part-closed gripper is out of distribution
-        log.info("ramping to sim home ...")
-        n = ramp_to(arm, HOME_POSE)
-        log.info("at home after %d micro-steps: %s", n, np.round(arm.read(), 3))
-    else:
-        log.info("DRY-RUN: perception + inference only, the arm will not move (pass --go to move)")
+    with ExitStack() as preflight:
+        with np.load(a.lut) as lut:
+            lut_open, lut_masks = lut["openings"], lut["masks"]
+        policy = PolicyClient(a.host, a.port)
+        preflight.callback(policy.close)
+        masker = PolicyClient(a.host, a.mask_port)
+        preflight.callback(masker.close)
+        pp = policy.request({"op": "ping"})
+        # runs are grouped by the served checkpoint (its directory name; the
+        # trainer's <run>/final layout is named after <run>)
+        ck = Path(str(pp.get("ckpt", "")).rstrip("/"))
+        model_name = (ck.parent.name if ck.name == "final" else ck.name) or "unknown_model"
+        run_dir = a.out_dir or os.path.join(a.runs_root, model_name, time.strftime("run_%Y%m%d_%H%M%S"))
+        os.makedirs(run_dir, exist_ok=True)
+        log.info("recording -> %s", run_dir)
+        with open(os.path.join(run_dir, "settings.json"), "w") as f:
+            json.dump({"ckpt": pp.get("ckpt"), "model": model_name, "args": vars(a), "server_ping": pp,
+                       "start": time.strftime("%Y-%m-%d %H:%M:%S")}, f, indent=1, default=str)
+        # the server reads nogrip from norm.json and zeros the gripper mask
+        # itself; this is the client-side guarantee that it never leaves this
+        # process for a tool-only checkpoint
+        server_nogrip = bool(pp.get("nogrip", True))
+        mp = masker.request({"op": "ping"})
+        log.info("servers ok: %s (nogrip=%s) | mask prompt %r", pp.get("ckpt"), server_nogrip, mp.get("prompt"))
+        validate_server_capabilities(pp, mp, a.plane_top_cut_m)
+        cam = D405()
+        preflight.callback(cam.stop)
+        arm = Arm(a.follower_ip, a.arm_model)
+        preflight.callback(arm.cleanup)
+        q0 = arm.read()
+        log.info("arm at %s", np.round(q0, 3))
+        if a.go:
+            arm.enable_position_mode()
+            if not a.yes:
+                input(f"*** LIVE on {a.follower_ip}: workspace clear, hand on e-stop? "
+                      "ENTER to start, Ctrl-C to abort *** ")
+            # every training episode starts at the simulation home with the
+            # gripper fully open; a part-closed gripper is out of distribution
+            log.info("ramping to sim home ...")
+            n = ramp_to(arm, HOME_POSE)
+            log.info("at home after %d micro-steps: %s", n, np.round(arm.read(), 3))
+        else:
+            log.info("DRY-RUN: perception + inference only, the arm will not move (pass --go to move)")
 
-    dt = 1.0 / CONTROL_HZ
-    goal_t = dt / max(a.speed, 1e-3)
-    chunk, prev_a = None, None
-    closed, aborted = False, False
-    ci, cur_exec, n_query = 10 ** 9, a.exec_h, 0   # force a query at tick 0
-    hold_t0: float | None = None
-    closed_tick: int | None = None
-    closer = CloseDetector(a.close_cmd)
-    tgt = cur = q0.copy()
-    rec: dict[str, list] = {"state": [], "action": [], "sent": [], "q_tick": [], "plane_n": [],
-                            "plane_c": [], "tool_px": []}
-    masker.request({"op": "reset"})  # fresh detection for this episode
-    plane_ref: dict[str, Any] = {}
+        dt = 1.0 / CONTROL_HZ
+        goal_t = dt / max(a.speed, 1e-3)
+        chunk, prev_a = None, None
+        closed, aborted = False, False
+        ci, cur_exec, n_query = 10 ** 9, a.exec_h, 0   # force a query at tick 0
+        hold_t0: float | None = None
+        closed_tick: int | None = None
+        closer = CloseDetector(a.close_cmd)
+        tgt = cur = q0.copy()
+        rec: dict[str, list] = {"state": [], "action": [], "sent": [], "q_tick": [], "plane_n": [],
+                                "plane_c": [], "tool_px": []}
+        masker.request({"op": "reset"})  # fresh detection for this episode
+        plane_ref: dict[str, Any] = {}
 
-    def gmask_now() -> np.ndarray:
-        return lut_masks[int(np.argmin(np.abs(lut_open - arm.present[6])))]
+        def gmask_now() -> np.ndarray:
+            return lut_masks[int(np.argmin(np.abs(lut_open - arm.present[6])))]
 
-    if a.plane_top_cut > 0:
-        log.info("plane top-cut on: %.2f of the tool length (server + overlay)", a.plane_top_cut)
-    view = LiveView(a.view)
-    stream = MaskStream(cam, masker, gmask_now, run_dir=run_dir, top_cut=a.plane_top_cut)
+        if a.plane_top_cut_m > 0:
+            log.info("metric crop on: %.1f cm (plane + model visibility)", 100 * a.plane_top_cut_m)
+        elif a.plane_top_cut > 0:
+            log.info("plane top-cut on: %.2f of the tool length (server + overlay)", a.plane_top_cut)
+        view = LiveView(a.view)
+        preflight.callback(view.close)
+        stream = MaskStream(cam, masker, gmask_now, run_dir=run_dir, top_cut=a.plane_top_cut,
+                            top_cut_m=a.plane_top_cut_m, input_mode=pp.get("input_mode", "masked_rgbd"),
+                            nogrip=server_nogrip, startup_min_tool_px=a.min_tool_px)
+        preflight.callback(stream.close)
+        preflight.pop_all()  # The episode finally below now owns these resources.
     try:
         for tick in range(a.max_ticks):
             if ci >= cur_exec:
                 t0 = time.time()
-                if a.settle > 0:
+                if chunk is None:
+                    rgb, dep_mm, mask = stream.get_startup(after_ts=t0 + a.settle)
+                elif a.settle > 0:
                     # the arm holds its last commanded pose; the input triple's
                     # source frame must postdate the settle window
                     rgb, dep_mm, mask = stream.get_settled(t0 + a.settle)
@@ -679,18 +825,26 @@ def run(a: argparse.Namespace) -> str:
                 hold_t0 = None
                 qpos = arm.read().astype(np.float32)
                 gmask = lut_masks[int(np.argmin(np.abs(lut_open - qpos[6])))]
+                metric_gmask = gmask
                 if server_nogrip:
                     gmask = np.zeros_like(gmask)
                 state14 = np.concatenate([qpos, np.zeros(7, np.float32)])
                 resp = policy.request({"rgb": rgb, "depth_mm": dep_mm, "mask": mask, "gmask": gmask,
                                        "state": state14, "want_plane": True,
-                                       "plane_top_cut": float(a.plane_top_cut)})
+                                       "plane_top_cut": float(a.plane_top_cut),
+                                       "plane_top_cut_m": float(a.plane_top_cut_m),
+                                       **({"metric_gripper_mask": metric_gmask}
+                                          if a.plane_top_cut_m > 0 else {})})
+                metric_inputs = None
                 if isinstance(resp, dict):
                     chunk = np.asarray(resp["chunk"], dtype=np.float32)
                     plane_ref["n"] = resp.get("plane_n")
                     plane_ref["c"] = resp.get("plane_c")
+                    metric_inputs = resp.get("metric_inputs")
                 else:
                     chunk = np.asarray(resp, dtype=np.float32)
+                if a.plane_top_cut_m > 0 and metric_inputs is None:
+                    raise RuntimeError("policy server did not return metric model inputs")
                 if chunk.shape != (H, 7):
                     raise RuntimeError(f"bad chunk shape {chunk.shape}, expected {(H, 7)}")
                 k = n_query
@@ -699,7 +853,7 @@ def run(a: argparse.Namespace) -> str:
                 td = dep_mm[tm & (dep_mm > 0)]
                 d_med = float(np.median(td)) / 1000.0 if len(td) else None
                 cur_exec = exec_horizon(a.exec_h, a.exec_min, d_med, a.near_d, a.far_d)
-                save_inspect(run_dir, k, rgb, dep_mm, mask, gmask)
+                save_inspect(run_dir, k, rgb, dep_mm, mask, gmask, metric_inputs=metric_inputs)
                 rec["q_tick"].append(tick)
                 rec["plane_n"].append(np.asarray(plane_ref.get("n") or [np.nan] * 3, np.float32))
                 rec["plane_c"].append(np.asarray(plane_ref.get("c") or [np.nan] * 3, np.float32))
@@ -743,6 +897,10 @@ def run(a: argparse.Namespace) -> str:
                 clip = float(np.abs(tgt[:6] - cur[:6]).max())
                 log.info("tick %d/%d max|dtgt|=%.3frad%s", tick, a.max_ticks, clip,
                          " (clamped)" if clip > a.max_step else "")
+    except StartupTrackingError as exc:
+        aborted = True
+        log.error("start cancelled: %s", exc)
+        raise
     except KeyboardInterrupt:
         aborted = True
         log.info("ABORTED; returning home with the gripper opening")
@@ -794,7 +952,7 @@ def _firm_close_and_hold(arm: Arm, stiff_hold: float) -> None:
         except Exception as e:
             log.warning("stiffen failed (%r); holding at default gains", e)
     log.info("gripper firm-closed (%.4f); HOLDING pose. Press ENTER to return home "
-             "(gripper stays closed), Ctrl-C to hold indefinitely.", arm.read()[6])
+             "(gripper stays closed), Ctrl-C to abort and open while returning home.", arm.read()[6])
     try:
         input()
     except EOFError:
@@ -828,7 +986,41 @@ def _return_home(arm: Arm, aborted: bool, home_speed: float) -> None:
 
 
 def _live_panel(lrgb: np.ndarray, ldep: np.ndarray, lmask: np.ndarray, stream: MaskStream,
-                tick: int, top_cut: float) -> np.ndarray:
+                tick: int, top_cut: float, overlay: dict[str, Any] | None = None) -> np.ndarray:
+    if stream.top_cut_m > 0:
+        overlay = overlay or stream.tracking_snapshot()
+        if overlay["observation"] is not None:
+            lrgb, ldep, lmask = overlay["observation"]
+        result = overlay["metric_inputs"]
+        if result is not None:
+            ov = lrgb.copy()
+            effective = result["mask"] > 0
+            removed = result["removed_mask"] > 0
+            rejected = (lmask > 0) & ~effective & ~removed
+            for region, color in ((effective, [60, 255, 60]), (removed, [255, 230, 0]),
+                                  (rejected, [255, 60, 60])):
+                ov[region] = (0.45 * ov[region] + 0.55 * np.array(color)).astype(np.uint8)
+            mrgb, dep = metric_model_preview(lrgb, ldep, lmask, stream.gmask_fn(), result,
+                                            stream.input_mode, stream.nogrip)
+            if stream.input_mode == "masked_rgb":
+                dep = (effective | ((stream.gmask_fn() > 0) if not stream.nogrip else False)).astype(np.float32)
+            if stream.input_mode == "masked_rgb_nodepth":
+                dvis = cv2.cvtColor(mrgb, cv2.COLOR_RGB2BGR)
+                preview_label = "model RGB visibility preview"
+            else:
+                dvis = cv2.applyColorMap((dep * 255).astype(np.uint8), cv2.COLORMAP_VIRIDIS)
+                preview_label = ("model binary mask preview" if stream.input_mode == "masked_rgb"
+                                 else "model depth visibility preview")
+            ov = cv2.cvtColor(ov, cv2.COLOR_RGB2BGR)
+            draw_plane(ov, overlay["plane"])
+            age = max(0.0, time.time() - overlay["source_time"])
+            cv2.putText(ov, f"metric {100 * stream.top_cut_m:.1f} cm: {result['status']}",
+                        (10, 26), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            cv2.putText(ov, f"source age {age:.2f}s  tick {tick}", (10, 48),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
+            cv2.putText(dvis, preview_label, (10, 26), cv2.FONT_HERSHEY_SIMPLEX,
+                        0.6, (255, 255, 255), 1)
+            return np.hstack([ov, dvis])
     ov = lrgb.copy()
     m = lmask > 0
     ov[m] = (0.4 * ov[m] + 0.6 * np.array([255, 60, 60])).astype(np.uint8)
@@ -855,10 +1047,24 @@ def _live_panel(lrgb: np.ndarray, ldep: np.ndarray, lmask: np.ndarray, stream: M
 
 
 # ------------------------------------------------------------------ CLI
+class PlaneArgumentParser(argparse.ArgumentParser):
+    """An explicit legacy cut selects the legacy path unless metric is explicit."""
+
+    def parse_known_args(self, args=None, namespace=None):
+        tokens = list(sys.argv[1:] if args is None else args)
+        parsed, remaining = super().parse_known_args(tokens, namespace)
+        flags = {token.split("=", 1)[0] for token in tokens}
+        if "--plane-top-cut" in flags and "--plane-top-cut-m" not in flags:
+            parsed.plane_top_cut_m = 0.0
+        if not np.isfinite(parsed.plane_top_cut_m) or parsed.plane_top_cut_m < 0:
+            self.error("--plane-top-cut-m must be finite and nonnegative")
+        return parsed, remaining
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Client flags. Defaults are the deployment regime; each flag falls back
     to ``SIMRETRACT_<FLAG>`` in the environment."""
-    ap = argparse.ArgumentParser(
+    ap = PlaneArgumentParser(
         prog="python -m simretract.real.client",
         description="Closed-loop real-arm take-over client (dry-run unless --go).",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -900,9 +1106,13 @@ def build_parser() -> argparse.ArgumentParser:
     ap.add_argument("--view", action=argparse.BooleanOptionalAction, default=False,
                     help="live overlay window (needs a display; degrades to a warning without one)")
     ap.add_argument("--plane-top-cut", dest="plane_top_cut", type=float,
-                    default=env_default(float, 0.10, "SIMRETRACT_PLANE_TOP_CUT", "PLANE_TOP_CUT"),
+                    default=env_default(float, 0.0, "SIMRETRACT_PLANE_TOP_CUT", "PLANE_TOP_CUT"),
                     help="fraction of the tool's pixel length removed from the top of the mask before "
                          "the plane fit, applied identically on the server and the overlay (0 = off)")
+    ap.add_argument("--plane-top-cut-m", type=float, nargs="?", const=0.01,
+                    default=env_default(float, 0.01, "SIMRETRACT_PLANE_TOP_CUT_M", "PLANE_TOP_CUT_M"),
+                    help="metric tip cut in metres for plane and model visibility (bare flag: 0.01; "
+                         "0 selects the legacy path; overrides --plane-top-cut)")
     ap.add_argument("--min-tool-px", dest="min_tool_px", type=int,
                     default=env_default(int, 300, "SIMRETRACT_MIN_TOOL_PX"),
                     help="fewer tool pixels than this (or <50%% valid depth on them) at a query = bad "

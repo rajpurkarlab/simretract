@@ -2,8 +2,8 @@
 data/raw/
 data/cache/
 checkpoints/*/
-runs/
-eval/
+/runs/
+/eval/
 *.safetensors
 *.pt
 *.tar
@@ -48,7 +48,7 @@ assets/usd/
 assets/tools/*/canonical_slots.json
 # source packs, CAD exports, scans and scene files never belong in the
 # repository at all, wherever they are dropped; the only tracked meshes are
-# the gripper's own OBJ files under assets/gripper/
+# the attributed gripper OBJ exports under assets/gripper/
 *.fbx
 *.blend
 *.max

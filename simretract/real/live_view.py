@@ -10,6 +10,7 @@ the gripper LUT mask at the current opening when an arm address is given
 from __future__ import annotations
 
 import argparse
+from contextlib import ExitStack
 import logging
 import os
 
@@ -17,7 +18,8 @@ import cv2
 import numpy as np
 
 from simretract.real import follower_ip_is_set
-from simretract.real.client import D405, default_lut_path, env_default
+from simretract.real.client import (D405, default_lut_path, env_default,
+                                    validate_server_capabilities)
 from simretract.serve.protocol import PolicyClient
 
 log = logging.getLogger("simretract.real.live_view")
@@ -41,24 +43,33 @@ def main(argv: list[str] | None = None) -> int:
     a = build_parser().parse_args(argv)
     if not (os.environ.get("DISPLAY") or os.environ.get("WAYLAND_DISPLAY")):
         raise SystemExit("live view needs a display (DISPLAY is not set)")
-    masker = PolicyClient(a.host, a.mask_port)
-    lut = np.load(a.lut or str(default_lut_path()))
-    lut_open, lut_masks = lut["openings"], lut["masks"]
-    gmask = None
-    if follower_ip_is_set(a.follower_ip):
-        try:
-            from simretract.real.client import Arm
-            arm = Arm(a.follower_ip, a.arm_model)
-            w = float(arm.read()[6])
-            arm.cleanup()
-            gmask = lut_masks[int(np.argmin(np.abs(lut_open - w)))] > 0
-            log.info("gripper mask at opening %.4f", w)
-        except Exception as e:
-            log.warning("no arm (%s); gripper overlay off", e)
-    cam = D405(warmup_frames=10)
-    cv2.namedWindow("SAM3 live", cv2.WINDOW_NORMAL)
-    cv2.resizeWindow("SAM3 live", 1280, 480)
-    log.info("window open; press q to quit")
+    with ExitStack() as preflight:
+        masker = PolicyClient(a.host, a.mask_port)
+        preflight.callback(masker.close)
+        validate_server_capabilities({}, masker.request({"op": "ping"}), 0)
+        masker.request({"op": "reset"})
+        with np.load(a.lut or str(default_lut_path())) as lut:
+            lut_open, lut_masks = lut["openings"], lut["masks"]
+        gmask = None
+        if follower_ip_is_set(a.follower_ip):
+            try:
+                from simretract.real.client import Arm
+                arm = Arm(a.follower_ip, a.arm_model)
+                try:
+                    w = float(arm.read()[6])
+                finally:
+                    arm.cleanup()
+                gmask = lut_masks[int(np.argmin(np.abs(lut_open - w)))] > 0
+                log.info("gripper mask at opening %.4f", w)
+            except Exception as e:
+                log.warning("no arm (%s); gripper overlay off", e)
+        cam = D405(warmup_frames=10)
+        preflight.callback(cam.stop)
+        cv2.namedWindow("SAM3 live", cv2.WINDOW_NORMAL)
+        preflight.callback(cv2.destroyAllWindows)
+        cv2.resizeWindow("SAM3 live", 1280, 480)
+        log.info("window open; press q to quit")
+        preflight.pop_all()
     try:
         while True:
             rgb, _ = cam.frame()

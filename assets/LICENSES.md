@@ -6,7 +6,7 @@
 | `tools/retractor_rake/meta.json` | reference description of the tool (extents, volume, collision-set summary, tip/bend points, build settings); no geometry | yes |
 | `grasp_candidates/retractor_rake.json` | the 444 grasp candidates (poses and finger contact points in the tool frame) the recorders draw from | yes |
 | `gmask_lut.npz` | gripper silhouette look-up table rendered from the robot USD and the fingers below; no tool geometry | yes |
-| `gripper/*` | the flat-pad fingers (authors' own CAD, released under the code license) | yes |
+| `gripper/*` | mesh exports of the Source Robotics SSG-48 finger design, modified to fit the Trossen WidowX-AI; upstream Apache-2.0, see [attribution](gripper/README.md) | yes |
 | `source/vretractor/vretractor.fbx`, `source/vretractor/textures/*.png` | the retractor asset as downloaded | never |
 | `tools/retractor_rake/visual.obj`, `tools/retractor_rake/collision/coll_NNN.obj` | tool meshes built locally by `simretract-build-assets` | never |
 | `usd/retractor_rake.usd` | tool USD built locally by `simretract-build-assets --usd` | never |

@@ -4,8 +4,8 @@
 # only (arm read-only); 'go' = the arm moves (ENTER gate before motion).
 # Launcher options (--preset, --plane-top-cut, --exec-h, ...) go before the mode and
 # everything after the mode is passed to the client (e.g. --no-view --max-ticks 60 --yes).
-# Without --preset the launcher uses the deployment preset (`default`: plane top cut
-# 0.10); a named preset keeps its own top cut unless --plane-top-cut is given.
+# Without --preset the launcher uses a 1 cm metric crop. --plane-top-cut selects
+# the legacy plane-only pixel fraction; --plane-top-cut-m 0 disables metric cropping.
 # Usage: scripts/run_real.sh <checkpoint dir> [launcher flags] [go|dry] [client flags]
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/_common.sh"

@@ -26,7 +26,7 @@ FOLLOWER_IP_PLACEHOLDER = "CHANGE_ME"
 """Value shipped in ``robot.follower_ip``; tools refuse to run while it is set."""
 
 PRESET_KEYS = ("exec_h", "exec_min", "settle", "speed", "max_step", "smooth",
-               "view", "plane_top_cut")
+               "view", "plane_top_cut", "plane_top_cut_m")
 """Preset keys, each mapping onto the client flag of the same name."""
 
 
@@ -88,6 +88,7 @@ def resolve_preset(cfg: dict[str, Any], name: str) -> dict[str, Any]:
         raise KeyError(f"unknown real-run preset {name!r}; "
                        f"available: {', '.join(sorted(presets)) or 'none'}")
     p = dict(presets[name])
+    p.setdefault("plane_top_cut_m", 0.0)  # Older custom presets keep legacy behavior.
     missing = [k for k in PRESET_KEYS if k not in p]
     if missing:
         raise KeyError(f"preset {name!r} lacks keys {missing}")
@@ -104,6 +105,7 @@ def preset_client_args(preset: dict[str, Any]) -> list[str]:
         "--max-step", str(float(preset["max_step"])),
         "--smooth", str(float(preset["smooth"])),
         "--plane-top-cut", str(float(preset["plane_top_cut"])),
+        "--plane-top-cut-m", str(float(preset.get("plane_top_cut_m", 0.0))),
     ]
     args.append("--view" if bool(preset["view"]) else "--no-view")
     return args

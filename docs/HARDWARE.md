@@ -78,6 +78,12 @@ Rules that follow from the budget:
 
 ## Robot setup
 
+**Fingers.** The flat-pad finger design is adapted from
+[Source Robotics' SSG-48 adaptive electric gripper](https://github.com/Source-Robotics/SSG-48-adaptive-electric-gripper),
+with modifications to fit the Trossen WidowX-AI. The repository includes
+exported visual and collision meshes; editable CAD is not included. See
+[gripper files and attribution](../assets/gripper/README.md).
+
 **Arm.** The client talks to the WidowX-AI controller with the raw
 `trossen_arm` driver (version 1.10.0): `configure(...)` is communication only,
 `get_all_positions()` reads the 7-D state (6 joints in rad + gripper opening
@@ -90,8 +96,8 @@ carries an address: set `robot.follower_ip` in `configs/real/default.yaml`
 (`CHANGE_ME` until you do; the launcher refuses to start otherwise) to the
 address of your controller, and check reachability on the controller's port
 before a run. `simretract.real.home` returns the arm to the simulation home
-pose (all joints 0, gripper 0.044 m); every episode starts and ends there
-because every training episode does.
+pose (all joints 0, gripper 0.044 m). A normal episode returns the joints home
+while retaining the gripper opening; an aborted episode opens it while homing.
 
 **Camera.** The D405 delivers aligned 640x480 colour and z16 depth; depth
 units are the device's own scale (0.1 mm on the D405), which the client
@@ -114,7 +120,12 @@ the path with `--ckpt`. The text prompt is `metal rake` with detection
 confidence 0.2; probe any new prompt on live frames before trusting it. The
 predictor is fed continuously by a background thread in the client so its
 temporal memory stays fresh, detections that mostly overlap the gripper mask
-are dropped, and a `reset` op clears the tracker between episodes.
+are dropped, and the selected identity stays locked through detector misses.
+Keepalive preserves that identity's memory; it does not reuse an old mask or
+switch to another object when the target disappears. Between episodes, a warm
+`reset` clears tracking and image state while retaining loaded weights and
+text embeddings. The first policy query waits for fresh, stable masks with
+usable raw and cropped depth; this startup gate does not require a plane.
 
 **Display.** `--view` opens an OpenCV overlay from the main thread and needs a
 display (`DISPLAY`); without one the client warns and continues headless.
@@ -127,32 +138,54 @@ display (`DISPLAY`); without one the client warns and continues headless.
 | 8766 | SAM 3 mask server | `configs/real/default.yaml`, `simretract.real.mask_server --port` |
 | 8767 | policy server, simulation benchmark | `configs/eval/sim.yaml`, `simretract-eval-sim --port` |
 
-All servers bind 127.0.0.1. The launchers reuse a live server only when its
-ping reports the requested checkpoint and regime, and they kill only the
-processes they own (by PID on their own ports). The wire format is an 8-byte
+All servers bind 127.0.0.1. Reserve the configured ports for SimRetract: the
+launchers reuse a server whose ping matches the requested checkpoint and
+regime, otherwise they may terminate the listener PID on that port. A port
+match alone does not establish process ownership. The wire format is an 8-byte
 big-endian length prefix followed by a pickle of plain Python lists and bytes
 (`simretract.serve.protocol`).
 
 ## Bring-up sequence
 
 ```bash
-conda activate simretract-policy
-simretract-serve --ckpt checkpoints/baseline --port 8765 --half          # 1. policy server
-# second shell: conda activate simretract-mask
-python -m simretract.real.mask_server --ckpt checkpoints/sam3/sam3.pt   # 2. mask server
-simretract-run-real --ckpt checkpoints/baseline dry --max-ticks 60 --view # 3. perception only, no motion
-simretract-run-real --ckpt checkpoints/baseline --preset conservative go  # 4. first live run, half speed
-simretract-run-real --ckpt checkpoints/baseline go                       # 5. deployment preset
+scripts/run_real.sh checkpoints/baseline dry --max-ticks 60 --view  # perception and inference; no motion
+scripts/run_real.sh checkpoints/baseline --preset conservative go  # first live run, half speed
+scripts/run_real.sh checkpoints/baseline go                        # deployment preset
 ```
 
-`simretract-run-real` performs steps 1 and 2 itself when the servers are not
-already up. Launcher options (`--preset`, `--plane-top-cut`, `--exec-h`, ...)
+The launcher starts or reuses the policy and mask servers itself. Launcher
+options (`--preset`, `--plane-top-cut-m`, `--exec-h`, ...)
 go before the mode; everything after `dry` / `go` is passed to the client.
-`scripts/run_real.sh <ckpt> [launcher flags] go|dry [client flags]` is the
-same command from any shell; without `--preset` it uses the deployment preset
-(`default`, plane top cut 0.10). Always start the client through the
-launcher: `python -m simretract.real.client` without flags runs with the
-deployment preset's values (exec-h 50/50, speed 0.8, max-step 0.06, smooth 0.6,
-top cut 0.10), not with the `conservative` bring-up values. Keep Ctrl-C under
-the operator's hand: it stops commanding and returns the arm home while
-opening the gripper.
+The wrapper selects the configured environments; the equivalent installed
+entry point is `simretract-run-real --ckpt <ckpt>`. Always start through the
+launcher. Without `--preset`, it uses `default`: exec-h/min 50/50, speed 0.8,
+max-step 0.06, smooth 0.6, pixel fraction 0, and metric cut 0.01 m. The direct
+Python client's defaults match these deployment values. Ctrl-C interrupts
+policy execution and returns the arm home while opening the gripper.
+
+## Plane and model crop options
+
+The default removes the upper **1 cm along the visible shaft direction** from
+both the plane fit and model RGB-D. The cut follows the shaft toward its upper
+image end, rather than a fixed horizontal row. Foreground depth selection
+rejects farther background visible through hollow handles, including rings
+and slots. Narrow, side-on views use the same depth-based plane fit when the
+remaining support permits it; no cylinder or camera-facing normal is assumed.
+
+A failed plane fit supplies a zero normal, while usable cropped RGB-D stays
+available. A zero normal does not itself pause segmentation or policy queries.
+When 3-D length calibration fails, a depth-scaled projected cut can retain a
+usable input; its physical length is approximate on a tilted shaft. Tracking
+continues to produce fresh masks independently of these geometry checks.
+
+```bash
+scripts/run_real.sh checkpoints/baseline dry                         # default: 1 cm metric crop
+scripts/run_real.sh checkpoints/baseline --plane-top-cut-m 0 dry     # no crop
+scripts/run_real.sh checkpoints/baseline --plane-top-cut .10 dry     # legacy pixel fraction: plane only
+scripts/run_real.sh checkpoints/baseline --plane-top-cut-m .02 dry   # 2 cm metric crop
+```
+
+Replace `dry` with `go` for a live run. An explicit `--plane-top-cut` selects
+the legacy path unless `--plane-top-cut-m` is also supplied; a positive metric
+value takes precedence. A bare `--plane-top-cut-m` means 0.01 m. The `parity`
+preset keeps both cuts disabled.

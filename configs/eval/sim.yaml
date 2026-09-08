@@ -1,0 +1,53 @@
+# Simulation benchmark protocol (simretract-eval-sim). These values define the
+# reported numbers; change them only for diagnostics and say so in the output tag.
+
+seeds: test_core50.json               # run set (data/selections); --seeds overrides
+score_seeds: test_core50.json         # report set; --score-seeds overrides
+passes: 3                             # non-completed seeds are re-run on each later pass; completed seeds never
+tool: retractor_rake
+
+# Closed-loop client (one Kit process per seed)
+exec_h:                               # actions executed from each 50-step chunk before re-querying;
+                                      # --exec-h auto reads the checkpoint type and picks from this table
+  pi0: 50
+  smolvla: 50
+  act: 50
+  pi05: 50
+  pi0_fast: 50
+  fastwam: 48                         # native horizon of the Fast-WAM head
+smooth: 0.45                          # EMA on the 7-D target: a = (1 - smooth) * a + smooth * prev
+skip_search: true                     # trust the seed's stored grasp feasibility; no scripted search
+max_steps: 450                        # control ticks (25 Hz, 18 s) before outcome = timeout
+tries: 10                             # candidate pool cap for the gated grasp pool
+mu: 0.4
+hand_style: test                      # benchmark occluder (fist 50 %, hand z U(-0.12,-0.05) m); train sets use `train`
+plane_top_cut: 0.0                    # protocol: no top cut; the real-robot preset uses a separate metric crop
+no_battery: false                     # the load battery runs on camera; held = survived it
+keep_frames: false
+
+# Policy server regime (the client refuses a server whose ping disagrees)
+server:
+  port: 8767
+  host: 127.0.0.1
+  half: true                          # bf16 serving for pi0 / pi05 / smolvla (act, fastwam, pi0_fast keep their own precision)
+  plane_filter: true                  # median blur + 5-MAD trim + 50..900 mm window before the plane fit
+  drop_px: 300                        # dropout checkpoints: plane zeroed when the tool mask has fewer pixels
+  fastwam_cpu_load: true              # load Fast-WAM weights on the CPU first (32 GB cards)
+  eval_aug: false
+
+# Process lifecycle (simretract.eval.driver)
+driver:
+  seed_timeout_s: 900                 # wall cap per Kit process
+  launches_per_seed: 2                # per pass
+  server_boot_timeout_s: 600
+  liveness_check: true                # ping (and reboot if needed) before every seed
+
+# Funnel definitions (simretract.eval.score)
+metrics:
+  grabbed: outcome == completed
+  secured: grabbed and drop_mm <= 20
+  held: grabbed and held
+  kept: held and grasp_t_mm < 10 and grasp_r_deg < 10
+  timeouts: outcome == timeout
+  offset_mm: grasp_t_mm over completed rows (mean, sd, median)
+  twist_deg: grasp_twist_deg over completed rows (mean, sd, median)
