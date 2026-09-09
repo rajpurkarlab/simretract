@@ -47,7 +47,7 @@ lists what each preset changes.
 | `half_data` | `--data half` | as baseline | deterministic half selection of both sets (250 strict seeds, far-500, RNG 0); normalization statistics still from the full sets |
 | `no_plane` | `--ablation no_plane` = `--state qpos` | as baseline | removes the plane normal (7-D state) |
 | `no_mask` | `--ablation no_mask` = `--input-mode full_rgbd` | as baseline | unmasked RGB and depth to the policy; the mask still feeds the plane fit |
-| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | the no-smoothing caches (`data/README.md`) | the training data: demonstrations generated without reach smoothing (two straight segments, the grasp candidate's own standoff, no joint-rate limit) |
+| `no_smooth` | `--sets strict_nosmooth,recovery_nosmooth` | the no-smoothing caches (`data/README.md`) | the training data: demonstrations generated without reach smoothing (two straight segments via a 6 cm pre-grasp, no joint-rate limit) |
 | `no_standoff` | `--sets strict_nostandoff,recovery_nostandoff` | the no-standoff caches (`data/README.md`) | the training data: demonstrations generated without the reach standoff (the smoothed reach curves straight to the grasp) |
 | `smolvla` | `--policy smolvla --init lerobot/smolvla_base --smolvla-full` | strict + recovery caches, SmolVLA base weights + SmolVLM2 tokenizer | the backbone: SmolVLA with the VLM and vision tower unfrozen under the baseline optimizer regime, on the baseline flags and data |
 

@@ -3,7 +3,7 @@
 # Every model row trains on a strict set plus a recovery set. Three pairs ship:
 #   strict / recovery                    the main pair (baseline and every single-change row)
 #   strict_nosmooth / recovery_nosmooth  the same task generated without reach smoothing
-#                                        (two straight segments, the candidate's own standoff)
+#                                        (two straight segments via a 6 cm pre-grasp)
 #   strict_nostandoff / recovery_nostandoff
 #                                        generated without the reach standoff (the smoothed reach
 #                                        curves straight to the grasp)

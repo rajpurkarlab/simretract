@@ -20,6 +20,7 @@ hand_style: train                     # legacy env ERA4_HAND=1: fist 75 % at 2.5
 
 # Reach shaping (quadratic Bezier reach with a short straight entry)
 blend: true                           # BLEND: single Bezier reach start -> control -> end
+fixed_standoff: 0.06                  # fixed pre-grasp distance when blend is false (m)
 blend_rot_frac: 0.7                   # BLEND_ROT_FRAC: orientation slerp completes over this fraction
 standoff: 0.03                        # STANDOFF: curve ends this far short of the grasp on the approach axis (m)
 ctrl_back: 0.06                       # CTRL_BACK: control point this far behind the grasp on-axis (m)

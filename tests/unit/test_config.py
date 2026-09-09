@@ -338,7 +338,7 @@ def test_eval_protocol_values() -> None:
 def test_generation_recipes() -> None:
     s = config.generation_recipe("strict")
     assert s["tool"] == "retractor_rake" and s["blend"] is True and s["keep_mode"] == "pose"
-    assert s["standoff"] == 0.03 and s["ctrl_back"] == 0.06 and s["decel_arc"] == 0.0
+    assert s["standoff"] == 0.03 and s["fixed_standoff"] == 0.06 and s["ctrl_back"] == 0.06 and s["decel_arc"] == 0.0
     assert s["joint_rate_deg"] == 2.5 and s["speed_scale"] == 0.9 and s["entry_speed"] == 1.0
     assert s["skip_battery"] is True and s["interfere_gate"] is True and s["tries"] == 20
     assert s["z_lo"] == -0.05 and s["z_hi"] == 0.05 and s["mu"] == 0.4 and s["e4_pick"] is True
@@ -346,7 +346,7 @@ def test_generation_recipes() -> None:
     r = config.generation_recipe("recovery")
     assert r["draws"] == 4 and r["range"] == [0, 2000] and r["pert_frac_lo"] == 0.25 and r["pert_frac_hi"] == 0.75
     assert r["rng_xor"] == 0x50455254 and r["assemble"]["far_n"] == 1000 and r["assemble"]["exact_per_seed"] == 4
-    for key in ("blend", "standoff", "ctrl_back", "decel_arc", "entry_speed", "joint_rate_deg", "speed_scale",
+    for key in ("blend", "standoff", "fixed_standoff", "ctrl_back", "decel_arc", "entry_speed", "joint_rate_deg", "speed_scale",
                 "keep_mode", "skip_battery", "interfere_gate", "hand_style", "mu"):
         assert r[key] == s[key], key
     with pytest.raises(ConfigError):

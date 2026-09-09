@@ -101,7 +101,7 @@ def test_recorder_config_cli_roundtrip(monkeypatch):
     cfg = RecorderConfig.from_args(ap.parse_args(["--speed-scale", "1.0", "--no-blend"]))
     assert cfg.standoff == 0.02 and cfg.hand_style == "test" and cfg.picker == "clearance"
     assert cfg.skip_battery is False and cfg.tries == 10
-    assert cfg.speed_scale == 1.0 and cfg.blend is False
+    assert cfg.speed_scale == 1.0 and cfg.blend is False and cfg.fixed_standoff == 0.06
     monkeypatch.setenv("TRIES", "7")
     ap2 = argparse.ArgumentParser()
     RecorderConfig.add_args(ap2, defaults={"tries": 10})
@@ -113,7 +113,7 @@ def test_recorder_config_cli_roundtrip(monkeypatch):
     assert RecorderConfig.from_args(ap3.parse_args(args)) == cfg
     prod = RecorderConfig()
     assert (prod.blend, prod.keep_mode, prod.picker, prod.hand_style) == (True, "pose", "height", "train")
-    assert (prod.standoff, prod.ctrl_back, prod.decel_arc, prod.entry_speed) == (0.03, 0.06, 0.0, 1.0)
+    assert (prod.standoff, prod.fixed_standoff, prod.ctrl_back, prod.decel_arc, prod.entry_speed) == (0.03, 0.06, 0.06, 0.0, 1.0)
     assert (prod.joint_rate_deg, prod.speed_scale, prod.tries, prod.mu) == (2.5, 0.9, 20, 0.4)
     assert (prod.skip_battery, prod.interfere_gate, prod.z_lo, prod.z_hi) == (True, True, -0.05, 0.05)
 
@@ -249,3 +249,32 @@ def test_bin_counts_from_synthetic_raw(tmp_path):
                                   "R_grasp": np.eye(3).tolist(), "pose_t_mm": 1, "pose_r_deg": 1}))
     per_bin, tilt = campaign.bin_counts(str(tmp_path), -0.05, 0.05, 4)
     assert per_bin == [1, 0, 1, 0] and tilt == [1, 0, 1, 0]
+
+
+def test_corridor_uses_effective_standoff():
+    from types import SimpleNamespace
+    from scipy.spatial.transform import Rotation
+
+    from simretract.sim.recorder import SimSession
+
+    session = SimSession.__new__(SimSession)
+    session.Rotation = Rotation
+    session.cfg = RecorderConfig(blend=False)
+    scene = SimpleNamespace(
+        R_tool=Rotation.identity(), tool_pos=np.zeros(3),
+        spec={"hand": {"subs": [{"pos": [-0.08, 0.0, 0.0],
+                                  "half": [0.001, 0.001, 0.001],
+                                  "quat_wxyz": [1.0, 0.0, 0.0, 0.0]}]},
+              "tip": {"subs": []}},
+    )
+    corridor = session.make_corridor(scene)
+    candidate = {"standoff": 0.09}
+
+    # The fixed 6 cm segment stops before the inflated obstacle; the
+    # candidate's 9 cm segment crosses it.
+    assert np.isclose(corridor(candidate, np.eye(3), np.zeros(3)), 0.013)
+    session.cfg.blend = True
+    assert corridor(candidate, np.eye(3), np.zeros(3)) == 0.0
+    session.cfg.blend = False
+    session.cfg.fixed_standoff = 0.0
+    assert corridor(candidate, np.eye(3), np.zeros(3)) == 0.0

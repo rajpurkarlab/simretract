@@ -25,6 +25,7 @@ hand_style: train                     # legacy env ERA4_HAND=1
 
 # Reach shaping (same as strict)
 blend: true                           # BLEND
+fixed_standoff: 0.06                  # fixed pre-grasp distance when blend is false (m)
 blend_rot_frac: 0.7                   # BLEND_ROT_FRAC
 standoff: 0.03                        # STANDOFF
 ctrl_back: 0.06                       # CTRL_BACK

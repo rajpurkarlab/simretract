@@ -93,7 +93,7 @@ class RecorderConfig:
     blend_rot_frac: float = 0.7     # orientation slerp completes over this path fraction
     standoff: float = 0.03          # Bezier ends this far short of the grasp (m), then straight
     ctrl_back: float = 0.06         # Bezier control point behind the pre-grasp (m)
-    fixed_standoff: float = 0.0     # straight reach only: force one pre-grasp distance (0 = candidate's)
+    fixed_standoff: float = 0.06    # straight reach only: fixed pre-grasp distance (0 = candidate's)
     speed_scale: float = 0.9        # scales the commanded step size of the blended reach
     joint_rate_deg: float = 2.5     # per-joint rate limit per update (time-scaling, blended reach)
     decel_arc: float = 0.0          # ramp the step down over the last N m of curve (0 = off)
@@ -251,7 +251,7 @@ _FIELD_HELP = {
     "blend_rot_frac": "orientation slerp completes over this fraction of the blended path",
     "standoff": "blended reach ends this far short of the grasp along the approach axis, then enters straight (m)",
     "ctrl_back": "Bezier control point this far behind the pre-grasp on the approach axis (m)",
-    "fixed_standoff": "straight reach only: fixed pre-grasp distance (m); 0 = candidate's own 5-9 cm",
+    "fixed_standoff": "straight reach only: fixed pre-grasp distance (m); 0 = candidate's own distance",
     "speed_scale": "global scale of the commanded TCP step of the blended reach",
     "joint_rate_deg": "per-joint rate limit per update; faster IK steps are subdivided in time",
     "decel_arc": "ramp the step size down over the last N metres of curve (0 = constant speed)",
@@ -820,7 +820,7 @@ class SimSession:
 
         def corridor(c, Rg, gw):
             approach = Rg[:, 0]
-            pre = gw - approach * c["standoff"]
+            pre = gw - approach * self.standoff_of(c)
             pts_w = pre + np.linspace(0, 1, 8)[:, None] * (gw - pre)
             pts_t = R_tool.inv().apply(pts_w - tool_pos)
             mind = np.inf
