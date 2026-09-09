@@ -146,5 +146,6 @@ the optional pixel-fraction crop for plane estimation only. See
 A real run writes `settings.json`, the per-query masked inputs, `log.npz`,
 `review_view.mp4` and `result.json` (`closed`, `closed_tick`, `aborted`,
 `ticks`, `queries`, `final_qpos`) under the run directory;
-`simretract.real.tally` counts `closed` outcomes per model. Whether a closed
-gripper became a good hand-over is judged by the operator, not by the code.
+`simretract.real.tally` counts `closed` outcomes per model. The operator
+assesses hand-over quality separately from the recorded gripper-close
+outcome.

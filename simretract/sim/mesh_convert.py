@@ -33,10 +33,9 @@ the new reference (a different source asset). With a recipe the exported
 skips that for a different asset. No provenance path is ever written into
 ``meta.json``.
 
-If a CAD import or the convex decomposition fails this reports the error
-and exits non-zero; it never fabricates geometry. ``coacd`` and the FBX
-loader (``pyassimp`` + the assimp shared library) are optional extras of the
-simulator environment (``envs/sim.txt``).
+CAD import and convex-decomposition failures report an error and exit
+non-zero. ``coacd`` and the FBX loader (``pyassimp`` + the assimp shared
+library) are optional extras of the simulator environment (``envs/sim.txt``).
 """
 
 from __future__ import annotations

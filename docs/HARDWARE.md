@@ -91,11 +91,11 @@ in m), and the arm moves only on explicit `set_all_positions(target,
 goal_time, blocking=True)` calls. Do not use the higher-level robot classes for
 inference: their connect/disconnect sequences move the arm.
 
-Trossen arms ship with a factory network address. Nothing in this repository
-carries an address: set `robot.follower_ip` in `configs/real/default.yaml`
-(`CHANGE_ME` until you do; the launcher refuses to start otherwise) to the
-address of your controller, and check reachability on the controller's port
-before a run. `simretract.real.home` returns the arm to the simulation home
+Set `robot.follower_ip` in `configs/real/default.yaml` to your controller's
+address. The launcher requires the `CHANGE_ME` placeholder to be replaced
+before starting. Check reachability on the controller's port before a run.
+
+`simretract.real.home` returns the arm to the simulation home
 pose (all joints 0, gripper 0.044 m). A normal episode returns the joints home
 while retaining the gripper opening; an aborted episode opens it while homing.
 

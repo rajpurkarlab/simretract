@@ -1,18 +1,14 @@
 # Tool asset: acquisition and local preparation
 
-The retractor the policy hands over is a third-party 3D model. The
-repository never contains it in any form that carries its geometry: no
-source file, no visual or collision mesh, no USD, no textures, no
-reconstruction captures. What the repository tracks for the tool is
-annotation and recipe only: `assets/tools/retractor_rake/meta.json`
-(extents, volume, tip/bend points, the collision-set summary and the
-settings of the build that produced them), `configs/assets/retractor_rake.yaml`
-(which file to convert, how, and the fingerprints the result must
-reproduce) and `assets/grasp_candidates/retractor_rake.json` (the sampled
-grasp poses the recorders draw from). Everything else is built on your
-machine from your own licensed copy of the asset with
-`simretract-build-assets`, and the build is checked against the tracked
-references so you know whether your copy reproduces the released setup.
+The repository provides annotations and a build recipe for the third-party
+retractor model: `assets/tools/retractor_rake/meta.json` (extents, volume,
+tip/bend points, the collision-set summary and build settings),
+`configs/assets/retractor_rake.yaml` (the source file, conversion settings
+and reference fingerprints), and `assets/grasp_candidates/retractor_rake.json`
+(the grasp poses used by the recorders). Build the tool geometry locally
+from your licensed copy of the asset with `simretract-build-assets`. The
+build checks the result against the tracked references for the released
+setup.
 
 ## Drop-in folder
 
@@ -239,14 +235,10 @@ The phase bits are one bit per coordinate (the second bit below the
 micrometre) and carry no shape information. To fingerprint a mesh of your
 own: `python -m simretract.sim.asset_recipe --obj FILE --print-fingerprint`.
 
-The collision set is verified on one machine; CoACD is not guaranteed to
-split identically across platforms or runs (see "Acquisition"), and a
-count within 3 of the reference with a hull volume within 5% is the same
-tool with a slightly different convex approximation, not a wrong asset. A
-count outside that (a different CoACD build or threshold) fails the check;
-`--accept-meta` records the local build as the reference if that is
-intended (the visual mesh, extents, volume, fingerprints and grasp
-candidates still have to match).
+Collision verification accepts a part count within 3 of the reference
+and a hull volume within 5%. These tolerances accommodate variation in
+CoACD decomposition. Builds outside either tolerance fail the check.
+Use `--accept-meta` to adopt the local build as the reference.
 
 ## Where the files land, and what never gets committed
 

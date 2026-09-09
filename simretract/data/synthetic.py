@@ -5,8 +5,8 @@ a fixed "gripper" blob, a tilted depth plane) and the trajectories follow the
 recorder's conventions (7-D state, a linear gripper close, a stall segment
 that the arc-length rule collapses), so the whole data pipeline - cache
 builder, plane sidecar, alignment gate, trainer and policy server - can be
-exercised without a simulator. Nothing here resembles real data; the
-episodes only satisfy the raw-episode contract of ``docs/DATA_FORMAT.md``.
+exercised without a simulator. These synthetic fixtures follow the
+raw-episode contract in ``docs/DATA_FORMAT.md``.
 """
 
 from __future__ import annotations
