@@ -11,7 +11,7 @@ z-score normalization, late-trajectory dropout (`docs/DROPOUT.md`), AdamW
 cosine to 0.1x, gradient clip 10, bf16 autocast, batch 16 x accum 4, 15,000
 steps, 5% of episodes held out as validation (never evaluated).
 
-Presets carry flags and a description. [Reference simulation results](../data/evaluation/README.md)
+Presets carry flags and a description. [Reference simulation results](../data/evaluation/)
 include the paper table and per-seed outcomes. [PROTOCOL.md](PROTOCOL.md)
 describes how to evaluate a checkpoint.
 

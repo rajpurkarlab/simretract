@@ -1,6 +1,6 @@
 # Data
 
-[Simulation benchmark results](evaluation/README.md) contain the paper
+[Simulation benchmark results](evaluation/) contain the paper
 reference table and per-seed first-attempt outcomes.
 
 ## What ships

@@ -20,7 +20,7 @@ The finger design is adapted from [Source Robotics' SSG-48 gripper](https://gith
 with modifications to fit the Trossen WidowX-AI. [Included meshes and attribution](assets/gripper/README.md).
 
 ```bash
-git clone --recurse-submodules https://github.com/xucheng-wang/simretract.git
+git clone --recurse-submodules https://github.com/YOUR_GITHUB_ORG/simretract.git
 cd simretract
 bash envs/setup.sh
 conda activate simretract-policy
@@ -38,11 +38,6 @@ With a compatible checkpoint installed at `checkpoints/baseline`:
 scripts/run_real.sh checkpoints/baseline dry  # perception and inference; no motion
 scripts/run_real.sh checkpoints/baseline go   # press ENTER to start motion
 ```
-
-The default real preset removes the top **1 cm** from both plane estimation and
-model visibility, then estimates a plane from the remaining foreground. An
-unreliable plane is withheld. Legacy no-cut and pixel-fraction modes remain
-available; see [real-run options](docs/HARDWARE.md).
 
 ## Simulation and training
 
@@ -74,9 +69,7 @@ The Python package is in `simretract/`; runnable wrappers are in `scripts/` and
 configuration is in `configs/`. Downloaded data, weights, and generated assets
 are kept outside version control.
 
-## Citation and licensing
-
-See [CITATION.cff](CITATION.cff) for citation metadata.
+## Licensing
 
 We release our code, policy checkpoints, and robot-action/grasp-point datasets. The third-party retractor asset by HQ3DMOD must be obtained separately under its publisher's license. Asset acquisition and local preparation instructions are provided in this repository.
 

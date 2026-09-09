@@ -45,7 +45,7 @@ simretract-download = "simretract.cli.download:main"
 simretract-smoke = "simretract.cli.smoke:main"
 
 [project.urls]
-Homepage = "https://github.com/xucheng-wang/simretract"
+Homepage = "https://github.com/YOUR_GITHUB_ORG/simretract"
 
 [tool.setuptools.packages.find]
 where = ["."]

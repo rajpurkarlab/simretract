@@ -5,7 +5,7 @@ Commands below run from the repository root. For the shortest path to an existin
 ## Environments and weights
 
 ```bash
-git clone --recurse-submodules https://github.com/xucheng-wang/simretract.git
+git clone --recurse-submodules https://github.com/YOUR_GITHUB_ORG/simretract.git
 cd simretract
 bash envs/setup.sh              # creates simretract-sim, simretract-policy, simretract-mask
 conda activate simretract-policy

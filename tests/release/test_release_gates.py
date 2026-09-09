@@ -92,9 +92,6 @@ def test_release_terms_chosen() -> None:
 def test_license_fields_filled_in() -> None:
     py = _read("pyproject.toml")
     assert re.search(r"^license\s*=", py, re.M), "pyproject.toml has no `license` entry"
-    cff = yaml.safe_load(_read("CITATION.cff"))
-    assert cff.get("license") and "SEE LICENSE" not in str(cff["license"]).upper(), "CITATION.cff license is a placeholder"
-    assert "SURNAME" not in _read("CITATION.cff"), "CITATION.cff authors are placeholders"
 
 
 def test_readme_carries_release_wording() -> None:

@@ -109,7 +109,7 @@ Outputs under `--out`: `result_<seed>.json` (+ `.try{k}.json`),
 `ep_<seed>/meta.npz`, `ep_<seed>_review.mp4`, `eval_log_<seed>.jsonl`, the
 driver ledger, `results.json` (all rows) and `table.md` (the scored row). The
 driver prints one `ROW` line at the end. The eight main paper rows and their
-50-seed first results are included in [data/evaluation](../data/evaluation/README.md).
+50-seed first results are included in [data/evaluation](../data/evaluation/).
 
 ### Nondeterminism
 
