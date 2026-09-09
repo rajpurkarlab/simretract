@@ -126,11 +126,11 @@ Expected counts for a regenerated set: 500 strict episodes (from roughly
 1000-1300 attempts), about 2000 recovery draws of which about 1950 are kept,
 1000 far-selected. Per-episode size is ~60 MB (~330 frames).
 
-The no-smoothing and no-standoff sets were recorded by the same recorders
-under different reach settings (no-smoothing: `blend false`, pre-grasp about
-6 cm from the grasp, no joint-rate limit, speed scale 1.0; no-standoff:
-`standoff 0`, no joint-rate limit, speed scale 1.0; the values are recorded in
-the `recipe` of their strict selection files). The shipped generation
-recipes and wrappers target the main pair; regenerating a variant means
-running `simretract-generate` with those settings and assembling the
-selections with the same commands.
+To regenerate the no-smoothing variant, use `blend false`, a pre-grasp about
+6 cm from the grasp, no joint-rate limit, and speed scale 1.0.
+
+For no-standoff regeneration, use the main generation settings with only
+`--standoff 0`; the grasp-height target range remains ±5 cm. Its selection
+file's `recipe` describes regeneration settings; the recorded bins and
+measured grasp heights are stored separately. Run `simretract-generate`
+with the variant settings and assemble the selections with the same commands.
