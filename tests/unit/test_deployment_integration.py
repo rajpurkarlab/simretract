@@ -1,4 +1,4 @@
-"""Cross-module regressions discovered while auditing the deployment port."""
+"""Cross-module deployment behavior."""
 from types import SimpleNamespace
 
 import numpy as np

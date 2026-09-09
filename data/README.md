@@ -1,5 +1,8 @@
 # Data
 
+[Simulation benchmark results](evaluation/README.md) contain the paper
+reference table and per-seed first-attempt outcomes.
+
 ## What ships
 
 `data/selections/` holds the seed lists and episode lists that define every

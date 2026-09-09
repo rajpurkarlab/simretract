@@ -97,13 +97,13 @@ simretract-build-cache --set recovery --raw data/raw/recovery_far1000 --out data
 # 6. train the baseline (pi0 + recovery co-training + dropout)
 simretract-train --preset baseline --cache data/cache --out runs/baseline --init checkpoints/pi0_base
 # evaluate
-simretract-eval-sim --ckpt runs/baseline/final --seeds data/selections/test_core50.json --passes 3 --out eval/baseline
+simretract-eval-sim --ckpt runs/baseline/final --seeds data/selections/test_core50.json --passes 1 --out eval/baseline
 ```
 
 
 ## Evaluate and verify
 
-The [benchmark protocol](PROTOCOL.md) specifies the held-out seeds, three-attempt rule, outcome definitions, and nondeterminism. Use the same configuration when comparing checkpoints.
+The [benchmark protocol](PROTOCOL.md) specifies the held-out seeds, first-attempt reporting, outcome definitions, and nondeterminism. Use the same configuration when comparing checkpoints.
 
 ```bash
 scripts/eval_sim.sh checkpoints/baseline

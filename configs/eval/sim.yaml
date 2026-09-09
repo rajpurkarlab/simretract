@@ -3,7 +3,8 @@
 
 seeds: test_core50.json               # run set (data/selections); --seeds overrides
 score_seeds: test_core50.json         # report set; --score-seeds overrides
-passes: 3                             # non-completed seeds are re-run on each later pass; completed seeds never
+passes: 1                             # one attempt per benchmark seed
+score_attempt: first                  # score the earliest result; latest is an optional retry diagnostic
 tool: retractor_rake
 
 # Closed-loop client (one Kit process per seed)
@@ -45,9 +46,9 @@ driver:
 # Funnel definitions (simretract.eval.score)
 metrics:
   grabbed: outcome == completed
-  secured: grabbed and drop_mm <= 20
+  secured: grabbed and drop_mm < 20   # Grasped in the paper
   held: grabbed and held
   kept: held and grasp_t_mm < 10 and grasp_r_deg < 10
   timeouts: outcome == timeout
-  offset_mm: grasp_t_mm over completed rows (mean, sd, median)
-  twist_deg: grasp_twist_deg over completed rows (mean, sd, median)
+  offset_mm: grasp_t_mm over secured rows (mean, population sd, median)
+  twist_deg: grasp_twist_deg over secured rows (mean, population sd, median)

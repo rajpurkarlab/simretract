@@ -1,0 +1,9 @@
+preset,model,n_trials,secured,secured_percent,offset_mean_mm,offset_sd_mm,offset_median_mm,twist_mean_deg,twist_sd_deg,twist_median_deg
+baseline,SimRetract (full),50,47,94,8.0,6.0,6.7,3.8,6.4,2.1
+no_dropout,w/o dropout,50,48,96,9.9,7.5,8.1,5.9,11.5,2.5
+no_recovery,w/o recovery,50,40,80,15.6,21.0,7.1,6.0,8.8,4.8
+half_data,half data (250 + 500),50,41,82,13.1,13.6,9.5,6.8,8.2,3.1
+no_plane,w/o plane normal,50,42,84,20.0,21.2,12.0,10.9,18.3,3.9
+no_mask,w/o mask,50,44,88,9.3,7.7,6.2,4.6,3.7,3.5
+no_smooth,w/o smoothing,50,43,86,8.8,7.7,7.3,4.5,4.3,3.8
+no_standoff,w/o standoff,50,42,84,10.2,14.8,5.5,2.6,1.9,1.9

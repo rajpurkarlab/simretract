@@ -14,14 +14,14 @@ mask:
   prompt: metal rake
   conf: 0.2
 
-# Default: validated real-run timing and a 1 cm shaft crop.
+# Default deployment preset with a 1 cm shaft crop.
 # Metric lengths are metres; plane_top_cut is the legacy pixel fraction.
 presets:
   default:
     exec_h: 50
     exec_min: 50
     settle: 0.0
-    speed: 0.8
+    speed: 1.0
     max_step: 0.06
     smooth: 0.6
     view: true

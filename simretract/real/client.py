@@ -1096,7 +1096,7 @@ def build_parser() -> argparse.ArgumentParser:
                     help="seconds to pause after each chunk; the next query uses a post-stop frame (0 = off)")
     ap.add_argument("--smooth", type=float, default=env_default(float, 0.6, "SIMRETRACT_SMOOTH"),
                     help="EMA weight on the previous executed action: act = (1-s)*act + s*prev")
-    ap.add_argument("--speed", type=float, default=env_default(float, 0.8, "SIMRETRACT_SPEED"),
+    ap.add_argument("--speed", type=float, default=env_default(float, 1.0, "SIMRETRACT_SPEED"),
                     help="1.0 = real-time 25 Hz; goal_time = (1/25 s) / speed")
     ap.add_argument("--max-step", dest="max_step", type=float,
                     default=env_default(float, 0.06, "SIMRETRACT_MAX_STEP"),

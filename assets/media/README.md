@@ -1,7 +1,6 @@
 # Demonstration media
 
-The MP4 files are retained here for later use. The poster is an unannotated
-frame from the first video.
+Demonstration videos and an unannotated poster frame from the first video.
 
 | File | View | Duration | Resolution |
 |---|---|---|---|

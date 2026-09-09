@@ -11,9 +11,9 @@ z-score normalization, late-trajectory dropout (`docs/DROPOUT.md`), AdamW
 cosine to 0.1x, gradient clip 10, bf16 autocast, batch 16 x accum 4, 15,000
 steps, 5% of episodes held out as validation (never evaluated).
 
-Presets carry flags and a description only. Benchmark results are not
-recorded in this repository; `docs/PROTOCOL.md` is the procedure that
-produces them from a checkpoint.
+Presets carry flags and a description. [Reference simulation results](../data/evaluation/README.md)
+include the paper table and per-seed outcomes. [PROTOCOL.md](PROTOCOL.md)
+describes how to evaluate a checkpoint.
 
 ## Released models
 
@@ -95,5 +95,4 @@ scripts/eval_sim.sh runs/no_plane/final                     # eval/no_plane/tabl
 ```
 
 The trainer records the resolved preset in `norm.json["train_regime"]`, so a
-checkpoint can always be traced back to its flags; the unit tests assert that
-each of the nine presets resolves to its flag set.
+checkpoint can be traced back to its training flags.

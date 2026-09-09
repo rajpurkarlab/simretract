@@ -1,7 +1,7 @@
 """``simretract-eval-sim``: the simulation benchmark for one checkpoint.
 
 Thin console entry point over ``simretract.eval.driver`` (server boot,
-one Isaac Sim process per seed, multi-pass retries, funnel scoring).  It is
+one Isaac Sim process per seed, optional retries, first-attempt scoring).  It is
 environment-agnostic: the policy server and the evaluator are started with
 the interpreters recorded by ``envs/setup.sh`` (``configs/envs.local.yaml``).
 """

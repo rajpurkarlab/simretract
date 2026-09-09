@@ -329,7 +329,8 @@ def test_eval_protocol_values() -> None:
     e = config.eval_protocol()
     assert e["exec_h"]["pi0"] == 50 and e["exec_h"]["fastwam"] == 48
     assert e["smooth"] == 0.45 and e["skip_search"] is True and e["max_steps"] == 450
-    assert e["passes"] == 3 and e["plane_top_cut"] == 0.0 and e["hand_style"] == "test"
+    assert e["passes"] == 1 and e["score_attempt"] == "first"
+    assert e["plane_top_cut"] == 0.0 and e["hand_style"] == "test"
     assert e["server"]["port"] == 8767 and e["server"]["half"] is True
     assert e["server"]["plane_filter"] is True and e["server"]["drop_px"] == 300
     assert e["seeds"] == "test_core50.json"

@@ -1,0 +1,4211 @@
+{
+  "schema_version": 1,
+  "attempt": "first",
+  "seed_selection": "data/selections/test_core50.json",
+  "models": {
+    "baseline": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.7,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 2.2
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.4,
+          "grasp_r_deg": 3.6,
+          "grasp_twist_deg": 0.6
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": -4.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 34.0,
+          "grasp_r_deg": 15.6,
+          "grasp_twist_deg": 13.7
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.9,
+          "grasp_r_deg": 5.3,
+          "grasp_twist_deg": 3.6
+        }
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 12.2,
+          "grasp_r_deg": 5.0,
+          "grasp_twist_deg": 3.8
+        }
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 0.7,
+          "grasp_r_deg": 2.2,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.1,
+          "grasp_r_deg": 2.0,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.3,
+          "grasp_r_deg": 4.6,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 200381,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 12.8,
+          "grasp_r_deg": 4.7,
+          "grasp_twist_deg": 1.3
+        }
+      },
+      {
+        "seed": 200432,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.1,
+          "grasp_r_deg": 7.3,
+          "grasp_twist_deg": 6.5
+        }
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.3,
+          "grasp_r_deg": 1.5,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": 0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.2,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.7,
+          "grasp_r_deg": 4.9,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 200726,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.3,
+          "grasp_r_deg": 7.6,
+          "grasp_twist_deg": 7.4
+        }
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.3,
+          "grasp_r_deg": 2.6,
+          "grasp_twist_deg": 0.2
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": 0.8,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 11.5,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 0.1
+        }
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 3.6,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 4.8
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "completed",
+        "drop_mm": 2.6,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 12.3,
+          "grasp_r_deg": 5.5,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 235.6,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": -2.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.4,
+          "grasp_r_deg": 4.1,
+          "grasp_twist_deg": 4.1
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.6,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 5.3
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.7,
+          "grasp_r_deg": 4.7,
+          "grasp_twist_deg": 4.2
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "completed",
+        "drop_mm": -5.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.9,
+          "grasp_r_deg": 12.2,
+          "grasp_twist_deg": 12.1
+        }
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.9,
+          "grasp_r_deg": 0.6,
+          "grasp_twist_deg": 0.4
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 2.5,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 2.4
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 1.1
+        }
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": -0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.5,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 13.8,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 3.4,
+          "grasp_twist_deg": 1.0
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": 0.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 3.3,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": 0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.7,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -2.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 12.2,
+          "grasp_r_deg": 4.1,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": 3.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 25.4,
+          "grasp_r_deg": 13.3,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.1,
+          "grasp_r_deg": 2.1,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 14.9,
+          "grasp_r_deg": 7.2,
+          "grasp_twist_deg": 3.8
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 6.7,
+          "grasp_r_deg": 2.7,
+          "grasp_twist_deg": 2.4
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 8.7,
+          "grasp_r_deg": 4.5,
+          "grasp_twist_deg": 3.6
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 3.1,
+          "grasp_r_deg": 41.9,
+          "grasp_twist_deg": 41.9
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.5,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.1,
+          "grasp_r_deg": 2.0,
+          "grasp_twist_deg": 0.1
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": 3.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.7,
+          "grasp_r_deg": 13.7,
+          "grasp_twist_deg": 11.7
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": -0.8,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 6.6,
+          "grasp_r_deg": 5.8,
+          "grasp_twist_deg": 2.7
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.2,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 6.3,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 15.5,
+          "grasp_r_deg": 6.8,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 203867,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.3,
+          "grasp_r_deg": 2.5,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.6,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.3,
+          "grasp_r_deg": 2.7,
+          "grasp_twist_deg": 2.1
+        }
+      }
+    ],
+    "no_dropout": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.1,
+          "grasp_r_deg": 1.5,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 19.0,
+          "grasp_r_deg": 8.6,
+          "grasp_twist_deg": 6.4
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": -0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.9,
+          "grasp_r_deg": 10.1,
+          "grasp_twist_deg": 10.1
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": 0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.2,
+          "grasp_r_deg": 4.1,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": 0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.8,
+          "grasp_r_deg": 7.0,
+          "grasp_twist_deg": 5.9
+        }
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.2,
+          "grasp_r_deg": 2.8,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.0,
+          "grasp_r_deg": 5.8,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": 262.0,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200381,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.4,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 200432,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 10.3,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.1,
+          "grasp_r_deg": 2.2,
+          "grasp_twist_deg": 0.2
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.1,
+          "grasp_r_deg": 3.1,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "completed",
+        "drop_mm": -0.8,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 15.3,
+          "grasp_r_deg": 9.0,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 200726,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.3,
+          "grasp_r_deg": 4.6,
+          "grasp_twist_deg": 3.4
+        }
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.4,
+          "grasp_r_deg": 1.6,
+          "grasp_twist_deg": 0.6
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": 7.9,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 34.3,
+          "grasp_r_deg": 13.5,
+          "grasp_twist_deg": 6.8
+        }
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 19.4,
+          "grasp_r_deg": 9.0,
+          "grasp_twist_deg": 5.4
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 6.8,
+          "grasp_twist_deg": 6.8
+        }
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 2.9,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.4,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": -5.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 14.5,
+          "grasp_r_deg": 0.8,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.2,
+          "grasp_r_deg": 5.5,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.3,
+          "grasp_r_deg": 3.5,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "completed",
+        "drop_mm": -3.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 22.2,
+          "grasp_r_deg": 39.2,
+          "grasp_twist_deg": 39.1
+        }
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": 0.9,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 0.8,
+          "grasp_r_deg": 2.6,
+          "grasp_twist_deg": 0.6
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 29.9,
+          "grasp_r_deg": 49.1,
+          "grasp_twist_deg": 47.7
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.4,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 3.0
+        }
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.7,
+          "grasp_r_deg": 4.9,
+          "grasp_twist_deg": 4.8
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.4,
+          "grasp_r_deg": 6.5,
+          "grasp_twist_deg": 2.9
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.1,
+          "grasp_r_deg": 6.3,
+          "grasp_twist_deg": 5.3
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 2.5,
+          "grasp_twist_deg": 1.0
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.1,
+          "grasp_r_deg": 3.5,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -0.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.2,
+          "grasp_r_deg": 0.7,
+          "grasp_twist_deg": 0.0
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.4,
+          "grasp_r_deg": 5.7,
+          "grasp_twist_deg": 2.5
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.5,
+          "grasp_r_deg": 10.4,
+          "grasp_twist_deg": 10.2
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.0,
+          "grasp_r_deg": 4.3,
+          "grasp_twist_deg": 0.8
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.2,
+          "grasp_r_deg": 5.3,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 9.6,
+          "grasp_r_deg": 1.6,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 3.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 8.1,
+          "grasp_twist_deg": 5.4
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.5,
+          "grasp_r_deg": 2.5,
+          "grasp_twist_deg": 0.8
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.8,
+          "grasp_r_deg": 4.5,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": -1.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.3,
+          "grasp_r_deg": 4.1,
+          "grasp_twist_deg": 1.0
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.5,
+          "grasp_r_deg": 3.7,
+          "grasp_twist_deg": 1.9
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.1,
+          "grasp_r_deg": 6.2,
+          "grasp_twist_deg": 5.5
+        }
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": 0.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.8,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": 6.6,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 33.5,
+          "grasp_r_deg": 60.7,
+          "grasp_twist_deg": 59.6
+        }
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": -8.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.3,
+          "grasp_r_deg": 5.5,
+          "grasp_twist_deg": 4.3
+        }
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 2.8,
+          "grasp_twist_deg": 2.3
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 3.0
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 2.5
+        }
+      }
+    ],
+    "no_recovery": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 2.4,
+          "grasp_r_deg": 6.1,
+          "grasp_twist_deg": 5.5
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 2.7,
+          "grasp_r_deg": 6.6,
+          "grasp_twist_deg": 6.6
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": -6.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 30.6,
+          "grasp_r_deg": 11.8,
+          "grasp_twist_deg": 10.9
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": -0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 7.0,
+          "grasp_twist_deg": 4.8
+        }
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.0,
+          "grasp_r_deg": 6.2,
+          "grasp_twist_deg": 5.6
+        }
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.2,
+          "grasp_r_deg": 3.6,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.6,
+          "grasp_r_deg": 1.9,
+          "grasp_twist_deg": 1.8
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": 0.9,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 17.3,
+          "grasp_r_deg": 6.9,
+          "grasp_twist_deg": 5.8
+        }
+      },
+      {
+        "seed": 200381,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 35.2,
+          "grasp_r_deg": 9.2,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 200432,
+        "outcome": "completed",
+        "drop_mm": 12.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 37.9,
+          "grasp_r_deg": 8.5,
+          "grasp_twist_deg": 3.1
+        }
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": -1.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 20.3,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 1.3
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": 10.6,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 110.1,
+          "grasp_r_deg": 69.8,
+          "grasp_twist_deg": 53.5
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200726,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 6.6,
+          "grasp_r_deg": 16.9,
+          "grasp_twist_deg": 16.6
+        }
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": 2.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 6.7,
+          "grasp_r_deg": 2.8,
+          "grasp_twist_deg": 0.1
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": 256.6,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 20.6,
+          "grasp_r_deg": 11.3,
+          "grasp_twist_deg": 6.9
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "completed",
+        "drop_mm": 12.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 81.8,
+          "grasp_r_deg": 37.6,
+          "grasp_twist_deg": 23.2
+        }
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.7,
+          "grasp_r_deg": 5.1,
+          "grasp_twist_deg": 4.9
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.2,
+          "grasp_r_deg": 4.4,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.3,
+          "grasp_r_deg": 4.8,
+          "grasp_twist_deg": 3.4
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201810,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 14.3,
+          "grasp_r_deg": 6.6,
+          "grasp_twist_deg": 5.7
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": -0.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 5.9,
+          "grasp_twist_deg": 5.6
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.9,
+          "grasp_r_deg": 4.1,
+          "grasp_twist_deg": 2.2
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": -3.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.6,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 5.0
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.0,
+          "grasp_r_deg": 5.7,
+          "grasp_twist_deg": 1.0
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.4,
+          "grasp_r_deg": 6.4,
+          "grasp_twist_deg": 5.4
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -0.6,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.1,
+          "grasp_r_deg": 9.1,
+          "grasp_twist_deg": 7.1
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.2,
+          "grasp_r_deg": 4.6,
+          "grasp_twist_deg": 4.1
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": 10.6,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.6,
+          "grasp_r_deg": 10.1,
+          "grasp_twist_deg": 8.0
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": 15.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 39.3,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 14.6,
+          "grasp_r_deg": 7.1,
+          "grasp_twist_deg": 5.3
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 13.9,
+          "grasp_r_deg": 7.8,
+          "grasp_twist_deg": 3.3
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 14.5,
+          "grasp_r_deg": 6.9,
+          "grasp_twist_deg": 5.2
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.3,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 9.5,
+          "grasp_twist_deg": 8.7
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.3,
+          "grasp_r_deg": 1.2,
+          "grasp_twist_deg": 0.8
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.4,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.9,
+          "grasp_r_deg": 2.2,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 15.4,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 1.1
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": 153.9,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": 231.5,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": 209.6,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 9.1,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 0.4
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.1,
+          "grasp_r_deg": 6.0,
+          "grasp_twist_deg": 5.1
+        }
+      }
+    ],
+    "half_data": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.1,
+          "grasp_r_deg": 20.0,
+          "grasp_twist_deg": 19.8
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 73.3,
+          "grasp_r_deg": 42.5,
+          "grasp_twist_deg": 24.2
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.4,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": 233.6,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": 0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.2,
+          "grasp_r_deg": 2.6,
+          "grasp_twist_deg": 0.2
+        }
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 1.8,
+          "grasp_twist_deg": 0.8
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": 1.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.3,
+          "grasp_r_deg": 5.5,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 12.1,
+          "grasp_r_deg": 6.3,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 200381,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200432,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.2,
+          "grasp_r_deg": 1.8,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.5,
+          "grasp_r_deg": 6.8,
+          "grasp_twist_deg": 6.0
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200726,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.7,
+          "grasp_r_deg": 39.2,
+          "grasp_twist_deg": 39.2
+        }
+      },
+      {
+        "seed": 200804,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": 4.9,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 13.4,
+          "grasp_r_deg": 7.0,
+          "grasp_twist_deg": 4.3
+        }
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 14.3,
+          "grasp_r_deg": 7.0,
+          "grasp_twist_deg": 2.3
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 0.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.0,
+          "grasp_r_deg": 2.8,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": 4.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 16.6,
+          "grasp_r_deg": 3.1,
+          "grasp_twist_deg": 3.1
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 0.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.1,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.4,
+          "grasp_r_deg": 1.9,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "completed",
+        "drop_mm": 159.9,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 6.1,
+          "grasp_twist_deg": 5.7
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.3,
+          "grasp_r_deg": 5.0,
+          "grasp_twist_deg": 5.0
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 4.4,
+          "grasp_twist_deg": 4.0
+        }
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 18.3,
+          "grasp_r_deg": 12.9,
+          "grasp_twist_deg": 9.4
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.5,
+          "grasp_r_deg": 25.2,
+          "grasp_twist_deg": 25.1
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 19.1,
+          "grasp_r_deg": 9.8,
+          "grasp_twist_deg": 4.0
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.7,
+          "grasp_r_deg": 2.3,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.5,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -3.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 16.0,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 2.3
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.4,
+          "grasp_r_deg": 5.5,
+          "grasp_twist_deg": 0.4
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": 12.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 26.0,
+          "grasp_r_deg": 23.2,
+          "grasp_twist_deg": 4.8
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.0,
+          "grasp_r_deg": 7.2,
+          "grasp_twist_deg": 2.7
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -1.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 19.8,
+          "grasp_r_deg": 11.0,
+          "grasp_twist_deg": 9.2
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": 1.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 55.0,
+          "grasp_r_deg": 18.1,
+          "grasp_twist_deg": 7.3
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 1.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 36.0,
+          "grasp_r_deg": 12.2,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 14.6,
+          "grasp_r_deg": 7.4,
+          "grasp_twist_deg": 2.2
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": -2.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 19.9,
+          "grasp_r_deg": 8.6,
+          "grasp_twist_deg": 8.1
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.5,
+          "grasp_r_deg": 21.0,
+          "grasp_twist_deg": 21.0
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.8,
+          "grasp_r_deg": 3.5,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.2,
+          "grasp_r_deg": 12.9,
+          "grasp_twist_deg": 12.6
+        }
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 10.7,
+          "grasp_r_deg": 8.4,
+          "grasp_twist_deg": 6.9
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": 150.1,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.9,
+          "grasp_r_deg": 16.9,
+          "grasp_twist_deg": 15.4
+        }
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": 1.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.9,
+          "grasp_r_deg": 11.0,
+          "grasp_twist_deg": 8.8
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.6,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": 2.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.4,
+          "grasp_r_deg": 3.5,
+          "grasp_twist_deg": 2.1
+        }
+      }
+    ],
+    "no_plane": [
+      {
+        "seed": 200037,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 1.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 18.4,
+          "grasp_r_deg": 3.4,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.0,
+          "grasp_r_deg": 2.8,
+          "grasp_twist_deg": 2.3
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 8.1,
+          "grasp_r_deg": 5.0,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 200164,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.5,
+          "grasp_r_deg": 4.8,
+          "grasp_twist_deg": 1.3
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.2,
+          "grasp_r_deg": 18.9,
+          "grasp_twist_deg": 18.2
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": 0.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 22.0,
+          "grasp_r_deg": 50.5,
+          "grasp_twist_deg": 49.4
+        }
+      },
+      {
+        "seed": 200381,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 20.1,
+          "grasp_r_deg": 2.0,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 200432,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 4.0,
+          "grasp_twist_deg": 3.8
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.7,
+          "grasp_r_deg": 5.8,
+          "grasp_twist_deg": 4.2
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "completed",
+        "drop_mm": 246.4,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200726,
+        "outcome": "completed",
+        "drop_mm": 287.9,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.7,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 0.0
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": 2.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 16.4,
+          "grasp_r_deg": 7.6,
+          "grasp_twist_deg": 6.9
+        }
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 22.1,
+          "grasp_r_deg": 8.6,
+          "grasp_twist_deg": 1.3
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "completed",
+        "drop_mm": -1.9,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.6,
+          "grasp_r_deg": 16.8,
+          "grasp_twist_deg": 16.7
+        }
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.8,
+          "grasp_r_deg": 4.4,
+          "grasp_twist_deg": 3.9
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": -5.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 20.0,
+          "grasp_r_deg": 5.3,
+          "grasp_twist_deg": 4.7
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 3.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 104.5,
+          "grasp_r_deg": 76.5,
+          "grasp_twist_deg": 66.6
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 15.5,
+          "grasp_r_deg": 6.2,
+          "grasp_twist_deg": 1.8
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": 4.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.6,
+          "grasp_r_deg": 8.1,
+          "grasp_twist_deg": 4.0
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 27.2,
+          "grasp_r_deg": 15.7,
+          "grasp_twist_deg": 8.8
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 16.2,
+          "grasp_r_deg": 10.8,
+          "grasp_twist_deg": 8.6
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.2,
+          "grasp_r_deg": 4.6,
+          "grasp_twist_deg": 4.5
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.9,
+          "grasp_r_deg": 3.6,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": -3.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 46.9,
+          "grasp_r_deg": 14.7,
+          "grasp_twist_deg": 3.6
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": -23.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 78.5,
+          "grasp_r_deg": 86.5,
+          "grasp_twist_deg": 84.1
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -4.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 48.4,
+          "grasp_r_deg": 24.3,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 12.8,
+          "grasp_r_deg": 4.9,
+          "grasp_twist_deg": 0.8
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": 3.8,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 22.5,
+          "grasp_r_deg": 8.1,
+          "grasp_twist_deg": 5.8
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.4,
+          "grasp_r_deg": 44.4,
+          "grasp_twist_deg": 43.6
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 11.2,
+          "grasp_r_deg": 6.4,
+          "grasp_twist_deg": 5.5
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.4,
+          "grasp_r_deg": 3.8,
+          "grasp_twist_deg": 3.4
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 3.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 28.0,
+          "grasp_r_deg": 14.1,
+          "grasp_twist_deg": 13.7
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": 0.6,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 7.4,
+          "grasp_r_deg": 7.7,
+          "grasp_twist_deg": 7.3
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 30.6,
+          "grasp_r_deg": 15.2,
+          "grasp_twist_deg": 9.5
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": -3.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 59.1,
+          "grasp_r_deg": 46.8,
+          "grasp_twist_deg": 41.3
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.3,
+          "grasp_r_deg": 0.9,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.1,
+          "grasp_r_deg": 6.9,
+          "grasp_twist_deg": 3.9
+        }
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 0.9,
+          "grasp_r_deg": 3.4,
+          "grasp_twist_deg": 3.4
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": 3.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.2,
+          "grasp_r_deg": 2.6,
+          "grasp_twist_deg": 2.2
+        }
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 52.2,
+          "grasp_r_deg": 23.0,
+          "grasp_twist_deg": 3.5
+        }
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 23.1,
+          "grasp_r_deg": 12.3,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.2,
+          "grasp_r_deg": 1.8,
+          "grasp_twist_deg": 1.8
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.4,
+          "grasp_r_deg": 10.2,
+          "grasp_twist_deg": 9.3
+        }
+      }
+    ],
+    "no_mask": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.5,
+          "grasp_r_deg": 1.8,
+          "grasp_twist_deg": 1.1
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 28.8,
+          "grasp_r_deg": 18.0,
+          "grasp_twist_deg": 12.7
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.9,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 1.1
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": 237.0,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": 8.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 18.6,
+          "grasp_r_deg": 20.9,
+          "grasp_twist_deg": 11.6
+        }
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 25.7,
+          "grasp_r_deg": 8.9,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.1,
+          "grasp_r_deg": 1.6,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.5,
+          "grasp_r_deg": 1.2,
+          "grasp_twist_deg": 1.2
+        }
+      },
+      {
+        "seed": 200381,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200432,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.2,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 2.3
+        }
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.9,
+          "grasp_r_deg": 7.3,
+          "grasp_twist_deg": 6.1
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.3,
+          "grasp_r_deg": 6.8,
+          "grasp_twist_deg": 4.1
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200726,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 2.5,
+          "grasp_twist_deg": 2.2
+        }
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.6,
+          "grasp_r_deg": 6.3,
+          "grasp_twist_deg": 4.7
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 27.7,
+          "grasp_r_deg": 11.2,
+          "grasp_twist_deg": 2.7
+        }
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 10.0,
+          "grasp_r_deg": 6.0,
+          "grasp_twist_deg": 4.6
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 1.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 3.7,
+          "grasp_r_deg": 5.5,
+          "grasp_twist_deg": 4.8
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 31.2,
+          "grasp_r_deg": 12.1,
+          "grasp_twist_deg": 5.3
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 23.1,
+          "grasp_r_deg": 9.3,
+          "grasp_twist_deg": 3.6
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.1,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 3.3
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.5,
+          "grasp_r_deg": 6.5,
+          "grasp_twist_deg": 6.0
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.4,
+          "grasp_r_deg": 1.9,
+          "grasp_twist_deg": 1.8
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.5,
+          "grasp_r_deg": 10.5,
+          "grasp_twist_deg": 10.3
+        }
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.8,
+          "grasp_r_deg": 3.6,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": 0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.9,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": 2.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 18.0,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 3.4
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.0,
+          "grasp_r_deg": 0.5,
+          "grasp_twist_deg": 0.1
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.8,
+          "grasp_r_deg": 2.5,
+          "grasp_twist_deg": 2.4
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.8,
+          "grasp_r_deg": 13.4,
+          "grasp_twist_deg": 13.2
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.0,
+          "grasp_r_deg": 14.0,
+          "grasp_twist_deg": 14.0
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.2,
+          "grasp_r_deg": 13.0,
+          "grasp_twist_deg": 12.4
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 16.8,
+          "grasp_r_deg": 4.2,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 17.3,
+          "grasp_r_deg": 7.1,
+          "grasp_twist_deg": 4.1
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.2,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 5.6
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.5,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 5.5
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 2.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.1,
+          "grasp_r_deg": 7.2,
+          "grasp_twist_deg": 5.4
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.6,
+          "grasp_r_deg": 4.3,
+          "grasp_twist_deg": 3.3
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.6,
+          "grasp_r_deg": 2.7,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.5,
+          "grasp_r_deg": 3.9,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.2,
+          "grasp_r_deg": 7.7,
+          "grasp_twist_deg": 7.4
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.8,
+          "grasp_r_deg": 1.6,
+          "grasp_twist_deg": 0.2
+        }
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.5,
+          "grasp_r_deg": 3.5,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 15.5,
+          "grasp_r_deg": 9.4,
+          "grasp_twist_deg": 7.3
+        }
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 7.9,
+          "grasp_twist_deg": 7.1
+        }
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 2.2,
+          "grasp_twist_deg": 2.0
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.2,
+          "grasp_r_deg": 2.3,
+          "grasp_twist_deg": 1.4
+        }
+      }
+    ],
+    "no_smooth": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.7,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 4.1
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 1.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 7.7,
+          "grasp_twist_deg": 4.2
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.2,
+          "grasp_r_deg": 3.1,
+          "grasp_twist_deg": 2.5
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 3.3,
+          "grasp_twist_deg": 3.1
+        }
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": 1.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 4.7,
+          "grasp_twist_deg": 3.3
+        }
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.0,
+          "grasp_r_deg": 4.7,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200302,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200381,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200432,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 12.6,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 4.2,
+          "grasp_r_deg": 8.5,
+          "grasp_twist_deg": 8.2
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.6,
+          "grasp_r_deg": 5.0,
+          "grasp_twist_deg": 5.0
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200726,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.7,
+          "grasp_r_deg": 9.8,
+          "grasp_twist_deg": 9.2
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 8.4,
+          "grasp_r_deg": 5.4,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.0,
+          "grasp_r_deg": 12.6,
+          "grasp_twist_deg": 12.0
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 47.4,
+          "grasp_r_deg": 32.0,
+          "grasp_twist_deg": 25.0
+        }
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.6,
+          "grasp_r_deg": 9.3,
+          "grasp_twist_deg": 8.7
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 4.3,
+          "grasp_r_deg": 5.7,
+          "grasp_twist_deg": 5.7
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 3.6,
+          "grasp_r_deg": 4.3,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.3,
+          "grasp_r_deg": 3.3,
+          "grasp_twist_deg": 1.0
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "completed",
+        "drop_mm": 3.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 13.1,
+          "grasp_r_deg": 4.3,
+          "grasp_twist_deg": 2.9
+        }
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": -0.7,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 4.5,
+          "grasp_r_deg": 2.8,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.4,
+          "grasp_r_deg": 3.1,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 201935,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.0,
+          "grasp_r_deg": 8.3,
+          "grasp_twist_deg": 6.0
+        }
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.3,
+          "grasp_r_deg": 6.1,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 1.2,
+          "grasp_twist_deg": 1.1
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "completed",
+        "drop_mm": 1.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.6,
+          "grasp_r_deg": 5.2,
+          "grasp_twist_deg": 4.5
+        }
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.5,
+          "grasp_r_deg": 9.1,
+          "grasp_twist_deg": 5.8
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.8,
+          "grasp_r_deg": 8.3,
+          "grasp_twist_deg": 7.8
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -3.9,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 23.6,
+          "grasp_r_deg": 7.5,
+          "grasp_twist_deg": 1.3
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.6,
+          "grasp_r_deg": 1.7,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": 1.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.6,
+          "grasp_r_deg": 7.1,
+          "grasp_twist_deg": 4.4
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": 9.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 15.5,
+          "grasp_r_deg": 4.0,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 10.3,
+          "grasp_r_deg": 10.3,
+          "grasp_twist_deg": 9.5
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.4,
+          "grasp_r_deg": 2.5,
+          "grasp_twist_deg": 2.5
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 0.7,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 2.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 24.8,
+          "grasp_r_deg": 7.9,
+          "grasp_twist_deg": 6.1
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.8,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 3.8
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": -0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.8,
+          "grasp_r_deg": 5.2,
+          "grasp_twist_deg": 4.3
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203811,
+        "outcome": "completed",
+        "drop_mm": -0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.0,
+          "grasp_r_deg": 6.0,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 0.2
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 6.8,
+          "grasp_r_deg": 6.2,
+          "grasp_twist_deg": 5.7
+        }
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 8.8,
+          "grasp_r_deg": 8.6,
+          "grasp_twist_deg": 7.5
+        }
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.9,
+          "grasp_r_deg": 4.1,
+          "grasp_twist_deg": 4.0
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": -0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.7,
+          "grasp_r_deg": 1.7,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.7,
+          "grasp_r_deg": 7.1,
+          "grasp_twist_deg": 6.7
+        }
+      }
+    ],
+    "no_standoff": [
+      {
+        "seed": 200037,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.7,
+          "grasp_r_deg": 6.2,
+          "grasp_twist_deg": 6.0
+        }
+      },
+      {
+        "seed": 200066,
+        "outcome": "completed",
+        "drop_mm": 3.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 16.0,
+          "grasp_r_deg": 1.6,
+          "grasp_twist_deg": 0.9
+        }
+      },
+      {
+        "seed": 200112,
+        "outcome": "completed",
+        "drop_mm": 0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.3,
+          "grasp_r_deg": 7.1,
+          "grasp_twist_deg": 7.0
+        }
+      },
+      {
+        "seed": 200161,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.2,
+          "grasp_r_deg": 5.9,
+          "grasp_twist_deg": 3.9
+        }
+      },
+      {
+        "seed": 200164,
+        "outcome": "completed",
+        "drop_mm": 177.6,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200178,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.8,
+          "grasp_r_deg": 2.9,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 200191,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 0.9,
+          "grasp_r_deg": 4.4,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 200302,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.4,
+          "grasp_r_deg": 3.7,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 200381,
+        "outcome": "completed",
+        "drop_mm": 175.9,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200432,
+        "outcome": "completed",
+        "drop_mm": 2.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.0,
+          "grasp_r_deg": 2.1,
+          "grasp_twist_deg": 1.4
+        }
+      },
+      {
+        "seed": 200548,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 5.6,
+          "grasp_twist_deg": 5.2
+        }
+      },
+      {
+        "seed": 200554,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.5,
+          "grasp_r_deg": 7.6,
+          "grasp_twist_deg": 4.6
+        }
+      },
+      {
+        "seed": 200606,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200726,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 200804,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.1,
+          "grasp_r_deg": 4.6,
+          "grasp_twist_deg": 4.0
+        }
+      },
+      {
+        "seed": 200831,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201025,
+        "outcome": "completed",
+        "drop_mm": -0.9,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.4,
+          "grasp_r_deg": 5.2,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 201332,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 4.8,
+          "grasp_r_deg": 3.9,
+          "grasp_twist_deg": 3.1
+        }
+      },
+      {
+        "seed": 201457,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 19.0,
+          "grasp_r_deg": 10.1,
+          "grasp_twist_deg": 7.1
+        }
+      },
+      {
+        "seed": 201531,
+        "outcome": "completed",
+        "drop_mm": -8.1,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 9.9,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 201721,
+        "outcome": "completed",
+        "drop_mm": 0.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 9.4,
+          "grasp_r_deg": 3.2,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 201745,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.9,
+          "grasp_r_deg": 1.0,
+          "grasp_twist_deg": 0.0
+        }
+      },
+      {
+        "seed": 201786,
+        "outcome": "completed",
+        "drop_mm": 9.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 30.3,
+          "grasp_r_deg": 6.5,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 201810,
+        "outcome": "completed",
+        "drop_mm": 15.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 11.4,
+          "grasp_r_deg": 14.2,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 201891,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 201935,
+        "outcome": "completed",
+        "drop_mm": 1.9,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 13.7,
+          "grasp_r_deg": 5.3,
+          "grasp_twist_deg": 2.6
+        }
+      },
+      {
+        "seed": 202206,
+        "outcome": "completed",
+        "drop_mm": -1.8,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.0,
+          "grasp_r_deg": 3.0,
+          "grasp_twist_deg": 0.5
+        }
+      },
+      {
+        "seed": 202369,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.4,
+          "grasp_r_deg": 1.9,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 202375,
+        "outcome": "timeout",
+        "drop_mm": null,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 202436,
+        "outcome": "completed",
+        "drop_mm": 1.3,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 4.0,
+          "grasp_r_deg": 3.9,
+          "grasp_twist_deg": 1.5
+        }
+      },
+      {
+        "seed": 202530,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 20.6,
+          "grasp_r_deg": 7.6,
+          "grasp_twist_deg": 1.3
+        }
+      },
+      {
+        "seed": 202611,
+        "outcome": "completed",
+        "drop_mm": -0.3,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 95.0,
+          "grasp_r_deg": 43.8,
+          "grasp_twist_deg": 4.3
+        }
+      },
+      {
+        "seed": 202687,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 5.1,
+          "grasp_r_deg": 5.1,
+          "grasp_twist_deg": 5.0
+        }
+      },
+      {
+        "seed": 202855,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 7.2,
+          "grasp_r_deg": 3.5,
+          "grasp_twist_deg": 2.5
+        }
+      },
+      {
+        "seed": 202916,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 3.9,
+          "grasp_r_deg": 0.8,
+          "grasp_twist_deg": 0.7
+        }
+      },
+      {
+        "seed": 203035,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": false,
+        "verdict": {
+          "grasp_t_mm": 27.9,
+          "grasp_r_deg": 10.1,
+          "grasp_twist_deg": 2.8
+        }
+      },
+      {
+        "seed": 203057,
+        "outcome": "completed",
+        "drop_mm": 0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 2.6,
+          "grasp_r_deg": 6.8,
+          "grasp_twist_deg": 3.0
+        }
+      },
+      {
+        "seed": 203154,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.5,
+          "grasp_r_deg": 1.2,
+          "grasp_twist_deg": 0.6
+        }
+      },
+      {
+        "seed": 203200,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 16.8,
+          "grasp_r_deg": 9.2,
+          "grasp_twist_deg": 6.1
+        }
+      },
+      {
+        "seed": 203234,
+        "outcome": "completed",
+        "drop_mm": 0.5,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.6,
+          "grasp_r_deg": 2.2,
+          "grasp_twist_deg": 2.1
+        }
+      },
+      {
+        "seed": 203687,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 9.7,
+          "grasp_r_deg": 4.4,
+          "grasp_twist_deg": 2.5
+        }
+      },
+      {
+        "seed": 203725,
+        "outcome": "completed",
+        "drop_mm": 1.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 0.8,
+          "grasp_r_deg": 4.5,
+          "grasp_twist_deg": 3.9
+        }
+      },
+      {
+        "seed": 203760,
+        "outcome": "completed",
+        "drop_mm": -0.4,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 4.6,
+          "grasp_r_deg": 1.9,
+          "grasp_twist_deg": 0.8
+        }
+      },
+      {
+        "seed": 203811,
+        "outcome": "completed",
+        "drop_mm": -0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 1.1,
+          "grasp_r_deg": 0.8,
+          "grasp_twist_deg": 0.3
+        }
+      },
+      {
+        "seed": 203823,
+        "outcome": "completed",
+        "drop_mm": 0.1,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.5,
+          "grasp_r_deg": 1.9,
+          "grasp_twist_deg": 1.2
+        }
+      },
+      {
+        "seed": 203851,
+        "outcome": "completed",
+        "drop_mm": 152.1,
+        "held": false,
+        "verdict": {}
+      },
+      {
+        "seed": 203867,
+        "outcome": "completed",
+        "drop_mm": -0.6,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 8.3,
+          "grasp_r_deg": 2.1,
+          "grasp_twist_deg": 1.7
+        }
+      },
+      {
+        "seed": 203884,
+        "outcome": "completed",
+        "drop_mm": 0.2,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 10.7,
+          "grasp_r_deg": 2.2,
+          "grasp_twist_deg": 1.6
+        }
+      },
+      {
+        "seed": 203968,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 5.2,
+          "grasp_r_deg": 6.6,
+          "grasp_twist_deg": 6.2
+        }
+      },
+      {
+        "seed": 204111,
+        "outcome": "completed",
+        "drop_mm": 0.0,
+        "held": true,
+        "verdict": {
+          "grasp_t_mm": 0.8,
+          "grasp_r_deg": 4.0,
+          "grasp_twist_deg": 4.0
+        }
+      }
+    ]
+  }
+}

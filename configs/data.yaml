@@ -24,9 +24,9 @@
 #
 # Cache set names double as file prefixes inside data/cache
 # (<name>_{rgb,dep,msk,gmk,state,action,gpose,plane,plane_conf}.npy + meta.json + <name>_verdicts.json).
-# `legacy_name` (main pair only) is the set name recorded in norm.json of checkpoints trained
-# before the rename; it must not change. `fingerprint: null` means no reference build is
-# recorded: `simretract-build-cache --verify` reports that and skips the comparison for that set.
+# `legacy_name` is the checkpoint-compatible cache name recorded in norm.json.
+# Preserve it when using existing checkpoints. `fingerprint: null` disables
+# reference verification for that set.
 
 sets:
   strict:

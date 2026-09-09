@@ -36,7 +36,7 @@ With a compatible checkpoint installed at `checkpoints/baseline`:
 
 ```bash
 scripts/run_real.sh checkpoints/baseline dry  # perception and inference; no motion
-scripts/run_real.sh checkpoints/baseline go   # live run with the original ENTER gate
+scripts/run_real.sh checkpoints/baseline go   # press ENTER to start motion
 ```
 
 The default real preset removes the top **1 cm** from both plane estimation and

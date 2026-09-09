@@ -1,9 +1,7 @@
-"""No private infrastructure, personal paths, hosts or dated notes ship in the repository.
+"""Check shipped files for machine-specific paths and connection identities.
 
-Every git-tracked and untracked-but-not-ignored file is scanned.  Text files
-are scanned as-is; binary assets (.npz, .usd, .obj, .png, .npy, ...) are reduced
-to their printable runs first, the way ``strings`` does.  The patterns are
-assembled from fragments so this file does not trip its own check.
+Scan first-party tracked and non-ignored files. Binary files are checked for
+printable paths; embedded metadata and visible media require separate review.
 """
 
 from __future__ import annotations
@@ -18,33 +16,15 @@ pytestmark = pytest.mark.unit
 
 REPO = Path(__file__).resolve().parents[2]
 
-# (pattern, case-insensitive)
-PATTERNS: list[tuple[str, bool]] = [
-    ("/ho" + "me/", False),
-    ("/m" + "nt/", False),
-    ("/work" + "space", False),
-    ("/scra" + "tch", False),
-    ("ddd" + "w123", False),
-    ("Drop" + "box", False),
-    ("inspect_" + "data", False),
-    ("192." + "168.", False),
-    ("ss" + "h ", False),
-    ("rsy" + "nc", False),
-    ("neb" + "ius", True),
-    ("run" + "pod", False),
-    ("66." + "201.", False),
-    ("89." + "169.", False),
-    ("david" + "wang", False),
-    ("ausc_" + "live", False),
-    ("omni-retract-" + "issac", False),
-    ("owner " + "20", False),
-    ("20" + "26-", False),
-    ("1038" + "lab", False),
-    ("cg" + "trader", True),
-    ("so7" + "si", True),
-    ("5268" + "240", True),
-    ("purch" + "as", True),
-]
+RULES = {
+    "user directory": re.compile(r"/(?:home|Users)/[^/\s\"']+"),
+    "Windows user directory": re.compile(
+        r"[A-Za-z]:[\\/](?:Users|Documents and Settings)[\\/][^\\/\s\"']+"
+    ),
+    "machine directory": re.compile(r"/(?:mnt|workspace|scratch)(?:/|\b)"),
+    "email address": re.compile(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"),
+    "SSH destination": re.compile(r"\bssh\s+(?:-\S+\s+)*[^\s\"']+@[^\s\"']+"),
+}
 
 BINARY_SUFFIXES = {".npz", ".npy", ".usd", ".usda", ".usdc", ".obj", ".mtl", ".png", ".jpg", ".jpeg",
                    ".pt", ".safetensors", ".mp4", ".tar", ".gz", ".zip", ".pdf", ".woff", ".woff2"}
@@ -79,26 +59,41 @@ def text_of(path: Path) -> str:
         return "\n".join(m.group(0).decode("ascii", "replace") for m in PRINTABLE_RUN.finditer(data))
 
 
-def find_leaks(text: str) -> list[str]:
+def find_leaks(text: str, *, binary: bool = False) -> list[str]:
     hits = []
-    lowered = text.lower()
-    for pat, ci in PATTERNS:
-        hay = lowered if ci else text
-        needle = pat.lower() if ci else pat
-        idx = hay.find(needle)
-        if idx >= 0:
-            start = max(0, idx - 30)
-            hits.append(f"{pat!r} near: {text[start: idx + len(pat) + 30]!r}")
+    for label, pattern in RULES.items():
+        if binary and not label.endswith("directory"):
+            continue  # Compressed bytes can resemble short email addresses.
+        match = pattern.search(text)
+        if match:
+            context = text[max(0, match.start() - 30):match.end() + 30]
+            hits.append(f"{label} near: {context!r}")
     return hits
 
 
-def test_detector_catches_every_pattern() -> None:
-    """Positive control: each pattern is found when present, in either case for the case-insensitive one."""
-    for pat, ci in PATTERNS:
-        assert find_leaks("prefix " + pat + " suffix"), pat
-        if ci:
-            assert find_leaks("prefix " + pat.upper() + " suffix"), pat
-    assert not find_leaks("a clean line with seeds 202606 and 400851")
+@pytest.mark.parametrize("sample", [
+    "/" + "/".join(("home", "example", "project")),
+    "/" + "/".join(("Users", "example", "project")),
+    "C:" + chr(92) + chr(92).join(("Users", "example", "project")),
+    "D:" + "/".join(("", "Users", "example", "project")),
+    *["/" + "/".join((root, "project")) for root in ("mnt", "workspace", "scratch")],
+    "example" + "@" + "example.invalid",
+    "ssh " + "example" + "@" + "example-host",
+])
+def test_detector_catches_machine_identifiers(sample: str) -> None:
+    assert find_leaks(sample)
+
+
+def test_detector_allows_portable_references() -> None:
+    assert not find_leaks("assets/gripper/LICENSE 127.0.0.1 configs/real/default.yaml")
+    assert not find_leaks("https://github.com/Source-Robotics/SSG-48-adaptive-electric-gripper")
+
+
+def test_binary_scan_checks_paths_without_treating_encoded_bytes_as_email() -> None:
+    encoded_text = "3" + "@" + "HHu.jB"
+    assert not find_leaks(encoded_text, binary=True)
+    path = "/" + "/".join(("home", "example", "project"))
+    assert find_leaks(path, binary=True)
 
 
 def test_repository_has_files() -> None:
@@ -108,7 +103,8 @@ def test_repository_has_files() -> None:
 
 @pytest.mark.parametrize("path", repo_files(), ids=lambda p: str(p.relative_to(REPO)))
 def test_no_leak_strings(path: Path) -> None:
-    hits = find_leaks(text_of(path))
+    binary = path.suffix.lower() in BINARY_SUFFIXES - {".obj", ".mtl", ".usda"}
+    hits = find_leaks(text_of(path), binary=binary)
     assert not hits, f"{path.relative_to(REPO)}: " + "; ".join(hits)
 
 

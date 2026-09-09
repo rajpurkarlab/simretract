@@ -53,23 +53,32 @@ returns its regime (checkpoint, half, plane filter, drop threshold, top cut,
 nogrip, type, chunk padding) and the driver refuses to run against a server
 whose regime does not match the configuration.
 
-### Three-attempt rule
+### First-attempt reporting
 
-The driver runs one fresh Isaac process per seed under a 900 s wall cap and
-keeps the policy server alive across seeds (liveness check and reboot before
-every seed, two launches per seed when a launch produces no result file).
+The benchmark runs one attempt per seed (`--passes 1`) and reports its first
+result. Each attempt uses a fresh Isaac process under a 900 s wall cap. A
+process that produces no result can be relaunched once for crash recovery;
+the policy server is reused and checked before every seed.
 
-- Pass 1 runs every seed in `--seeds`.
-- Pass 2 re-runs only the seeds whose result is not `completed` (or missing);
-  the previous result is kept as `result_<seed>.try1.json`.
-- Pass 3 does the same once more (`result_<seed>.try2.json`).
+Timeouts and other failed first results remain failures in the benchmark.
+The denominator is the full `--score-seeds` selection (the same as `--seeds`
+by default), including seeds with missing results. Interrupted runs resume
+from their existing result files.
 
-`--passes 3` is the protocol. Completed seeds are never re-run, and a seed that
-completes on any attempt counts as completed; every attempt stays on disk. The
-driver is resume-safe: an interrupted run continues from the result files. The
-scored set is `--score-seeds` (default: the same file as `--seeds`); the
-denominator is always the size of that set, so seeds without a result count as
-failures.
+Additional passes are available for diagnostics. They retry non-completed
+seeds and archive prior results as `result_<seed>.try<k>.json`. Archives are
+preserved across resumed invocations. Reporting still selects the earliest
+attempt; use `--score-attempt latest` explicitly for retry results:
+
+```bash
+scripts/eval_sim.sh checkpoints/baseline --passes 3 --score-attempt latest --out eval/baseline_retries
+```
+
+When rescoring a directory, `simretract.eval.score` selects the earliest
+numbered archive, or the current result if no archive exists. A damaged first
+result is counted as missing; a later success cannot replace it. `--attempt
+latest` selects current results instead. The scorer's optional `--sample-sd`
+uses sample SD for diagnostic comparisons.
 
 ### Funnel and statistics
 
@@ -85,12 +94,12 @@ Every seed ends with one `result_<seed>.json` (fields: `seed`, `outcome`,
 | column | definition |
 |---|---|
 | grabbed | `outcome == "completed"` |
-| secured | grabbed and `drop_mm <= 20` (the tool did not fall when the hand released) |
+| secured / Grasped | grabbed and `drop_mm < 20` after the hand released; Grasped (%) is `100 * secured / number of seeds` |
 | held | `held` is true (the tool stayed in the gripper through the load battery) |
 | kept | held and `verdict.grasp_t_mm < 10` and `verdict.grasp_r_deg < 10` (presented pose preserved) |
 | timeouts | `outcome == "timeout"` |
-| offset | `verdict.grasp_t_mm`: mean +/- sd [median] over completed rows that carry the field |
-| twist | `verdict.grasp_twist_deg`: mean +/- sd [median] over the same rows |
+| offset | `verdict.grasp_t_mm`: mean +/- population SD [median] over secured rows that carry the field |
+| twist | `verdict.grasp_twist_deg`: mean +/- population SD [median] over the same secured rows |
 
 `grasp_t_mm` is the tip displacement and `grasp_r_deg` the rotation of the
 tool between its presented pose and its pose after the release settles;
@@ -99,7 +108,8 @@ twist is the rotation component about the tool axis, swing the remainder.
 Outputs under `--out`: `result_<seed>.json` (+ `.try{k}.json`),
 `ep_<seed>/meta.npz`, `ep_<seed>_review.mp4`, `eval_log_<seed>.jsonl`, the
 driver ledger, `results.json` (all rows) and `table.md` (the scored row). The
-driver prints one `ROW` line at the end.
+driver prints one `ROW` line at the end. The eight main paper rows and their
+50-seed first results are included in [data/evaluation](../data/evaluation/README.md).
 
 ### Nondeterminism
 
@@ -108,7 +118,7 @@ resolution, GPU rendering and bf16 inference all vary between runs, and the
 policy's own chunks depend on those observations. Two evaluations of the same
 checkpoint on the same 50 seeds can differ by several seeds in every funnel
 column, and rollout variance on small seed sets is large. Report the full 50
-seeds with the three-attempt rule, and compare rows only under identical
+seeds using their first attempts, and compare rows only under identical
 settings (in particular the same `exec_h`; rows evaluated at `exec_h 20` are
 not comparable to `exec_h 50` rows). Training is not bit-reproducible either
 (unseeded sampler and augmentation), so a retrained row is expected to land
@@ -127,11 +137,11 @@ joint, 5 mm on the gripper) and a blocking move of `0.04 / speed` seconds.
 
 Presets (`configs/real/default.yaml`):
 
-| preset | exec_h / exec_min | settle | speed | max_step | smooth | plane_top_cut | use |
+| preset | exec_h / exec_min | settle | speed | max_step | smooth | metric cut (m) | use |
 |---|---|---|---|---|---|---|---|
-| `default` | 50 / 50 | 0 | 0.8 | 0.06 | 0.6 | **0.10** | deployment default: whole chunk per query, bad-observation hold guard |
-| `parity` | 20 / 20 | 0 | 1.0 | 0.06 | 0.45 | 0.0 | mirrors the simulation control loop at exec_h 20 (not the benchmark regime) |
-| `conservative` | 10 / 10 | 0.25 | 0.5 | 0.03 | 0.45 | 0.10 | stop-and-go bring-up regime |
+| `default` | 50 / 50 | 0 | 1.0 | 0.06 | 0.6 | 0.01 | whole chunk per query with bad-observation hold guard |
+| `parity` | 20 / 20 | 0 | 1.0 | 0.06 | 0.45 | 0 | uncut input and 20-step execution |
+| `conservative` | 10 / 5 | 0.25 | 0.5 | 0.03 | 0.45 | 0.01 | slower motion and shorter execution near the tool |
 
 Common client settings: `min_tool_px 300` and `hold_max 2.0` (hold the pose
 for up to 2 s while the tool mask is too small or has too little valid depth),
@@ -140,14 +150,11 @@ freeze the arm, firm-close the gripper, hold until ENTER), `max_ticks 451`,
 `home_speed 0.6` rad/s ramps to and from the simulation home pose
 (all joints 0, gripper 0.044 m). Fast-WAM checkpoints use `exec_h 48`.
 
-Plane top cut: `--plane-top-cut f` removes the top fraction `f` of the tool's
-pixel length (along its principal axis) before the plane fit, guarded so that
-a fit that swings more than 20 deg from the uncut fit is discarded in favour
-of the uncut plane. The value travels with every query; the server's own
-default is 0. The reported real-robot bench runs used 0 (most runs) or 0.15
-(early runs). 0.10 is the deployment default shipped in `default` because it
-removes the operator's fingers from the fit without the swing guard
-triggering on narrow presentations; it is not a benchmark-protocol value.
+The default `--plane-top-cut-m 0.01` removes 1 cm along the tool shaft from
+both plane estimation and model RGB-D. All presets use pixel fraction 0.
+`--plane-top-cut-m 0` disables the metric crop; `--plane-top-cut f` selects
+the optional pixel-fraction crop for plane estimation only. See
+[Plane and model crop options](HARDWARE.md#plane-and-model-crop-options).
 
 A real run writes `settings.json`, the per-query masked inputs, `log.npz`,
 `review_view.mp4` and `result.json` (`closed`, `closed_tick`, `aborted`,

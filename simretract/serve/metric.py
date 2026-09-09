@@ -486,10 +486,10 @@ def _projected_metric_fallback(mask, depth_mm, length_m, intrinsics, reason):
 
 
 def metric_plane_inputs(mask, depth_mm, length_m=0.01, intrinsics=None):
-    """Use the existing metric fit, falling back only for an empty crop.
+    """Fit the retained shaft, using a projected cut if calibrated cropping is empty.
 
-    Successful calibrated results, disabled cuts, and genuine SAM dropouts
-    remain unchanged. No past mask or plane is reused.
+    Disabled cuts and tracker dropouts pass through. No past mask or plane
+    is reused.
     """
     result = _metric_plane_inputs(mask, depth_mm, length_m, intrinsics)
     if float(length_m) > 0 and not np.any(result["mask"]):

@@ -1,5 +1,5 @@
 """Simulation-benchmark driver: policy server + one Kit process per seed,
-multi-pass retries, scoring.
+first-attempt scoring with optional retries.
 
 The benchmark protocol (``configs/eval/sim.yaml``) is: bf16 server with the
 plane filter on, no plane top-cut, dropout gate at 300 px; the evaluator
@@ -7,8 +7,10 @@ executes the full chunk (exec-h 50; 48 for fastwam) with EMA smoothing
 0.45, skips the scripted grasp search, times out after 450 control ticks
 and runs the release + load battery.  Each seed runs in a fresh Kit process
 with a wall-clock cap; a seed gets up to ``--launches`` launches per pass,
-and a non-completed seed is re-run on the next pass (its previous result is
-kept as ``result_<seed>.try<k>.json``).  Completed seeds are never re-run,
+and optional later passes re-run non-completed seeds. Earlier results are
+kept as ``result_<seed>.try<k>.json`` without overwriting previous attempts.
+Scoring uses the first attempt unless ``--score-attempt latest`` is selected.
+Completed seeds are never re-run,
 so an interrupted run can simply be restarted.
 
 ``--seeds`` is the set to RUN, ``--score-seeds`` the set the ROW line and
@@ -55,7 +57,8 @@ PROTOCOL: dict[str, Any] = {
     "mu": 0.4,
     "hand_style": "test",
     "plane_top_cut": 0.0,
-    "passes": 3,
+    "passes": 1,
+    "score_attempt": "first",
     "launches": 2,
     "timeout_s": 900,
     "server_boot_s": 600,
@@ -69,7 +72,7 @@ PROTOCOL: dict[str, Any] = {
 }
 #: sim.yaml keys (top level / server: / driver:) -> PROTOCOL keys.
 _YAML_KEYS = {
-    "": ("seeds", "score_seeds", "passes", "tool", "smooth", "skip_search", "max_steps",
+    "": ("seeds", "score_seeds", "passes", "score_attempt", "tool", "smooth", "skip_search", "max_steps",
          "tries", "mu", "hand_style", "plane_top_cut", "no_battery", "keep_frames"),
     "server": {"port": "port", "host": "host", "half": "half", "plane_filter": "plane_filter",
                "drop_px": "drop_px", "fastwam_cpu_load": "fastwam_cpu_load"},
@@ -121,7 +124,8 @@ class DriverConfig:
     seeds_json: Path
     score_json: Path
     name: str
-    passes: int = 3
+    passes: int = 1
+    score_attempt: str = "first"
     launches: int = 2
     timeout_s: int = 900
     server_boot_s: int = 600
@@ -165,8 +169,9 @@ def _outcome(path: Path) -> str | None:
 def select_seeds(out: Path, run_seeds: list[int], pass_no: int) -> list[int]:
     """Seeds to run in ``pass_no``: on pass 1 every run seed without a
     result (resume); on later passes every run seed whose result is not
-    ``completed`` (renamed to ``.try<pass_no-1>.json``) plus seeds still
-    without a result.  Completed seeds are never selected."""
+    ``completed`` (archived under the next unused ``.try<k>.json``) plus seeds
+    still without a result. Completed seeds are never selected; existing
+    attempt archives are preserved across resumed invocations."""
     sel: list[int] = []
     for s in run_seeds:
         p = result_path(out, s)
@@ -174,7 +179,10 @@ def select_seeds(out: Path, run_seeds: list[int], pass_no: int) -> list[int]:
             sel.append(s)
             continue
         if pass_no > 1 and _outcome(p) != "completed":
-            p.rename(out / f"result_{s}.try{pass_no - 1}.json")
+            indices = [int(m.group(1)) for q in out.glob(f"result_{s}.try*.json")
+                       if (m := re.fullmatch(rf"result_{s}\.try(\d+)\.json", q.name))]
+            archive_no = max(indices, default=0) + 1
+            p.rename(out / f"result_{s}.try{archive_no}.json")
             sel.append(s)
     return sel
 
@@ -452,7 +460,7 @@ def run(cfg: DriverConfig) -> scoring.Funnel:
             todo = select_seeds(cfg.out, run_seeds, pass_no)
             if not todo:
                 log.info("pass %d: nothing to run", pass_no)
-                break
+                continue
             log.info("pass %d: %d seed(s) on port %d: %s", pass_no, len(todo), cfg.port,
                      " ".join(map(str, todo)))
             server.ensure()
@@ -477,12 +485,13 @@ def run(cfg: DriverConfig) -> scoring.Funnel:
     finally:
         server.stop()
 
-    f = scoring.funnel(scoring.load_results(cfg.out), score_seeds)
-    line = scoring.row_line(cfg.name, label, f, cfg.exec_h, cfg.passes)
+    f = scoring.funnel(scoring.load_results(cfg.out, attempt=cfg.score_attempt), score_seeds)
+    line = scoring.row_line(cfg.name, label, f, cfg.exec_h, cfg.passes, attempt=cfg.score_attempt)
     print(line, flush=True)
     with open(cfg.out / "results.json", "w") as fh:
         json.dump({"name": cfg.name, "label": label, "exec_h": cfg.exec_h,
-                   "passes": cfg.passes, "protocol": {
+                   "passes": cfg.passes, "score_attempt": cfg.score_attempt,
+                   "statistics": {"population": "secured", "sd_ddof": 0}, "protocol": {
                        "smooth": cfg.smooth, "skip_search": cfg.skip_search,
                        "max_steps": cfg.max_steps, "half": cfg.half,
                        "plane_filter": cfg.plane_filter, "drop_px": cfg.drop_px,
@@ -490,7 +499,7 @@ def run(cfg: DriverConfig) -> scoring.Funnel:
                        "tries": cfg.tries, "mu": cfg.mu, "tool": cfg.tool},
                    "row": line, "funnel": f.to_dict()}, fh, indent=1)
     with open(cfg.out / "table.md", "w") as fh:
-        fh.write(scoring.table_md(cfg.name, label, f, cfg.exec_h))
+        fh.write(scoring.table_md(cfg.name, label, f, cfg.exec_h, attempt=cfg.score_attempt))
         fh.write("\n" + line + "\n")
     return f
 
@@ -502,7 +511,7 @@ def build_parser(proto: dict[str, Any] | None = None) -> argparse.ArgumentParser
         prog="simretract-eval-sim",
         description="Run the simulation benchmark for one checkpoint: boots the "
                     "policy server, evaluates every seed in a fresh Isaac Sim "
-                    "process (with retries over several passes) and scores the "
+                    "process (with optional retries) and scores the "
                     "funnel. Defaults are the benchmark protocol.",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     p.add_argument("--ckpt", default="", help="checkpoint directory (flat or with final/)")
@@ -515,7 +524,9 @@ def build_parser(proto: dict[str, Any] | None = None) -> argparse.ArgumentParser
     p.add_argument("--score-seeds", default="",
                    help="selection json the ROW/table are scored over (default: --seeds)")
     p.add_argument("--passes", type=int, default=int(proto["passes"]),
-                   help="retry passes; non-completed seeds are re-run each pass")
+                   help="passes to run; later passes retry non-completed seeds")
+    p.add_argument("--score-attempt", choices=("first", "latest"), default=proto["score_attempt"],
+                   help="result selection for reporting (first is the paper protocol)")
     p.add_argument("--launches", type=int, default=int(proto["launches"]),
                    help="Kit launches per seed per pass (crash protection)")
     p.add_argument("--timeout", type=int, default=int(proto["timeout_s"]),
@@ -590,7 +601,7 @@ def config_from_args(a: argparse.Namespace, proto: dict[str, Any] | None = None)
     sim_python = a.sim_python or str(config.interpreter("sim"))
     return DriverConfig(
         ckpt=ckpt, out=out, seeds_json=seeds_json, score_json=score_json, name=name,
-        passes=a.passes, launches=a.launches, timeout_s=a.timeout,
+        passes=a.passes, score_attempt=a.score_attempt, launches=a.launches, timeout_s=a.timeout,
         server_boot_s=a.server_boot_timeout, host=a.host, port=a.port, exec_h=exec_h,
         smooth=a.smooth, skip_search=a.skip_search, max_steps=a.max_steps, tries=a.tries,
         mu=a.mu, hand_style=a.hand_style, plane_top_cut=a.plane_top_cut,

@@ -158,7 +158,7 @@ options (`--preset`, `--plane-top-cut-m`, `--exec-h`, ...)
 go before the mode; everything after `dry` / `go` is passed to the client.
 The wrapper selects the configured environments; the equivalent installed
 entry point is `simretract-run-real --ckpt <ckpt>`. Always start through the
-launcher. Without `--preset`, it uses `default`: exec-h/min 50/50, speed 0.8,
+launcher. Without `--preset`, it uses `default`: exec-h/min 50/50, speed 1.0,
 max-step 0.06, smooth 0.6, pixel fraction 0, and metric cut 0.01 m. The direct
 Python client's defaults match these deployment values. Ctrl-C interrupts
 policy execution and returns the arm home while opening the gripper.

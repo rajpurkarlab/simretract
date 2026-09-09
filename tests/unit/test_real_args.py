@@ -27,7 +27,7 @@ def test_client_defaults_are_the_deployment_regime():
     assert d.plane_top_cut_m == pytest.approx(0.01)
     assert d.follower_ip is None
     assert (d.exec_h, d.exec_min) == (50, 50)
-    assert d.speed == pytest.approx(0.8)
+    assert d.speed == pytest.approx(1.0)
     assert d.max_step == pytest.approx(0.06)
     assert d.smooth == pytest.approx(0.6)
     assert d.settle == 0.0
@@ -93,7 +93,7 @@ def test_shipped_config_has_placeholder_ip_and_ports():
 
 
 @pytest.mark.parametrize("name,expect", [
-    ("default", dict(exec_h=50, exec_min=50, settle=0.0, speed=0.8, max_step=0.06, smooth=0.6,
+    ("default", dict(exec_h=50, exec_min=50, settle=0.0, speed=1.0, max_step=0.06, smooth=0.6,
                      view=True, plane_top_cut=0.0, plane_top_cut_m=0.01)),
     ("parity", dict(exec_h=20, exec_min=20, settle=0.0, speed=1.0, max_step=0.06, smooth=0.45,
                     view=False, plane_top_cut=0.0, plane_top_cut_m=0.0)),

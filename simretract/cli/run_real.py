@@ -172,7 +172,7 @@ def policy_regime_ok(pp: dict[str, Any] | None, ckpt: str, *, metric_required: b
 
 
 def mask_regime_ok(reply: dict | None, ckpt: str, prompt: str, conf: float) -> bool:
-    """Reuse only the requested warmed tracker with the selected-ID fix."""
+    """Reuse the requested warmed tracker with selected-target keepalive."""
     return bool(reply and reply.get("ok") and reply.get("warm_reset")
                 and reply.get("locked_track_keepalive")
                 and reply.get("protocol_version") == 2
@@ -355,7 +355,7 @@ def main(argv: list[str] | None = None) -> int:
                     dict(os.environ), logs / f"mask_{mask_port}.log")
         mp = wait_for_ping(host, mask_port, proc, logs / f"mask_{mask_port}.log", boot_timeout, "mask server")
     if not mask_regime_ok(mp, str(sam3_ckpt), prompt, conf):
-        raise SystemExit("mask server is missing the requested checkpoint or tracking fixes")
+        raise SystemExit("mask server does not provide the requested checkpoint and tracking capabilities")
     log.info("mask ping: %s", mp)
     log.info("servers verified")
 

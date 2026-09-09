@@ -75,6 +75,4 @@ mainly on the real arm.
 | server `--drop-px` | 300 | 300 |
 
 With `--no-dropout` the plane keeps its base noise (constant sigma 3 deg, 3%
-glitches) and the blind drop is off, which is the pre-dropout recipe. The unit
-tests check the ramp statistics (median error at w = 0, 0.5 and 1) against
-these values.
+glitches) and the blind drop is off.

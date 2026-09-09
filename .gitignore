@@ -44,7 +44,7 @@ assets/tools/**/*.bmp
 assets/tools/**/*.exr
 assets/tools/**/textures/
 assets/usd/
-# legacy hand-picked grasp annotation of the research tree; not part of the release
+# local grasp annotations
 assets/tools/*/canonical_slots.json
 # source packs, CAD exports, scans and scene files never belong in the
 # repository at all, wherever they are dropped; the only tracked meshes are
