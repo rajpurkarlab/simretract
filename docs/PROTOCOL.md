@@ -6,14 +6,14 @@
 seed set and scores the outcome funnel. The settings below are pinned in
 `configs/eval/sim.yaml` and apply to every model row of `docs/ABLATIONS.md`.
 
-### Seed sets
+### Benchmark seeds
 
 | file | seeds | use |
 |---|---|---|
-| `data/selections/test_pool.json` | 115 | the frozen held-out pool; never trained on |
-| `data/selections/test_core40.json` | 40 | 4x4-stratified core of the pool (presented x and z) |
-| `data/selections/test_extra10.json` | 10 | pool seeds that fill the sparsest cells |
-| `data/selections/test_core50.json` | 50 | **the benchmark set** = core-40 + extra-10 |
+| `data/selections/test_core50.json` | 50 | the fixed benchmark set |
+
+These seeds belong to the frozen 115-seed held-out pool in
+`data/selections/test_pool.json`. The entire pool is excluded from training.
 
 Each seed rebuilds the recorder-identical scene: presented pose drawn from
 x U(0.35, 0.50), y U(-0.12, 0.12), z U(0.15, 0.30) m, tilt U(0, 1.4 rad) about
@@ -110,19 +110,6 @@ Outputs under `--out`: `result_<seed>.json` (+ `.try{k}.json`),
 driver ledger, `results.json` (all rows) and `table.md` (the scored row). The
 driver prints one `ROW` line at the end. The eight main paper rows and their
 50-seed first results are included in [data/evaluation](../data/evaluation/).
-
-### Nondeterminism
-
-Neither generation nor evaluation is bit-reproducible: PhysX contact
-resolution, GPU rendering and bf16 inference all vary between runs, and the
-policy's own chunks depend on those observations. Two evaluations of the same
-checkpoint on the same 50 seeds can differ by several seeds in every funnel
-column, and rollout variance on small seed sets is large. Report the full 50
-seeds using their first attempts, and compare rows only under identical
-settings (in particular the same `exec_h`; rows evaluated at `exec_h 20` are
-not comparable to `exec_h 50` rows). Training is not bit-reproducible either
-(unseeded sampler and augmentation), so a retrained row is expected to land
-near, not on, an earlier evaluation of the same preset.
 
 ## 2. Real-robot runs
 

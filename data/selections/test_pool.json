@@ -1,7 +1,7 @@
 {
  "name": "test_pool",
  "purpose": "held-out test seeds; never train on these",
- "rule": "strict-pass expert episodes outside the training seed pool, stratified 4x4 over the presented-pose box x[0.35,0.50] z[0.15,0.30]; the first 40 form test_core40",
+ "rule": "strict-pass expert episodes outside the training seed pool, stratified 4x4 over the presented-pose box x[0.35,0.50] z[0.15,0.30]",
  "count": 115,
  "seeds": [
   200037,

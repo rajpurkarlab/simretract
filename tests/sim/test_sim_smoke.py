@@ -18,8 +18,7 @@ verifies the tracked grasp candidates.  Without a source file the build
 step is skipped with a message, and the later steps run only if the assets
 were built earlier on this machine (``docs/ASSETS.md``).
 
-Recorder outcomes are not deterministic (PhysX + GPU rendering): the strict
-step records candidate seeds two at a time until one is kept, and a
+The strict step records candidate seeds two at a time until one is kept, and a
 ``.filtered`` recovery draw is a valid recorder outcome (the recovery cache
 step is then skipped with a message).  A Kit worker occasionally stalls
 mid-episode; the recovery lane is killed after 10 minutes and relaunched

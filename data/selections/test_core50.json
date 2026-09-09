@@ -1,6 +1,6 @@
 {
  "name": "test_core50",
- "note": "test_core40 + test_extra10; the benchmark protocol set",
+ "note": "50 held-out test_pool seeds; the fixed benchmark protocol set",
  "seeds": [
   200037,
   200066,

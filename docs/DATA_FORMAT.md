@@ -134,9 +134,7 @@ listed here.
 | `strict_500_no_standoff.json` | `name`, `seeds` (500), `per_bin` (125), `bins_cm` (four 3 cm bands over -6..+6), `rule`, `recipe`, `grasp_z_cm` (recomputed from the stored grasp point), `trimmed_out`, `repaired_frames` | the no-standoff strict set: the smoothed reach curving straight to the grasp, band-balanced at recording time |
 | `recovery_far1000_no_standoff.json` | `name`, `rule`, `episodes` (1000 ids), `frac_max`, `n`, `seeds_covered` | the far-1000 selection over the recovery draws on the no-standoff seeds |
 | `test_pool.json` | `name`, `purpose`, `rule`, `count` (115), `seeds`, `episodes` [{seed, strict, x, y, z, tilt_deg}] | the frozen held-out pool; every seed in it is excluded from every cache |
-| `test_core40.json` | `name`, `note`, `seeds` (40) | 4x4-stratified core of the pool (presented x and z) |
-| `test_extra10.json` | `name`, `note`, `seeds` (10) | 10 further pool seeds that fill the sparsest cells |
-| `test_core50.json` | `name`, `note`, `seeds` (50) | core-40 + extra-10: the benchmark seed set |
+| `test_core50.json` | `name`, `note`, `seeds` (50) | the fixed benchmark seed set, drawn from the held-out pool |
 
 The half-data preset writes two files beside its run: `<run>_subset.json`
 (`{"<strict set>": [episode indices], "<recovery set>": [episode indices]}`,

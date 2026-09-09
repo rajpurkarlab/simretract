@@ -63,14 +63,10 @@ geometry within 0.25 um (the recipe's grid fingerprint): the same 3152
 vertices and 6308 faces in the same order, the same extents and volume, and
 the same tip and bend points. The released grasp candidates were generated
 from it and re-sample identically from the local build (`--grasps
---compare`, 1 um on positions and 1e-4 on rotation entries). The collision
-decomposition is the one step that is not deterministic: CoACD
-(`coacd==1.0.11`, threshold 0.015) splits the mesh into 20 or 21 convex parts
-with a summed hull volume between 7.82 and 8.00 cm3 from run to run, so the
-reference checks accept the collision set within 3 parts and 5% of the hull
-volume. Physics-driven outputs (regenerated demonstrations, benchmark
-rollouts) are not bit-reproducible in any case (`README.md`, "Rebuild from
-scratch").
+--compare`, 1 um on positions and 1e-4 on rotation entries). Collision
+decomposition uses CoACD (`coacd==1.0.11`, threshold 0.015). The reference
+checks accept the collision set within 3 parts and 5% of the reference hull
+volume.
 
 Users may obtain other retractor assets and run the same pipeline ("Using a
 different asset"); the shipped grasp candidates and metadata are for this

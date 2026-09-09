@@ -55,11 +55,9 @@ Real-robot deployment does not need the asset.
 Two paths reproduce the training pipeline:
 
 - **Path A (after publication)** - download the raw episodes, build the cache,
-  train. Reproduces the checkpoints up to training nondeterminism (the sampler
-  and augmentation are unseeded).
-- **Path B (regenerate)** - regenerate the demonstrations. Physics search and
-  GPU rendering are not bit-reproducible, so you get a different set of
-  episodes from the same distribution, then the same cache and training steps.
+  and train.
+- **Path B (regenerate)** - generate demonstrations locally, then build the
+  cache and train.
 
 Path A (after publication):
 
@@ -103,7 +101,7 @@ simretract-eval-sim --ckpt runs/baseline/final --seeds data/selections/test_core
 
 ## Evaluate and verify
 
-The [benchmark protocol](PROTOCOL.md) specifies the held-out seeds, first-attempt reporting, outcome definitions, and nondeterminism. Use the same configuration when comparing checkpoints.
+The [benchmark protocol](PROTOCOL.md) specifies the held-out seeds, first-attempt reporting, and outcome definitions. Use the same configuration when comparing checkpoints.
 
 ```bash
 scripts/eval_sim.sh checkpoints/baseline

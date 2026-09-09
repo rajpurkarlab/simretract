@@ -3,9 +3,7 @@
 ``mesh_convert.compare_meta`` (after the conversion) and
 ``tool_usd.check_against_meta`` (after the USD build) are pure functions;
 the tolerances are 0.1 mm on extents, 1% on volume, and for the collision
-set (``tool_usd.check_parts``) 3 parts and 5% of the summed hull volume,
-because CoACD splits the same shape differently for sub-micrometre
-coordinate differences and from run to run.
+set (``tool_usd.check_parts``) 3 parts and 5% of the summed hull volume.
 """
 
 from __future__ import annotations
@@ -51,8 +49,7 @@ def test_each_reference_key_is_checked(reference: dict) -> None:
 
 
 def test_collision_set_tolerance(reference: dict) -> None:
-    """The reference mesh splits into 20 or 21 parts with a hull volume
-    within 2% from run to run on the reference machine; both pass."""
+    """Accept collision geometry within the configured count and volume tolerances."""
     n, hull = reference["n_collision_parts"], reference["collision_hull_volume_m3"]
     for dn, dv in ((0, 0.0), (-1, 0.02), (1, -0.02), (3, 0.049), (-3, -0.049)):
         new = dict(reference, n_collision_parts=n + dn, collision_hull_volume_m3=hull * (1 + dv))

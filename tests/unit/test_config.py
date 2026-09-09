@@ -239,7 +239,7 @@ def test_data_fingerprints_match_the_reference_builds() -> None:
     assert d["test"]["exclude_from_training"] == "test_pool.json"
     for key in ("strict", "recovery"):
         assert config.selection_path(d["sets"][key]["selection"]).is_file()
-    for key in ("pool", "core40", "extra10", "core50"):
+    for key in ("pool", "core50"):
         assert config.selection_path(d["test"][key]).is_file()
     # the no-smoothing / no-standoff pairs: same cache flags, no recorded fingerprint (verify is skipped)
     repos = config.hub()["repos"]
@@ -261,7 +261,7 @@ def test_selection_counts_and_disjointness() -> None:
     strict = _sel("strict_500")
     far = _sel("recovery_far1000")
     pool_json = _sel("recovery_train_2000")
-    test_pool, core40, extra10, core50 = _sel("test_pool"), _sel("test_core40"), _sel("test_extra10"), _sel("test_core50")
+    test_pool, core50 = _sel("test_pool"), _sel("test_core50")
 
     assert len(strict["seeds"]) == 500 == len(set(strict["seeds"]))
     assert strict["per_bin"] == 125 and len(strict["bins_cm"]) == 4
@@ -270,8 +270,7 @@ def test_selection_counts_and_disjointness() -> None:
     assert len(pool_json["train_episodes"]) == 1954
     assert set(far["episodes"]) <= set(pool_json["train_episodes"])
     assert len(test_pool["seeds"]) == test_pool["count"] == 115 == len(test_pool["episodes"])
-    assert len(core40["seeds"]) == 40 and len(extra10["seeds"]) == 10 and len(core50["seeds"]) == 50
-    assert set(core50["seeds"]) == set(core40["seeds"]) | set(extra10["seeds"])
+    assert len(core50["seeds"]) == len(set(core50["seeds"])) == 50
     assert set(core50["seeds"]) <= set(test_pool["seeds"])
     # frozen test seeds never appear in a training selection
     assert not set(test_pool["seeds"]) & set(strict["seeds"])

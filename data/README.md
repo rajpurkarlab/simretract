@@ -20,7 +20,7 @@ training and test set (schemas in `docs/DATA_FORMAT.md`):
 | `strict_500_no_standoff.json` | the no-standoff strict set: 500 seeds recorded using the smoothed reach curving straight to the grasp, band-balanced over the grasp height (`no_standoff` preset) |
 | `recovery_far1000_no_standoff.json` | its recovery set: the 1000 recovery draws with the smallest perturbation fraction on those seeds |
 | `test_pool.json` | the frozen held-out pool (115 seeds); excluded from every cache |
-| `test_core40.json`, `test_extra10.json`, `test_core50.json` | benchmark seed sets; `test_core50.json` is the protocol set |
+| `test_core50.json` | the fixed 50-seed benchmark set |
 
 `data/raw/` and `data/cache/` are git-ignored and are filled by the commands
 below. The selection files, not the contents of a download, define a training
@@ -84,8 +84,7 @@ on a mismatch (use it for the downloaded sets only):
 | recovery | 106,868 | `636630ba` | `93dda3b0` | `7f918202` |
 
 Matching fingerprints mean the cache is frame-for-frame the one the reference
-checkpoints were trained on. A regenerated data set (below) produces different
-fingerprints by construction. The no-smoothing and no-standoff sets build with
+checkpoints were trained on. The no-smoothing and no-standoff sets build with
 the same flags as the main pair (strict flags for the strict sets, recovery
 flags for the recovery sets) but carry no recorded fingerprint
 (`fingerprint: null` in `configs/data.yaml`): `--verify` reports that for

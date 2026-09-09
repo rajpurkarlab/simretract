@@ -89,8 +89,6 @@ examples
   simretract-train --policy act --data full --ablation none --smoke
   simretract-train --preset no_plane --batch 8 --accum 8
   simretract-train --preset no_smooth --cache data/cache --out runs/no_smooth
-
-training is not bit-reproducible (unseeded sampler and augmentation).
 """
 
 

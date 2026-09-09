@@ -20,7 +20,7 @@
 #   strict_500_no_standoff.json            the no-standoff strict set (500 seeds)
 #   recovery_far1000_no_standoff.json      its far-1000 recovery set
 #   test_pool.json                         115 held-out seeds, excluded from every cache
-#   test_core40.json, test_extra10.json, test_core50.json   benchmark seed sets (core50 = the protocol set)
+#   test_core50.json                       the fixed 50-seed benchmark set
 #
 # Cache set names double as file prefixes inside data/cache
 # (<name>_{rgb,dep,msk,gmk,state,action,gpose,plane,plane_conf}.npy + meta.json + <name>_verdicts.json).
@@ -111,10 +111,8 @@ sets:
 # Frozen test seeds. Every cache build excludes `exclude_from_training` seeds
 # (logged), regardless of what the raw directory contains.
 test:
-  pool: test_pool.json                  # 115 held-out seeds (superset of every test set)
-  core40: test_core40.json              # 40 seeds, 4x4-stratified over the presented-pose box
-  extra10: test_extra10.json            # 10 additional seeds
-  core50: test_core50.json              # core40 + extra10: the benchmark protocol set
+  pool: test_pool.json                  # 115 held-out seeds, including the benchmark set
+  core50: test_core50.json              # the fixed 50-seed benchmark set
   exclude_from_training: test_pool.json
 
 # Half-data row (--data half): deterministic subset drawn in-process by the trainer

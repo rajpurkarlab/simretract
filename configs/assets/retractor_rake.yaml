@@ -26,10 +26,9 @@ source:
   # half-turn about y, applied with the scale before the converter's own
   # repair, centring and alignment steps (docs/ASSETS.md)
   pre_rotate: [[-1, 0, 0], [0, 1, 0], [0, 0, -1]]
-  # what the converter prints for this file (informational): the centroid offset
-  # removed, and the collision sets seen with coacd==1.0.11 on the reference
-  # machine (CoACD varies from run to run; meta.json records 21 parts / 7.848 cm3,
-  # the check accepts 3 parts and 5% hull volume)
+  # Converter reference measurements: centroid offset and collision geometry.
+  # meta.json records 21 parts / 7.848 cm3; the collision check accepts
+  # a difference of 3 parts and 5% hull volume.
   expected_center_removed_pre_m: [-0.01806, 0.00234, 0.0]
   observed_collision_parts: [20, 21]
   observed_collision_hull_cm3: [7.82, 8.00]
