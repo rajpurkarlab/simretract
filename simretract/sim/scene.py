@@ -98,7 +98,7 @@ def _ensure_light_pool(stage) -> None:
     d = UsdLux.DomeLight.Define(stage, "/World/DomeLight")
     key = UsdLux.DistantLight.Define(stage, "/World/DistantLight")
     fills = []
-    for i in range(2):
+    for i in range(3):
         s = UsdLux.SphereLight.Define(stage, f"/World/FillLight_{i}")
         s.CreateRadiusAttr(0.10)
         xf = UsdGeom.Xformable(s)
@@ -111,7 +111,7 @@ def _ensure_light_pool(stage) -> None:
 
 def randomize_lighting(stage, rng: np.random.Generator) -> dict:
     """Per-episode lighting randomisation: dome intensity/tint, key light
-    direction/intensity/tint/softness, 0-2 coloured fill lights. Returns the
+    direction/intensity/tint/softness, 0-3 coloured fill lights. Returns the
     drawn spec (stored in the episode meta)."""
     _ensure_light_pool(stage)
     warmth = float(rng.uniform(-1, 1))  # -1 cool .. +1 warm
@@ -135,7 +135,7 @@ def randomize_lighting(stage, rng: np.random.Generator) -> dict:
     # soft vs hard shadows: distant-light angle
     key.CreateAngleAttr(float(rng.uniform(0.2, 8.0)))
 
-    n_fill = int(rng.integers(0, 3))
+    n_fill = int(rng.integers(0, 4))
     spec = {"dome_i": dome_i, "warmth": warmth, "key_i": key_i,
             "key_elev": elev, "key_azim": azim, "n_fill": n_fill}
     for i, (s, t) in enumerate(_LIGHT_POOL["fills"]):
