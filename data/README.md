@@ -1,5 +1,7 @@
 # Data
 
+Dataset download links will be released upon publication.
+
 [Simulation benchmark results](evaluation/) contain the paper
 reference table and per-seed first-attempt outcomes.
 
@@ -24,7 +26,7 @@ training and test set (schemas in `docs/DATA_FORMAT.md`):
 below. The selection files, not the contents of a download, define a training
 set.
 
-The released datasets are robot-action and grasp-point data: joint states
+The datasets contain robot-action and grasp-point data: joint states
 and actions, the grasp pose, tool-masked RGB and depth renders, masks and
 metadata per episode, plus the grasp-candidate database
 (`assets/grasp_candidates/retractor_rake.json`). They were generated in
@@ -35,11 +37,11 @@ point cloud of that asset; the tool appears in the wrist-camera renders
 itself is obtained and prepared locally (`docs/ASSETS.md`). Terms:
 `LICENSE-DATA.md`.
 
-## Download the released raw sets
+## Download raw data
 
-The hub repositories are named in `configs/hub.yaml` (`org: YOUR_HF_ORG` until
-the release is published; the files carry the manifest contract described in
-`docs/DATA_FORMAT.md`).
+After publication, configure the download locations in `configs/hub.yaml`
+before running the commands below. The current `org: YOUR_HF_ORG` is a
+placeholder. The files follow the manifest contract in `docs/DATA_FORMAT.md`.
 
 ```bash
 scripts/download_data.sh strict      # -> data/raw/strict_train      500 episode dirs, ~27 GB (5 shards of 100)
@@ -81,7 +83,7 @@ on a mismatch (use it for the downloaded sets only):
 | strict | 69,402 | `7d0e2c3b` | `034cb12d` | `6a415e21` |
 | recovery | 106,868 | `636630ba` | `93dda3b0` | `7f918202` |
 
-Matching fingerprints mean the cache is frame-for-frame the one the released
+Matching fingerprints mean the cache is frame-for-frame the one the reference
 checkpoints were trained on. A regenerated data set (below) produces different
 fingerprints by construction. The no-smoothing and no-standoff sets build with
 the same flags as the main pair (strict flags for the strict sets, recovery

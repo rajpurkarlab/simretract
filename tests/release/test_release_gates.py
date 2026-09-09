@@ -23,7 +23,7 @@ REPO = Path(__file__).resolve().parents[2]
 
 #: The release statement; it appears verbatim in README.md.
 RELEASE_WORDING = (
-    "We release our code, policy checkpoints, and robot-action/grasp-point datasets. "
+    "Policy checkpoint and robot-action/grasp-point dataset download links will be released upon publication. "
     "The third-party retractor asset by HQ3DMOD must be obtained separately under its "
     "publisher's license. Asset acquisition and local preparation instructions are provided "
     "in this repository."

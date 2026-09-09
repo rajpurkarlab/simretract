@@ -28,9 +28,9 @@ simretract-download base-weights                                 # pi0 base weig
 hf download facebook/sam3 sam3.pt --local-dir checkpoints/sam3    # SAM 3 (real robot only)
 ```
 
-`simretract-download` and the `scripts/download_*.sh` wrappers work once `org`
-in `configs/hub.yaml` names the organisation that hosts the release; with the
-shipped placeholder they stop with a one-line message.
+Checkpoint and dataset download links will be released upon publication.
+The corresponding `simretract-download` and `scripts/download_*.sh` commands
+require those locations in `configs/hub.yaml`; the shipped values are placeholders.
 
 The retractor 3D model is a third-party asset that is not part of this
 repository. Every simulation command (generation, benchmark, the asset
@@ -52,16 +52,16 @@ Real-robot deployment does not need the asset.
 
 ## Rebuild from data or regenerate demonstrations
 
-Two paths lead to the released checkpoints:
+Two paths reproduce the training pipeline:
 
-- **Path A (reproduce)** - download the released raw episodes, build the cache,
+- **Path A (after publication)** - download the raw episodes, build the cache,
   train. Reproduces the checkpoints up to training nondeterminism (the sampler
   and augmentation are unseeded).
 - **Path B (regenerate)** - regenerate the demonstrations. Physics search and
   GPU rendering are not bit-reproducible, so you get a different set of
   episodes from the same distribution, then the same cache and training steps.
 
-Path A:
+Path A (after publication):
 
 ```bash
 scripts/download_data.sh all                        # data/raw/strict_train (500 episodes), data/raw/recovery_far1000 (1000)

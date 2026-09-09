@@ -27,8 +27,8 @@ conda activate simretract-policy
 ```
 
 The setup creates separate policy, simulation, and mask environments. Checkpoint
-and dataset locations are configured in `configs/hub.yaml`; its release-location
-placeholder must be filled before using the download commands. Gated weights,
+and dataset download links will be released upon publication. Download locations
+in `configs/hub.yaml` remain placeholders until then. Gated weights,
 including SAM 3, require their upstream access terms. See
 [environment and weight setup](docs/REPRODUCING.md#environments-and-weights).
 
@@ -71,7 +71,7 @@ are kept outside version control.
 
 ## Licensing
 
-We release our code, policy checkpoints, and robot-action/grasp-point datasets. The third-party retractor asset by HQ3DMOD must be obtained separately under its publisher's license. Asset acquisition and local preparation instructions are provided in this repository.
+Policy checkpoint and robot-action/grasp-point dataset download links will be released upon publication. The third-party retractor asset by HQ3DMOD must be obtained separately under its publisher's license. Asset acquisition and local preparation instructions are provided in this repository.
 
 License choices and release status are recorded in [LICENSING.md](LICENSING.md),
 [checkpoint terms](LICENSE-CHECKPOINTS.md), and [dataset terms](LICENSE-DATA.md).

@@ -15,19 +15,21 @@ Presets carry flags and a description. [Reference simulation results](../data/ev
 include the paper table and per-seed outcomes. [PROTOCOL.md](PROTOCOL.md)
 describes how to evaluate a checkpoint.
 
-## Released models
+## Models
 
-| model | preset | checkpoint |
-|---|---|---|
-| SimRetract | `baseline` | [link](https://YOUR_HOST/simretract/checkpoints/baseline) |
-| w/o dropout | `no_dropout` | [link](https://YOUR_HOST/simretract/checkpoints/no_dropout) |
-| w/o recovery | `no_recovery` | [link](https://YOUR_HOST/simretract/checkpoints/no_recovery) |
-| half data (250 + 500) | `half_data` | [link](https://YOUR_HOST/simretract/checkpoints/half_data) |
-| w/o plane normal | `no_plane` | [link](https://YOUR_HOST/simretract/checkpoints/no_plane) |
-| w/o mask | `no_mask` | [link](https://YOUR_HOST/simretract/checkpoints/no_mask) |
-| w/o smoothing | `no_smooth` | [link](https://YOUR_HOST/simretract/checkpoints/no_smooth) |
-| w/o standoff | `no_standoff` | [link](https://YOUR_HOST/simretract/checkpoints/no_standoff) |
-| smolvla | `smolvla` | [link](https://YOUR_HOST/simretract/checkpoints/smolvla) |
+Checkpoint download links will be released upon publication.
+
+| model | preset |
+|---|---|
+| SimRetract | `baseline` |
+| w/o dropout | `no_dropout` |
+| w/o recovery | `no_recovery` |
+| half data (250 + 500) | `half_data` |
+| w/o plane normal | `no_plane` |
+| w/o mask | `no_mask` |
+| w/o smoothing | `no_smooth` |
+| w/o standoff | `no_standoff` |
+| smolvla | `smolvla` |
 
 ## Presets
 
@@ -53,8 +55,8 @@ The two data variants keep every baseline flag, including the dropout rule;
 only the cache pair changes. `--data half` works on any pair (`--preset
 no_smooth --data half`): the strict selection of the first set supplies the
 per-seed grasp heights the selection stratifies on (`--strict-json` overrides
-it). Every preset trains from the released raw sets or their regenerated
-counterparts; no preset needs data that is not released.
+it). Every preset trains from the raw sets described in [data/README.md](../data/README.md)
+or their regenerated counterparts.
 
 ## Other switches
 

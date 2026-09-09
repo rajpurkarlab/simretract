@@ -1,5 +1,5 @@
-# Hugging Face hub locations. Replace `org` with the organisation that hosts the
-# released data and checkpoints; every repo id below is derived from it.
+# Checkpoint and dataset download links will be released upon publication.
+# Replace `org` with the release organisation; every repo id below is derived from it.
 # sha256 fields are placeholders until the release is published
 # (simretract-download verifies a file only when its sha256 is filled in).
 org: YOUR_HF_ORG
