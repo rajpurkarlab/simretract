@@ -40,8 +40,8 @@ itself is obtained and prepared locally (`docs/ASSETS.md`). Terms:
 ## Download raw data
 
 After publication, configure the download locations in `configs/hub.yaml`
-before running the commands below. The current `org: YOUR_HF_ORG` is a
-placeholder. The files follow the manifest contract in `docs/DATA_FORMAT.md`.
+before running the commands below. Dataset repository IDs under `repos`
+still use the `YOUR_HF_ORG` placeholder. The files follow the manifest contract in `docs/DATA_FORMAT.md`.
 
 ```bash
 scripts/download_data.sh strict      # -> data/raw/strict_train      500 episode dirs, ~27 GB (5 shards of 100)

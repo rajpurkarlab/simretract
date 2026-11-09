@@ -1,39 +1,112 @@
-# Checkpoint and dataset download links will be released upon publication.
-# Replace `org` with the release organisation; every repo id below is derived from it.
-# sha256 fields are placeholders until the release is published
-# (simretract-download verifies a file only when its sha256 is filled in).
-org: YOUR_HF_ORG
+# Public model downloads. Dataset locations remain placeholders until release.
+# File sizes and SHA-256 values verify checkpoint downloads.
+org: dddw123
 
 repos:
-  checkpoints: "${org}/simretract-checkpoints"      # model repo: one directory per row + pi0_base
-  selections: "${org}/simretract-selections"        # dataset repo: selection JSONs
-  # raw dataset repos: tar shards of episode directories + manifest.json (docs/DATA_FORMAT.md);
-  # configs/data.yaml maps each cache set to one of these keys (sets.<name>.hub_repo)
-  strict_raw: "${org}/simretract-strict-raw"                           # strict-500
-  recovery_raw: "${org}/simretract-recovery-raw"                       # recovery far-1000
-  strict_nosmooth_raw: "${org}/simretract-strict-no-smoothing-raw"     # no-smoothing strict-500
-  recovery_nosmooth_raw: "${org}/simretract-recovery-no-smoothing-raw" # no-smoothing recovery far-1000
-  strict_nostandoff_raw: "${org}/simretract-strict-no-standoff-raw"    # no-standoff strict-500
-  recovery_nostandoff_raw: "${org}/simretract-recovery-no-standoff-raw"  # no-standoff recovery far-1000
-
-# Directory names inside `repos.checkpoints`, one per preset of
-# configs/train/presets.yaml plus the pi0 base weights. Each directory holds
-# config.json + model.safetensors + norm.json.
+  checkpoints: dddw123/omni-retract-checkpoints-public
+  selections: YOUR_HF_ORG/simretract-selections
+  strict_raw: YOUR_HF_ORG/simretract-strict-raw
+  recovery_raw: YOUR_HF_ORG/simretract-recovery-raw
+  strict_nosmooth_raw: YOUR_HF_ORG/simretract-strict-no-smoothing-raw
+  recovery_nosmooth_raw: YOUR_HF_ORG/simretract-recovery-no-smoothing-raw
+  strict_nostandoff_raw: YOUR_HF_ORG/simretract-strict-no-standoff-raw
+  recovery_nostandoff_raw: YOUR_HF_ORG/simretract-recovery-no-standoff-raw
 checkpoints:
   pi0_base:
-    path: pi0_base
-    files: [config.json, model.safetensors]
-    sha256: {}                       # model.safetensors: <fill in>
-    note: pi0 initialisation weights; a local copy is required by simretract-train --policy pi0
-  baseline:      {path: baseline,      files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_dropout:    {path: no_dropout,    files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_recovery:   {path: no_recovery,   files: [config.json, model.safetensors, norm.json], sha256: {}}
-  half_data:     {path: half_data,     files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_plane:      {path: no_plane,      files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_mask:       {path: no_mask,       files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_smooth:     {path: no_smooth,     files: [config.json, model.safetensors, norm.json], sha256: {}}
-  no_standoff:   {path: no_standoff,   files: [config.json, model.safetensors, norm.json], sha256: {}}
-  smolvla:       {path: smolvla,       files: [config.json, model.safetensors, norm.json], sha256: {}}
+    path: pi0_base_usmd1
+    files:
+    - config.json
+    - model.safetensors
+    sizes:
+      config.json: 1186
+      model.safetensors: 14005623256
+    sha256:
+      model.safetensors: e1bbcefd55bab3ddff07ead42f4773505f07c68c9694ae44d636d86733dfebc1
+      config.json: 9af5485feb4f40c849a465311db88415f3eec59a00c66e91928bdfc58185e2e8
+  baseline:
+    path: pi0_e5_step1far1000_plane_ng_bal_drop
+    files:
+    - config.json
+    - model.safetensors
+    - norm.json
+    sizes:
+      config.json: 2179
+      model.safetensors: 16112212536
+      norm.json: 1097
+    sha256:
+      config.json: 8d50137a5c6c4d4782472f3f47246dde3aa28ed25f3da2f26164c71c77063fe1
+      model.safetensors: bb6e2667010d7b36468f380abbf77f8e463dc5a7bf4cb9ec25beb3cfd9dee6e3
+      norm.json: faeb9538a46c3e8e548aa483a9d46530905bda92572646d282a5955f5ae2ae8a
+  no_dropout:
+    path: pi0_e5_step1far1000_plane_ng_bal
+    files:
+    - config.json
+    - model.safetensors
+    - norm.json
+    sizes:
+      config.json: 2179
+      model.safetensors: 16112212536
+      norm.json: 861
+    sha256:
+      config.json: 8d50137a5c6c4d4782472f3f47246dde3aa28ed25f3da2f26164c71c77063fe1
+      model.safetensors: f39bbcdfd09cc4a2c9541a1477a665c5452a79c2c562da040cb90c06f91e9fe7
+      norm.json: 5eb87cee93f2207715a3ef51362f080d63f930d9273a141462751c2ea2a6c51b
+  no_recovery:
+    path: pi0_e5_strict_plane_ng_15k_drop
+    files:
+    - config.json
+    - model.safetensors
+    - norm.json
+    sizes:
+      config.json: 2179
+      model.safetensors: 16112212536
+      norm.json: 1099
+    sha256:
+      config.json: 8d50137a5c6c4d4782472f3f47246dde3aa28ed25f3da2f26164c71c77063fe1
+      model.safetensors: 5edc3da07dee529cbf300a6255fe47efa397a36d77eebad42b6a3bb2a13b8a35
+      norm.json: 7bf44dce1edc27fffb101deff7fce71d40ba4ea5d1d36d03a25b585105aab4b5
+  half_data:
+    path: pi0_e5half_step1far500_plane_ng_bal_drop
+    files:
+    - config.json
+    - model.safetensors
+    - norm.json
+    sizes:
+      config.json: 2179
+      model.safetensors: 16112212536
+      norm.json: 1097
+    sha256:
+      config.json: 8d50137a5c6c4d4782472f3f47246dde3aa28ed25f3da2f26164c71c77063fe1
+      model.safetensors: 5d4e690601f52ca9cc4e51d8a1736c2276e13616763d32970e96cf0b3ef32d71
+      norm.json: faeb9538a46c3e8e548aa483a9d46530905bda92572646d282a5955f5ae2ae8a
+  smolvla:
+    path: smolvla_full_e5_step1far1000_plane_ng_bal_drop
+    files:
+    - config.json
+    - model.safetensors
+    - norm.json
+    sizes:
+      config.json: 2262
+      model.safetensors: 1197789224
+      norm.json: 1101
+    sha256:
+      config.json: 07a5ef9c74ad86a5cfa2e13ef7db769877338c067043dc08f74dc81f88f725cc
+      model.safetensors: 41b0ad3a7011e867616f41bd1d32c10ef676956d4882a87eaf75af00fbdddb00
+      norm.json: b01e0c67f82df6121c06e308da33ab4b629644d52fac55fafebfb3e34bccb163
+  act:
+    path: act_e5_step1far1000_plane_ng_bal_bl_drop
+    files:
+    - config.json
+    - model.safetensors
+    - norm.json
+    sizes:
+      config.json: 1666
+      model.safetensors: 206515420
+      norm.json: 1097
+    sha256:
+      config.json: 5b610b4e96afcfa6eef73c702b7af466b2102a3b96da9507fa89c7ade546e633
+      model.safetensors: e4dafb1dc474243e2cc96206d2b60bcf0eb27fab2c91782515ff6d2080102d61
+      norm.json: 3daef16c883ac0fb2c1835200fb924bd20478849f0276c00d126593901ceeeff
 
 # Third-party weights and tokenizers pulled from their canonical hub locations.
 # Gated entries need `huggingface-cli login` after accepting the licence.

@@ -17,7 +17,7 @@ describes how to evaluate a checkpoint.
 
 ## Models
 
-Checkpoint download links will be released upon publication.
+Available pretrained models and download commands are listed in [Checkpoints](../checkpoints/README.md). Four ablation presets have no matching pretrained download configured; they can be trained with the commands below.
 
 | model | preset |
 |---|---|

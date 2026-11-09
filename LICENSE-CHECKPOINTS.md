@@ -1,8 +1,8 @@
 # Checkpoint terms
 
-Planned release upon publication: the eight pi0 rows and the SmolVLA row of `configs/train/presets.yaml`
-and the `pi0_base` copy the pi0 rows were fine-tuned from (`checkpoints/README.md`). The authors' own
-contribution will be released under a license to be chosen by the authors. No
+Available policy checkpoints and initialization weights are listed in
+`checkpoints/README.md`. The authors' own contribution remains subject to a
+license to be chosen by the authors. No
 checkpoint contains geometry of the third-party tool asset.
 
 Upstream notices that travel with the weights:

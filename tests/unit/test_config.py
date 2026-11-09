@@ -131,16 +131,21 @@ def test_require_kit_eula(monkeypatch: pytest.MonkeyPatch) -> None:
 # --------------------------------------------------------------------------- hub
 
 
-def test_hub_placeholder_and_substitution() -> None:
+def test_hub_models_configured_and_dataset_placeholders() -> None:
+    from simretract.data.hub import _require_repo
+
     h = config.hub()
-    assert h["org"] == "YOUR_HF_ORG"
-    assert not config.hub_is_configured()
-    assert h["repos"]["checkpoints"] == "YOUR_HF_ORG/simretract-checkpoints"
+    assert config.hub_is_configured()
+    assert _require_repo(h, "checkpoints") == "dddw123/omni-retract-checkpoints-public"
     assert "${" not in json.dumps(h)
-    assert h["checkpoints"]["pi0_base"]["path"] == "pi0_base"
-    for row in ("baseline", "no_dropout", "no_recovery", "half_data", "no_plane", "no_mask", "no_smooth", "no_standoff", "smolvla"):
-        assert row in h["checkpoints"]
-    assert [n for n in h["checkpoints"] if n != "pi0_base"] == config.preset_names()
+    assert h["checkpoints"]["pi0_base"]["path"] == "pi0_base_usmd1"
+    assert h["checkpoints"]["baseline"]["path"] == "pi0_e5_step1far1000_plane_ng_bal_drop"
+    for entry in h["checkpoints"].values():
+        for filename in entry["files"]:
+            assert entry["sizes"][filename] > 0
+            assert len(entry["sha256"][filename]) == 64
+    with pytest.raises(config.ConfigError):
+        _require_repo(h, "strict_raw")
     for key in ("strict_raw", "recovery_raw", "strict_nosmooth_raw", "recovery_nosmooth_raw",
                 "strict_nostandoff_raw", "recovery_nostandoff_raw"):
         assert h["repos"][key].startswith("YOUR_HF_ORG/simretract-"), key

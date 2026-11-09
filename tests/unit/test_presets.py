@@ -244,9 +244,10 @@ def test_data_variants_train_on_their_own_pairs() -> None:
             assert s in sets, s
 
 
-def test_presets_and_checkpoint_rows_agree() -> None:
-    rows = [n for n in config.hub()["checkpoints"] if n != "pi0_base"]
-    assert rows == list(PRESETS)
+def test_available_checkpoints_and_train_only_presets() -> None:
+    rows = set(config.hub()["checkpoints"]) - {"pi0_base", "act"}
+    assert rows <= set(PRESETS)
+    assert set(PRESETS) - rows == {"no_plane", "no_mask", "no_smooth", "no_standoff"}
 
 
 def test_unknown_preset_lists_alternatives() -> None:

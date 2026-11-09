@@ -20,21 +20,23 @@ The finger design is adapted from [Source Robotics' SSG-48 gripper](https://gith
 with modifications to fit the Trossen WidowX-AI. [Included meshes and attribution](assets/gripper/README.md).
 
 ```bash
-git clone --recurse-submodules https://github.com/YOUR_GITHUB_ORG/simretract.git
+git clone --recurse-submodules https://github.com/rajpurkarlab/simretract.git
 cd simretract
 bash envs/setup.sh
 conda activate simretract-policy
 ```
 
-The setup creates separate policy, simulation, and mask environments. Checkpoint
-and dataset download links will be released upon publication. Download locations
-in `configs/hub.yaml` remain placeholders until then. Gated weights,
-including SAM 3, require their upstream access terms. See
+The setup creates separate policy, simulation, and mask environments.
+[Pretrained models](checkpoints/README.md) are publicly available on Hugging Face;
+`configs/hub.yaml` contains their download paths and verification hashes.
+Dataset download locations remain placeholders until publication. Gated upstream
+resources, including SAM 3, require their access terms. See
 [environment and weight setup](docs/REPRODUCING.md#environments-and-weights).
 
-With a compatible checkpoint installed at `checkpoints/baseline`:
+Download the baseline and run:
 
 ```bash
+scripts/download_checkpoints.sh baseline
 scripts/run_real.sh checkpoints/baseline dry  # perception and inference; no motion
 scripts/run_real.sh checkpoints/baseline go   # press ENTER to start motion
 ```
@@ -71,7 +73,7 @@ are kept outside version control.
 
 ## Licensing
 
-Policy checkpoint and robot-action/grasp-point dataset download links will be released upon publication. The third-party retractor asset by HQ3DMOD must be obtained separately under its publisher's license. Asset acquisition and local preparation instructions are provided in this repository.
+[Policy checkpoints](checkpoints/README.md) are available on Hugging Face. Robot-action/grasp-point dataset download links will be released upon publication. The third-party retractor asset by HQ3DMOD must be obtained separately under its publisher's license. Asset acquisition and local preparation instructions are provided in this repository.
 
 License choices and release status are recorded in [LICENSING.md](LICENSING.md),
 [checkpoint terms](LICENSE-CHECKPOINTS.md), and [dataset terms](LICENSE-DATA.md).

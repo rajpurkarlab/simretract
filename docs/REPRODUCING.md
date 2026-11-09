@@ -5,7 +5,7 @@ Commands below run from the repository root. For the shortest path to an existin
 ## Environments and weights
 
 ```bash
-git clone --recurse-submodules https://github.com/YOUR_GITHUB_ORG/simretract.git
+git clone --recurse-submodules https://github.com/rajpurkarlab/simretract.git
 cd simretract
 bash envs/setup.sh              # creates simretract-sim, simretract-policy, simretract-mask
 conda activate simretract-policy
@@ -28,9 +28,9 @@ simretract-download base-weights                                 # pi0 base weig
 hf download facebook/sam3 sam3.pt --local-dir checkpoints/sam3    # SAM 3 (real robot only)
 ```
 
-Checkpoint and dataset download links will be released upon publication.
-The corresponding `simretract-download` and `scripts/download_*.sh` commands
-require those locations in `configs/hub.yaml`; the shipped values are placeholders.
+[Pretrained checkpoint downloads](../checkpoints/README.md) are configured in
+`configs/hub.yaml`. Run `scripts/download_checkpoints.sh baseline` to retrieve
+the full model. Dataset download locations remain placeholders until publication.
 
 The retractor 3D model is a third-party asset that is not part of this
 repository. Every simulation command (generation, benchmark, the asset
